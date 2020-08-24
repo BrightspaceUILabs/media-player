@@ -1,11 +1,12 @@
 import '@brightspace-ui/core/components/icons/icon.js';
 import '@d2l/seek-bar/d2l-seek-bar.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
+import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin';
 import { styleMap } from 'lit-html/directives/style-map';
 
 const nativeControls = !document.createElement('video').canPlayType;
 
-class MediaPlayer extends LitElement {
+class MediaPlayer extends InternalLocalizeMixin(LitElement) {
 
 	static get properties() {
 		return {
@@ -365,15 +366,15 @@ class MediaPlayer extends LitElement {
 	}
 
 	_getPlayTooltip() {
-		return `${this._playing ? 'Pause' : 'Play'} (${MediaPlayer._keyBindings.play})`;
+		return `${this._playing ? this.localize('pause') : this.localize('play')} (${MediaPlayer._keyBindings.play})`;
 	}
 
 	_getFullscreenTooltip() {
-		return `${this._fullscreen ? 'Exit fullscreen' : 'Fullscreen'} (${MediaPlayer._keyBindings.fullscreen})`;
+		return `${this._fullscreen ? this.localize('exitFullscreen') : this.localize('fullscreen')} (${MediaPlayer._keyBindings.fullscreen})`;
 	}
 
 	_getMuteTooltip() {
-		return `${this._muted ? 'Unmute' : 'Mute'} (${MediaPlayer._keyBindings.mute})`;
+		return `${this._muted ? this.localize('unmute') : this.localize('mute')} (${MediaPlayer._keyBindings.mute})`;
 	}
 
 	_onDragEndSeek() {

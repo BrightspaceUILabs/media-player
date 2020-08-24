@@ -37,8 +37,9 @@
   },
   "dependencies": {
     "@brightspace-ui/core": "^1",
+    "@d2l/seek-bar": "Brightspace/d2l-seek-bar#semver:^1",
+    "@polymer/polymer": "^3.4.1",
     "@webcomponents/webcomponentsjs": "^2",
-    "lit-element": "^2",
-    "@d2l/seek-bar": "Brightspace/d2l-seek-bar#semver:^1"
+    "lit-element": "^2"
   }
 }

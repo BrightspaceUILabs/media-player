@@ -1,0 +1,5 @@
+{
+  "name": "media-player",
+  "source_dir": "locales",
+  "output_file_path": "locales/%CULTURE%.json"
+}
