@@ -34,6 +34,7 @@
     "@brightspace-ui/visual-diff": "^1",
     "@open-wc/testing": "^2",
     "@open-wc/testing-karma": "^3",
+    "@webcomponents/webcomponentsjs": "^2",
     "babel-eslint": "^10",
     "deepmerge": "^3",
     "es-dev-server": "^1",
@@ -42,7 +43,6 @@
     "eslint-plugin-html": "^6",
     "eslint-plugin-lit": "^1",
     "eslint-plugin-sort-class-members": "^1",
-    "frau-ci": "^1",
     "karma-sauce-launcher": "^2",
     "lit-analyzer": "^1",
     "puppeteer": "^5",
@@ -52,7 +52,6 @@
   "dependencies": {
     "@brightspace-ui/core": "^1",
     "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^1",
-    "@webcomponents/webcomponentsjs": "^2",
     "lit-element": "^2",
     "parse-srt": "^1.0.0-alpha",
     "resize-observer-polyfill": "^1"
