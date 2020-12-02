@@ -4,6 +4,8 @@ cache:
   npm: false
 jobs:
   include:
+    - stage: Empty Stage (Temporary)
+      script: echo "Empty first stage because visual-diff needs to be 2nd"
     - stage: Visual-difference-tests
       script:
       - if [ $TRAVIS_SECURE_ENV_VARS == true ]; then
