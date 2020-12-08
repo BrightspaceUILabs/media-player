@@ -23,6 +23,7 @@ import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
 import { styleMap } from 'lit-html/directives/style-map';
 
+const DEFAULT_SPEED = '1.0';
 const FULLSCREEN_ENABLED = fullscreenApi.isEnabled;
 const HIDE_DELAY_MS = 3000;
 const KEY_BINDINGS = {
@@ -36,7 +37,7 @@ const MESSAGE_TYPES = {
 };
 const MIN_TRACK_WIDTH_PX = 250;
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.platform);
-const PLAYBACK_SPEEDS = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '2.0'];
+const PLAYBACK_SPEEDS = ['0.25', '0.5', '0.75', DEFAULT_SPEED, '1.25', '1.5', '2.0'];
 const PREFERENCES_KEY_PREFIX = 'D2L.MediaPlayer.Preferences';
 const PREFERENCES_SPEED_KEY = `${PREFERENCES_KEY_PREFIX}.Speed`;
 const PREFERENCES_TRACK_IDENTIFIER_KEY = `${PREFERENCES_KEY_PREFIX}.Track`;
@@ -547,7 +548,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 										${PLAYBACK_SPEEDS.map(speed => html`
 											<d2l-menu-item-radio
 												?selected="${speed === this._selectedSpeed}"
-												text="${speed === '1.0' ? `1.0 (${this.localize('default')})` : speed}"
+												text="${speed === DEFAULT_SPEED ? `${DEFAULT_SPEED} (${this.localize('default')})` : speed}"
 												value="${speed}"
 											></d2l-menu-item-radio>
 										`)}
@@ -941,13 +942,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._loading = false;
 		this._setLoadSuccessMessage();
 
-		if (localStorage.getItem(PREFERENCES_SPEED_KEY)) {
-			this._onPlaybackSpeedsMenuItemChange({
-				target: {
-					value: localStorage.getItem(PREFERENCES_SPEED_KEY)
-				}
-			});
-		}
+		const speed = localStorage.getItem(PREFERENCES_SPEED_KEY) ? localStorage.getItem(PREFERENCES_SPEED_KEY) : DEFAULT_SPEED;
+
+		this._onPlaybackSpeedsMenuItemChange({
+			target: {
+				value: speed
+			}
+		});
 
 		this.dispatchEvent(new CustomEvent('loadedmetadata'));
 	}
