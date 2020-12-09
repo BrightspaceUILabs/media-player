@@ -1,23 +1,23 @@
 /* eslint quotes: 0 */
 export default {
-	"captions": "Captions",
+	"captions": "Billedtekster",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Download",
 	"exitFullscreen": "Afslut fuld skærm",
 	"fullscreen": "Fuld skærm",
-	"loadErrorMessage": "An error occurred while trying to load the media",
-	"loadSuccessMessage": "The media has loaded successfully",
+	"loadErrorMessage": "Hovsa, der opstod et problem med at indlæse denne mediefil",
+	"loadSuccessMessage": "Mediet er indlæst",
 	"menu": "menu",
 	"mute": "Lydløs",
 	"off": "Fra",
 	"pause": "Pause",
 	"play": "Afspil",
 	"playbackSpeed": "Afspilningshastighed",
-	"retry": "Retry",
+	"retry": "Forsøg igen",
 	"seekSlider": "søgningsskyder",
 	"settings": "settings",
-	"speed": "speed",
+	"speed": "hastighed",
 	"unmute": "Slå lydløs fra",
 	"volumeSlider": "lydstyrkeskyder"
 };
