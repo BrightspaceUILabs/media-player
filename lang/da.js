@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Download",
 	"exitFullscreen": "Afslut fuld skærm",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "søgningsskyder",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "Undertekster",
 	"unmute": "Slå lydløs fra",
 	"volumeSlider": "lydstyrkeskyder"
 };

@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "Predeterminado",
 	"download": "Download",
 	"exitFullscreen": "Salir de la pantalla completa",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "busque el control deslizante",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "Subtítulos",
 	"unmute": "Activar sonido",
 	"volumeSlider": "control deslizante del volumen"
 };

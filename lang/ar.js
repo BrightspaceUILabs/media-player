@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "افتراضية",
 	"download": "Download",
 	"exitFullscreen": "الخروج من وضع ملء الشاشة",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "شريط تمرير التقديم/الترجيع",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "الترجمة",
 	"unmute": "إلغاء كتم الصوت",
 	"volumeSlider": "شريط تمرير مستوى الصوت"
 };

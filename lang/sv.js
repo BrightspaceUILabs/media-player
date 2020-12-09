@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Download",
 	"exitFullscreen": "Avsluta helskärmsläget",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "sökskjutreglage",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "Undertexter",
 	"unmute": "Slå på ljudet",
 	"volumeSlider": "volymskjutreglage"
 };

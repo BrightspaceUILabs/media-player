@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "기본값",
 	"download": "Download",
 	"exitFullscreen": "전체 화면 끝내기",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "검색 슬라이더",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "부제목",
 	"unmute": "음소거 해제",
 	"volumeSlider": "볼륨 슬라이더"
 };

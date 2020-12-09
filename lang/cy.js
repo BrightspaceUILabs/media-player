@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "Diofyn",
 	"download": "Download",
 	"exitFullscreen": "Gadael sgrîn lawn",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "llithrydd chwilio",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "Is-deitlau:",
 	"unmute": "Dad-dewi",
 	"volumeSlider": "llithrydd sain"
 };

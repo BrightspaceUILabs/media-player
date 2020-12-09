@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "預設",
 	"download": "Download",
 	"exitFullscreen": "退出全螢幕",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "搜尋滑桿",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "字幕",
 	"unmute": "取消靜音",
 	"volumeSlider": "音量滑桿"
 };

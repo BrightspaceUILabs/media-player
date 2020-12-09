@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"closedCaptionsAcronym": "CC",
 	"default": "Varsayılan",
 	"download": "Download",
 	"exitFullscreen": "Tam ekrandan çık",
@@ -17,7 +18,6 @@ export default {
 	"seekSlider": "arama kaydırıcısı",
 	"settings": "settings",
 	"speed": "speed",
-	"subtitles": "Altyazı",
 	"unmute": "Sesi Aç",
 	"volumeSlider": "ses düzeyi kaydırıcısı"
 };
