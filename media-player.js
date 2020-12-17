@@ -94,6 +94,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 
 			#d2l-labs-media-player-media-container {
+				align-items: center;
+				justify-content: center;
 				overflow: hidden;
 				position: relative;
 				width: 100%;
@@ -439,7 +441,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() || this._sourceType === SOURCE_TYPES.unknown ? 'auto' : 'none',
-			display: this._loading || this._sourceType === SOURCE_TYPES.unknown ? 'none' : 'block',
+			display: this._loading || this._sourceType === SOURCE_TYPES.unknown ? 'none' : 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height: this._heightPixels ? `${this._heightPixels}px` : '100%'
 		};
