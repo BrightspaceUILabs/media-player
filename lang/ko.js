@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "캡션",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "참조",
 	"default": "기본값",
 	"download": "다운로드",
 	"exitFullscreen": "전체 화면 끝내기",

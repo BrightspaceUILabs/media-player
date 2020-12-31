@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Sous-titres",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "Cc",
 	"default": "Par défaut",
 	"download": "Télécharger",
 	"exitFullscreen": "Quitter le mode plein écran",
