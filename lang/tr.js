@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Altyazı",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "Bilgi",
 	"default": "Varsayılan",
 	"download": "İndir",
 	"exitFullscreen": "Tam ekrandan çık",

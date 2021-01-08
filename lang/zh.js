@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "标题",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "字幕",
 	"default": "默认值",
 	"download": "下载",
 	"exitFullscreen": "退出全屏",

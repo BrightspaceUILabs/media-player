@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "字幕",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "副本",
 	"default": "預設",
 	"download": "下載",
 	"exitFullscreen": "退出全螢幕",

@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "التسميات التوضيحية",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "التسميات التوضيحية المغلقة",
 	"default": "افتراضية",
 	"download": "تنزيل",
 	"exitFullscreen": "الخروج من وضع ملء الشاشة",

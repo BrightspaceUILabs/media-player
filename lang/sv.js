@@ -1,7 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Bildtexter",
-	"closedCaptionsAcronym": "CC",
+	"closedCaptionsAcronym": "Kopia",
 	"default": "Standard",
 	"download": "Ladda ned",
 	"exitFullscreen": "Avsluta helskärmsläget",
