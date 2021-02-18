@@ -715,7 +715,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 							</g>
 						</svg>
 
-						<span>${this.localize('loadErrorMessage')}</span>
+						<span>${this._message.text}</span>
 
 						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
 						<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>
