@@ -353,6 +353,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				flex-shrink: 0;
 				margin-right: 0.5rem;
 			}
+
+			#d2l-labs-media-player-alert-inner > span {
+				font-size: 1rem;
+				line-height: 2.1rem;
+			}
 		`;
 	}
 
@@ -665,21 +670,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
-		// Due to Ionic rewritter bug we need to use '_' as a first query string parameter
-		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
-		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
-		url.searchParams.append('attachment', 'true');
-		const linkHref = url.toString();
+		const linkHref = this._getDownloadLink();
 
 		return html`
 			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
 		`;
 	}
 
+	_getDownloadLink() {
+		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
+		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
+		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
+		url.searchParams.append('attachment', 'true');
+		return url.toString();
+	}
+
 	_getErrorAlertView() {
 		return this._message.type === MESSAGE_TYPES.error ? html`
 			<div class="d2l-labs-media-player-full-area-centred">
-				<d2l-alert button-text="${this.localize('retry')}" type="critical" @d2l-alert-button-press=${this._onAlertButtonPress}>
+				<d2l-alert type="critical">
 					<div id="d2l-labs-media-player-alert-inner">
 						<svg width="33" height="31" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 							<defs>
@@ -706,9 +715,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 							</g>
 						</svg>
 
-						<span>
-							${this._message.text}
-						</span>
+						<span>${this.localize('loadErrorMessage')}</span>
+
+						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
+						<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>
 					</div>
 				</d2l-alert>
 			</div>
@@ -859,10 +869,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
-	_onAlertButtonPress() {
-		this._determineSourceType();
-	}
-
 	_onContextMenu(e) {
 		if (!this.allowDownload) e.preventDefault();
 	}
@@ -875,6 +881,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				} else this._trackText = null;
 			}
 		}
+	}
+
+	_onDownloadButtonPress() {
+		const linkHref = this._getDownloadLink();
+
+		const anchor = document.createElement('a');
+		anchor.href = linkHref;
+		anchor.download = '';
+		anchor.click();
+		anchor.remove();
 	}
 
 	_onDragEndSeek() {
@@ -991,6 +1007,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_onPositionChangeVolume() {
 		this._media.volume = this._volumeSlider.immediateValue / 100;
+	}
+
+	_onRetryButtonPress() {
+		this._determineSourceType();
 	}
 
 	async _onSlotChange(e) {
