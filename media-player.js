@@ -379,6 +379,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._muted = false;
 		this._playing = false;
 		this._recentlyShowedCustomControls = false;
+		this._recentlyToggledFullscreen = false;
 		this._settingsMenu = null;
 		this._sourceType = SOURCE_TYPES.unknown;
 		this._trackFontSizeRem = 1;
@@ -417,11 +418,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
 
-				if (height === this._twoHeightsAgo && width === this._twoWidthsAgo) {
+				if (height === this._twoHeightsAgo && width === this._twoWidthsAgo && !this._recentlyToggledFullscreen) {
 					this._heightPixels = Math.floor(Math.max(height, this._lastHeight));
 				} else {
 					this._heightPixels = null;
 				}
+
+				this._recentlyToggledFullscreen = false;
 
 				this._twoHeightsAgo = this._lastHeight;
 				this._lastHeight = height;
@@ -1253,6 +1256,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (!FULLSCREEN_ENABLED) return;
 
 		if (this._sourceType !== SOURCE_TYPES.video) return;
+
+		this._recentlyToggledFullscreen = true;
 
 		if (fullscreenApi.isFullscreen) {
 			fullscreenApi.exit();
