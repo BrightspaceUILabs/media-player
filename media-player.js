@@ -642,7 +642,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				Range: 'bytes=0-1'
 			}
 		});
-		if (response.status !== 200) {
+		if (response.status !== 200 && response.status !== 206) {
 			this._message = {
 				text: this.localize('unableToDownload'),
 				type: MESSAGE_TYPES.error,
