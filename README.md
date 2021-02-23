@@ -57,6 +57,7 @@ npm install @brightspace-ui-labs/media-player
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String, required |  | URL of the media to play. |
+| download-src | String |  | URL of the media to download. |
 
 ```
 <!-- Render a media player with a source file and loop the media when it reaches the end -->

@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "seek slider",
 	"settings": "settings",
 	"speed": "speed",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Unmute",
 	"volumeSlider": "volume slider"
 };
