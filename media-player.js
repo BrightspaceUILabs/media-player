@@ -637,7 +637,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	async _downloadFromSrc() {
-		const response = await fetch(this.downloadSrc);
+		const response = await fetch(this.downloadSrc, { method: 'HEAD' });
 		if (response.status !== 200) {
 			this._message = {
 				text: this.localize('unableToDownload'),
@@ -690,7 +690,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (this.downloadSrc) {
 			return html`
-				<d2l-menu-item-link @click=${this._downloadFromSrc} text="${this.localize('download')}"></d2l-menu-item-link>
+				<d2l-menu-item @click=${this._downloadFromSrc} text="${this.localize('download')}"></d2l-menu-item>
 			`;
 		}
 
