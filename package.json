@@ -27,11 +27,11 @@
   "author": "D2L Corporation",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@babel/eslint-parser": "^7",
     "@brightspace-ui/stylelint-config": "^0",
     "@open-wc/testing": "^2",
     "@open-wc/testing-karma": "^3",
     "@webcomponents/webcomponentsjs": "^2",
-    "babel-eslint": "^10",
     "deepmerge": "^3",
     "es-dev-server": "^1",
     "eslint": "^6",
