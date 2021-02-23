@@ -637,7 +637,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	async _downloadFromSrc() {
-		const response = await fetch(this.downloadSrc, { method: 'HEAD' });
+		const response = await fetch(this.downloadSrc, {
+			headers: {
+				Range: 'bytes=0-1'
+			}
+		});
 		if (response.status !== 200) {
 			this._message = {
 				text: this.localize('unableToDownload'),
