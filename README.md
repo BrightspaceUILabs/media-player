@@ -74,6 +74,7 @@ npm install @brightspace-ui-labs/media-player
 | ended | Boolean | Get | Whether or not the video has ended. |
 | paused | Boolean | Get | Whether or not the video is currently paused. |
 | sourceType | ["audio", "video", "unknown"] | Get | The source type of the media.
+| textTracks | [TextTrack] | Get | The TextTracks, for handling WebVTT. (See [MDN link](https://developer.mozilla.org/en-US/docs/Web/API/TextTrack))
 
 ```
 // Programatically determine the current playback time of the media player
@@ -107,6 +108,7 @@ this.document.querySelector('d2l-labs-media-player').pause();
 | play | Dispatched when the media begins playing. |
 | pause | Dispatched when the media is paused. |
 | timeupdate | Dispatched when the currentTime of the media player has been updated. |
+| trackloaded | Dispatched when a track element has loaded. |
 
 ```
 // Listen for the loadeddata event
