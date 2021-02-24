@@ -627,6 +627,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this._sourceType;
 	}
 
+	get textTracks() {
+		return this._media.textTracks;
+	}
+
 	_determineSourceType() {
 		this._loading = true;
 		this._message = {
@@ -1126,6 +1130,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				trackElement.srclang = track.srclang;
 				trackElement.oncuechange = this._onCueChange.bind(this);
 				this._media.appendChild(trackElement);
+				trackElement.addEventListener('load', () => {
+					this.dispatchEvent(new CustomEvent('trackloaded'));
+				});
 			}
 		});
 
