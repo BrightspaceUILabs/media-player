@@ -65,6 +65,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			poster: { type: String },
 			src: { type: String },
 			downloadSrc: { type: String, attribute: 'download-src' },
+			downloadReady: { type: Boolean, attribute: 'download-ready', reflect: true },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -368,6 +369,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.allowDownload = false;
 		this.autoplay = false;
 		this.loop = false;
+		this.downloadReady = false;
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
@@ -585,6 +587,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (changedProperties.has('src')) {
 			this._determineSourceType();
 		}
+
+		if (changedProperties.has('downloadReady') && this.downloadReady) {
+			this._onDownloadButtonPress();
+		}
 	}
 
 	get duration() {
@@ -641,21 +647,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	async _downloadFromSrc() {
-		const response = await fetch(this.downloadSrc, {
-			headers: {
-				Range: 'bytes=0-1'
-			}
-		});
-		if (!response.ok) {
-			this._message = {
-				text: this.localize('unableToDownload'),
-				type: MESSAGE_TYPES.error,
-				hideDownload: true,
-			};
-			return;
-		}
-
-		this._onDownloadButtonPress();
+		this.downloadReady = false;
+		this.dispatchEvent(new CustomEvent('download'));
 	}
 
 	static _formatTime(totalSeconds) {
@@ -753,7 +746,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						<span>${this._message.text}</span>
 
 						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
-						${this._message.hideDownload ? '' : html`<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>`}
+						<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>
 					</div>
 				</d2l-alert>
 			</div>

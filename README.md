@@ -58,6 +58,7 @@ npm install @brightspace-ui-labs/media-player
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String, required |  | URL of the media to play. |
 | download-src | String |  | URL of the media to download. |
+| download-ready | Boolean |  | Set dynamically to perform download using `download-src`. |
 
 ```
 <!-- Render a media player with a source file and loop the media when it reaches the end -->
