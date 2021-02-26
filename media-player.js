@@ -641,7 +641,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_emitDownloadEvent() {
-		this.dispatchEvent(new CustomEvent('download'));
+		this.dispatchEvent(new CustomEvent('download-requested'));
 	}
 
 	static _formatTime(totalSeconds) {
