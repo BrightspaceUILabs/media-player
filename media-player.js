@@ -64,7 +64,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			emitEventToDownload: { type: Boolean, attribute: 'emit-event-to-download' },
+			disableLegacyDownload: { type: Boolean, attribute: 'disable-legacy-download' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -682,15 +682,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
-		if (this.emitEventToDownload) {
-			return html`
-				<d2l-menu-item @click=${this._emitDownloadEvent} text="${this.localize('download')}"></d2l-menu-item>
-			`;
-		}
-
-		const linkHref = this._getDownloadLink();
 		return html`
-			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
+			<d2l-menu-item @click=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
 		`;
 	}
 
@@ -901,17 +894,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDownloadButtonPress() {
-		if (this.emitEventToDownload) {
-			return this._emitDownloadEvent();
+		this._emitDownloadEvent();
+
+		if (!this.disableLegacyDownload) {
+			const linkHref = this._getDownloadLink();
+
+			const anchor = document.createElement('a');
+			anchor.href = linkHref;
+			anchor.download = '';
+			anchor.click();
+			anchor.remove();
 		}
-
-		const linkHref = this._getDownloadLink();
-
-		const anchor = document.createElement('a');
-		anchor.href = linkHref;
-		anchor.download = '';
-		anchor.click();
-		anchor.remove();
 	}
 
 	_onDragEndSeek() {
