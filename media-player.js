@@ -64,8 +64,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			downloadSrc: { type: String, attribute: 'download-src' },
-			downloadReady: { type: Boolean, attribute: 'download-ready', reflect: true },
+			emitEventToDownload: { type: Boolean, attribute: 'emit-event-to-download' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -369,7 +368,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.allowDownload = false;
 		this.autoplay = false;
 		this.loop = false;
-		this.downloadReady = false;
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
@@ -587,10 +585,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (changedProperties.has('src')) {
 			this._determineSourceType();
 		}
-
-		if (changedProperties.has('downloadReady') && this.downloadReady) {
-			this._onDownloadButtonPress();
-		}
 	}
 
 	get duration() {
@@ -646,8 +640,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sourceType = SOURCE_TYPES.unknown;
 	}
 
-	async _downloadFromSrc() {
-		this.downloadReady = false;
+	_emitDownloadEvent() {
 		this.dispatchEvent(new CustomEvent('download'));
 	}
 
@@ -689,9 +682,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
-		if (this.downloadSrc) {
+		if (this.emitEventToDownload) {
 			return html`
-				<d2l-menu-item @click=${this._downloadFromSrc} text="${this.localize('download')}"></d2l-menu-item>
+				<d2l-menu-item @click=${this._emitDownloadEvent} text="${this.localize('download')}"></d2l-menu-item>
 			`;
 		}
 
@@ -702,10 +695,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getDownloadLink() {
-		if (this.downloadSrc) {
-			return this.downloadSrc;
-		}
-
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
 		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
@@ -912,6 +901,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDownloadButtonPress() {
+		if (this.emitEventToDownload) {
+			return this._emitDownloadEvent();
+		}
+
 		const linkHref = this._getDownloadLink();
 
 		const anchor = document.createElement('a');
