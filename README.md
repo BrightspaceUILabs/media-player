@@ -140,7 +140,7 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
 | srclang | String, required | The language's code.
-
+| default | Boolean | false | The track to be selected by default. The user's local storage value will take precendence over the default.
 ## Local Storage
 
 The media player uses local storage to persist the user's playback speed and track selections.

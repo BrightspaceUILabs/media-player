@@ -1051,6 +1051,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
+		let defaultTrack;
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 
@@ -1099,6 +1100,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				srclang: node.srclang,
 				srt: node.srt
 			});
+
+			if (node.default) {
+				// Stringified to be parsed in initializeTracks
+				defaultTrack = JSON.stringify({
+					srclang: node.srclang,
+					kind: node.kind
+				});
+			}
 		}
 
 		await new Promise(resolve => {
@@ -1142,7 +1151,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// Needs to be caught right away, since the cuechange event can be emitted immediately
 		// Set default track to 'hidden'
 		const initializeTracks = (() => {
-			this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY);
+			this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
 				const textTrack = this._media.textTracks[i];
