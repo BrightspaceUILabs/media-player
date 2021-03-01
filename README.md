@@ -57,7 +57,7 @@ npm install @brightspace-ui-labs/media-player
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String, required |  | URL of the media to play. |
-| disable-legacy-download | String |  | If set, the component will not perform the download. Instead, it'll rely on emitting the `download-requested` event for download.|
+| allow-download-on-error | Boolean |  | If set, display the download button in the error view. |
 
 ```
 <!-- Render a media player with a source file and loop the media when it reaches the end -->
@@ -109,7 +109,6 @@ this.document.querySelector('d2l-labs-media-player').pause();
 | pause | Dispatched when the media is paused. |
 | timeupdate | Dispatched when the currentTime of the media player has been updated. |
 | trackloaded | Dispatched when a track element has loaded. |
-| download-requested | Dispatched when a download is requested. |
 ```
 // Listen for the loadeddata event
 
