@@ -47,9 +47,9 @@ npm install @brightspace-ui-labs/media-player
 <d2l-labs-media-player src="/video.webm"></d2l-labs-media-player>
 ```
 
-**Properties:**
+**Attributes:**
 
-| Property | Type | Default | Description |
+| Attribute | Type | Default | Description |
 |--|--|--|--|
 | allow-download| Boolean | false | If set, will allow the media to be downloaded.
 | autoplay | Boolean | false | If set, will play the media as soon as it has been loaded. |
@@ -65,9 +65,9 @@ npm install @brightspace-ui-labs/media-player
 <d2l-labs-media-player loop src="./local-video.mp4"></d2l-labs-media-player>
 ```
 
-**Attributes:**
+**Properties:**
 
-| Attribute | Type | Get/Set | Description |
+| Property | Type | Get/Set | Description |
 |--|--|--|--|
 | currentTime | Number | Get & Set | Current time playback time of the media in seconds. |
 | duration | Number | Get | Total duration of the media in seconds. |
@@ -132,15 +132,15 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 </d2l-labs-media-player>
 ```
 
-**Properties**
+**Attributes**
 
-| Property | Type | Default | Description |
+| Attribute | Type | Default | Description |
 |--|--|--|--|
 | kind | ["captions", "subtitles"], required | The kind of track.
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
 | srclang | String, required | The language's code.
-
+| default | Boolean | false | The track to be selected by default. The user's local storage value will take precendence over the default.
 ## Local Storage
 
 The media player uses local storage to persist the user's playback speed and track selections.
