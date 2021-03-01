@@ -368,7 +368,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.allowDownload = false;
 		this.autoplay = false;
 		this.loop = false;
-		this.downloadReady = false;
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
@@ -585,10 +584,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (changedProperties.has('src')) {
 			this._determineSourceType();
-		}
-
-		if (changedProperties.has('downloadReady') && this.downloadReady) {
-			this._onDownloadButtonPress();
 		}
 	}
 
