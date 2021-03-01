@@ -64,7 +64,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			disableLegacyDownload: { type: Boolean, attribute: 'disable-legacy-download' },
+			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -567,6 +567,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 								</d2l-menu-item>
 								${this._getTracksMenuView()}
 								${this._getDownloadButtonView()}
+								<slot name="settings-menu-item"></slot>
 							</d2l-menu>
 						</d2l-dropdown-menu>
 					</d2l-dropdown>
@@ -640,10 +641,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sourceType = SOURCE_TYPES.unknown;
 	}
 
-	_emitDownloadEvent() {
-		this.dispatchEvent(new CustomEvent('download-requested'));
-	}
-
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -682,8 +679,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
+		const linkHref = this._getDownloadLink();
 		return html`
-			<d2l-menu-item @d2l-menu-item-select=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
+			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
 		`;
 	}
 
@@ -728,7 +726,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						<span>${this._message.text}</span>
 
 						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
-						<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>
+						${this.allowDownloadOnError ? html`<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>` : ''}
 					</div>
 				</d2l-alert>
 			</div>
@@ -894,17 +892,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDownloadButtonPress() {
-		this._emitDownloadEvent();
+		const linkHref = this._getDownloadLink();
 
-		if (!this.disableLegacyDownload) {
-			const linkHref = this._getDownloadLink();
-
-			const anchor = document.createElement('a');
-			anchor.href = linkHref;
-			anchor.download = '';
-			anchor.click();
-			anchor.remove();
-		}
+		const anchor = document.createElement('a');
+		anchor.href = linkHref;
+		anchor.download = '';
+		anchor.click();
+		anchor.remove();
 	}
 
 	_onDragEndSeek() {
