@@ -688,7 +688,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (!this.allowDownload) return null;
 
 		return html`
-			<d2l-menu-item @click=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
+			<d2l-menu-item @d2l-menu-item-select=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
 		`;
 	}
 
