@@ -64,7 +64,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			downloadSrc: { type: String, attribute: 'download-src' },
+			disableLegacyDownload: { type: Boolean, attribute: 'disable-legacy-download' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -640,22 +640,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sourceType = SOURCE_TYPES.unknown;
 	}
 
-	async _downloadFromSrc() {
-		const response = await fetch(this.downloadSrc, {
-			headers: {
-				Range: 'bytes=0-1'
-			}
-		});
-		if (!response.ok) {
-			this._message = {
-				text: this.localize('unableToDownload'),
-				type: MESSAGE_TYPES.error,
-				hideDownload: true,
-			};
-			return;
-		}
-
-		this._onDownloadButtonPress();
+	_emitDownloadEvent() {
+		this.dispatchEvent(new CustomEvent('download-requested'));
 	}
 
 	static _formatTime(totalSeconds) {
@@ -696,23 +682,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
-		if (this.downloadSrc) {
-			return html`
-				<d2l-menu-item @click=${this._downloadFromSrc} text="${this.localize('download')}"></d2l-menu-item>
-			`;
-		}
-
-		const linkHref = this._getDownloadLink();
 		return html`
-			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
+			<d2l-menu-item @click=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
 		`;
 	}
 
 	_getDownloadLink() {
-		if (this.downloadSrc) {
-			return this.downloadSrc;
-		}
-
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
 		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
@@ -753,7 +728,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						<span>${this._message.text}</span>
 
 						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
-						${this._message.hideDownload ? '' : html`<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>`}
+						<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>
 					</div>
 				</d2l-alert>
 			</div>
@@ -919,13 +894,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDownloadButtonPress() {
-		const linkHref = this._getDownloadLink();
+		this._emitDownloadEvent();
 
-		const anchor = document.createElement('a');
-		anchor.href = linkHref;
-		anchor.download = '';
-		anchor.click();
-		anchor.remove();
+		if (!this.disableLegacyDownload) {
+			const linkHref = this._getDownloadLink();
+
+			const anchor = document.createElement('a');
+			anchor.href = linkHref;
+			anchor.download = '';
+			anchor.click();
+			anchor.remove();
+		}
 	}
 
 	_onDragEndSeek() {
