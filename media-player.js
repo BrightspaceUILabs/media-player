@@ -64,8 +64,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			downloadSrc: { type: String, attribute: 'download-src' },
-			downloadReady: { type: Boolean, attribute: 'download-ready', reflect: true },
+			disableLegacyDownload: { type: Boolean, attribute: 'disable-legacy-download' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -646,9 +645,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sourceType = SOURCE_TYPES.unknown;
 	}
 
-	async _downloadFromSrc() {
-		this.downloadReady = false;
-		this.dispatchEvent(new CustomEvent('download'));
+	_emitDownloadEvent() {
+		this.dispatchEvent(new CustomEvent('download-requested'));
 	}
 
 	static _formatTime(totalSeconds) {
@@ -689,23 +687,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
-		if (this.downloadSrc) {
-			return html`
-				<d2l-menu-item @click=${this._downloadFromSrc} text="${this.localize('download')}"></d2l-menu-item>
-			`;
-		}
-
-		const linkHref = this._getDownloadLink();
 		return html`
-			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
+			<d2l-menu-item @click=${this._onDownloadButtonPress} text="${this.localize('download')}"></d2l-menu-item>
 		`;
 	}
 
 	_getDownloadLink() {
-		if (this.downloadSrc) {
-			return this.downloadSrc;
-		}
-
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
 		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
@@ -912,13 +899,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDownloadButtonPress() {
-		const linkHref = this._getDownloadLink();
+		this._emitDownloadEvent();
 
-		const anchor = document.createElement('a');
-		anchor.href = linkHref;
-		anchor.download = '';
-		anchor.click();
-		anchor.remove();
+		if (!this.disableLegacyDownload) {
+			const linkHref = this._getDownloadLink();
+
+			const anchor = document.createElement('a');
+			anchor.href = linkHref;
+			anchor.download = '';
+			anchor.click();
+			anchor.remove();
+		}
 	}
 
 	_onDragEndSeek() {
@@ -1044,6 +1035,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
+		let defaultTrack;
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 
@@ -1092,6 +1084,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				srclang: node.srclang,
 				srt: node.srt
 			});
+
+			if (node.default) {
+				// Stringified to be parsed in initializeTracks
+				defaultTrack = JSON.stringify({
+					srclang: node.srclang,
+					kind: node.kind
+				});
+			}
 		}
 
 		await new Promise(resolve => {
@@ -1135,7 +1135,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// Needs to be caught right away, since the cuechange event can be emitted immediately
 		// Set default track to 'hidden'
 		const initializeTracks = (() => {
-			this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY);
+			this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
 				const textTrack = this._media.textTracks[i];
