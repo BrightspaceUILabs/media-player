@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "søgningsskyder",
 	"settings": "settings",
 	"speed": "hastighed",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Slå lydløs fra",
 	"volumeSlider": "lydstyrkeskyder"
 };

@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "搜索滑块",
 	"settings": "settings",
 	"speed": "速度",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "取消静音",
 	"volumeSlider": "音量滑块"
 };

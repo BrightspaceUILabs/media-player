@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "شريط تمرير التقديم/الترجيع",
 	"settings": "settings",
 	"speed": "السرعة",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "إلغاء كتم الصوت",
 	"volumeSlider": "شريط تمرير مستوى الصوت"
 };

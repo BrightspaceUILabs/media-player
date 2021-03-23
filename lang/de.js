@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "Suchregler",
 	"settings": "settings",
 	"speed": "Geschwindigkeit",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Stummschaltung aufheben",
 	"volumeSlider": "Lautstärkeregler"
 };

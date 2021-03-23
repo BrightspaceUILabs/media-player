@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "llithrydd chwilio",
 	"settings": "settings",
 	"speed": "cyflymder",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Dad-dewi",
 	"volumeSlider": "llithrydd sain"
 };

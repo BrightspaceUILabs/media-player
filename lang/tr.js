@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "arama kaydırıcısı",
 	"settings": "settings",
 	"speed": "hız",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Sesi Aç",
 	"volumeSlider": "ses düzeyi kaydırıcısı"
 };

@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "controle deslizante de busca",
 	"settings": "settings",
 	"speed": "velocidade",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Desativar mudo",
 	"volumeSlider": "controle deslizante de volume"
 };

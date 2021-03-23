@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
+	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Annuler le mode muet",
 	"volumeSlider": "curseur du volume"
 };
