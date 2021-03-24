@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "sökskjutreglage",
 	"settings": "settings",
 	"speed": "hastighet",
+	"unableToDownload": "Kan inte ladda ner. Uppdatera sidan eller försök igen.",
 	"unmute": "Slå på ljudet",
 	"volumeSlider": "volymskjutreglage"
 };

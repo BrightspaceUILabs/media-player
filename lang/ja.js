@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "シークバー",
 	"settings": "settings",
 	"speed": "速度",
+	"unableToDownload": "ダウンロードできません。ページを更新し、もう一度試してください。",
 	"unmute": "ミュート解除",
 	"volumeSlider": "音量調節"
 };
