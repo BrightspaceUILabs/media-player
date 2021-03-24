@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "llithrydd chwilio",
 	"settings": "settings",
 	"speed": "cyflymder",
+	"unableToDownload": "Methu lawrlwytho. Adnewyddwch y dudalen neu rhowch gynnig arall arni.",
 	"unmute": "Dad-dewi",
 	"volumeSlider": "llithrydd sain"
 };

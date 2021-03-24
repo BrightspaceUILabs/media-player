@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "barra deslizante de búsqueda",
 	"settings": "settings",
 	"speed": "velocidad",
+	"unableToDownload": "Se ha producido un error al descargar. Actualice la página e inténtelo de nuevo.",
 	"unmute": "Activar sonido",
 	"volumeSlider": "control deslizante del volumen"
 };

@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "검색 슬라이더",
 	"settings": "settings",
 	"speed": "속도",
+	"unableToDownload": "다운로드할 수 없습니다. 페이지를 새로 고치거나 다시 시도하십시오.",
 	"unmute": "음소거 해제",
 	"volumeSlider": "볼륨 슬라이더"
 };

@@ -18,6 +18,7 @@ export default {
 	"seekSlider": "zoekschuifregelaar",
 	"settings": "settings",
 	"speed": "snelheid",
+	"unableToDownload": "Downloaden is niet mogelijk. Vernieuw de pagina en probeer het opnieuw.",
 	"unmute": "Dempen opheffen",
 	"volumeSlider": "volumeschuifregelaar"
 };
