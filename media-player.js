@@ -543,7 +543,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						</div>
 					</div>
 
-					<div id="d2l-labs-media-player-time">
+					<div id="d2l-labs-media-player-time"
+						aria-live="off"
+						tabindex="0"
+						@focus=${this._onPlayerTimeFocus}
+						@blur=${this._onPlayerTimeBlur}>
 						${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
 					</div>
 
@@ -1006,6 +1010,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._media.playbackRate = speed;
 		this._selectedSpeed = speed;
 		localStorage.setItem(PREFERENCES_SPEED_KEY, speed);
+	}
+
+	_onPlayerTimeFocus(event) {
+		if (event && event.target) {
+			event.target.setAttribute('aria-live', 'polite');
+		}
+	}
+
+	_onPlayerTimeBlur(event) {
+		if (event && event.target) {
+			event.target.setAttribute('aria-live', 'off');
+		}
 	}
 
 	_onPositionChangeSeek() {
