@@ -401,6 +401,30 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._media.currentTime = time;
 	}
 
+	get duration() {
+		return this._duration;
+	}
+
+	get ended() {
+		return this._media.ended;
+	}
+
+	get isIOSVideo() {
+		return IS_IOS && this._sourceType === SOURCE_TYPES.video;
+	}
+
+	get paused() {
+		return this._media.paused;
+	}
+
+	get sourceType() {
+		return this._sourceType;
+	}
+
+	get textTracks() {
+		return this._media.textTracks;
+	}
+
 	firstUpdated(changedProperties) {
 		super.firstUpdated(changedProperties);
 
@@ -592,30 +616,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
-	get duration() {
-		return this._duration;
-	}
-
-	get ended() {
-		return this._media.ended;
-	}
-
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
 		this._toggleFullscreen();
 	}
 
-	get isIOSVideo() {
-		return IS_IOS && this._sourceType === SOURCE_TYPES.video;
-	}
-
 	pause() {
 		if (!this._media.paused) this._togglePlay();
-	}
-
-	get paused() {
-		return this._media.paused;
 	}
 
 	play() {
@@ -628,12 +636,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._toggleFullscreen();
 	}
 
-	get sourceType() {
-		return this._sourceType;
+	get _media() {
+		switch (this._sourceType) {
+			case SOURCE_TYPES.audio:
+				return this.shadowRoot.getElementById('d2l-labs-media-player-audio');
+			case SOURCE_TYPES.video:
+				return this.shadowRoot.getElementById('d2l-labs-media-player-video');
+			default:
+				return null;
+		}
 	}
 
-	get textTracks() {
-		return this._media.textTracks;
+	get _selectedTrackLabel() {
+		for (let i = 0; i < this._tracks.length; i++) {
+			const track = this._tracks[i];
+
+			if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) return track.label;
+		}
+
+		return this.localize('off');
 	}
 
 	_determineSourceType() {
@@ -870,17 +891,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
-	get _media() {
-		switch (this._sourceType) {
-			case SOURCE_TYPES.audio:
-				return this.shadowRoot.getElementById('d2l-labs-media-player-audio');
-			case SOURCE_TYPES.video:
-				return this.shadowRoot.getElementById('d2l-labs-media-player-video');
-			default:
-				return null;
-		}
-	}
-
 	_onContextMenu(e) {
 		if (!this.allowDownload) e.preventDefault();
 	}
@@ -1012,15 +1022,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		localStorage.setItem(PREFERENCES_SPEED_KEY, speed);
 	}
 
-	_onPlayerTimeFocus(event) {
-		if (event && event.target) {
-			event.target.setAttribute('aria-live', 'polite');
-		}
-	}
-
 	_onPlayerTimeBlur(event) {
 		if (event && event.target) {
 			event.target.setAttribute('aria-live', 'off');
+		}
+	}
+
+	_onPlayerTimeFocus(event) {
+		if (event && event.target) {
+			event.target.setAttribute('aria-live', 'polite');
 		}
 	}
 
@@ -1218,16 +1228,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (this._volume > 0) {
 			this._muted = false;
 		}
-	}
-
-	get _selectedTrackLabel() {
-		for (let i = 0; i < this._tracks.length; i++) {
-			const track = this._tracks[i];
-
-			if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) return track.label;
-		}
-
-		return this.localize('off');
 	}
 
 	_setLoadErrorMessage() {

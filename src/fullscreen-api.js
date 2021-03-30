@@ -71,6 +71,14 @@ class FullscreenApi {
 		return document[this.namesMap.fullscreenElement];
 	}
 
+	get isEnabled() {
+		return Boolean(document[this.namesMap.fullscreenEnabled]);
+	}
+
+	get isFullscreen() {
+		return Boolean(document[this.namesMap.fullscreenElement]);
+	}
+
 	exit() {
 		return new Promise((resolve, reject) => {
 			if (!this.isFullscreen) {
@@ -90,14 +98,6 @@ class FullscreenApi {
 				returnPromise.then(onFullScreenExit).catch(reject);
 			}
 		});
-	}
-
-	get isEnabled() {
-		return Boolean(document[this.namesMap.fullscreenEnabled]);
-	}
-
-	get isFullscreen() {
-		return Boolean(document[this.namesMap.fullscreenElement]);
 	}
 
 	off(event, callback) {
