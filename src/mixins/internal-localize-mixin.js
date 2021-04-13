@@ -33,6 +33,9 @@ const internalLocalizeMixin = superClass => class extends LocalizeMixin(superCla
 				case 'fr-fr':
 					translations = await import('../../lang/fr-fr.js');
 					break;
+				case 'fr-on':
+					translations = await import('../../lang/fr-on.js');
+					break;
 				case 'ja':
 					translations = await import('../../lang/ja.js');
 					break;
