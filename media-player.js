@@ -713,7 +713,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getDownloadLink() {
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
-		const attachmentUrl = `${this.src}${this.src.indexOf('?') === -1 ? '?_' : ''}`;
+		const attachmentUrl = `${this.src}${this.src?.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
 		url.searchParams.append('attachment', 'true');
 		return url.toString();
