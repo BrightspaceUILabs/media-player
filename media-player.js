@@ -52,6 +52,7 @@ const TRACK_KINDS = {
 	captions: 'captions',
 	subtitles: 'subtitles'
 };
+const DEFAULT_QUALITY = 'HD';
 const Url = URL || window.URL;
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
@@ -64,6 +65,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
+			altSources: { type: Object },
 			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -73,6 +75,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_playing: { type: Boolean, attribute: false },
 			_recentlyShowedCustomControls: { type: Boolean, attribute: false },
 			_selectedSpeed: { type: String, attribute: false },
+			_selectedQuality: { type: String, attribute: false },
 			_selectedTrackIdentifier: { type: String, attribute: false },
 			_sourceType: { type: String, attribute: false },
 			_trackFontSizeRem: { type: Number, attribute: false },
@@ -390,6 +393,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._videoClicked = false;
 		this._volume = 1;
 		this._heightPixels = null;
+		this._selectedQuality = DEFAULT_QUALITY;
 	}
 
 	get currentTime() {
@@ -595,6 +599,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 									</d2l-menu>
 								</d2l-menu-item>
 								${this._getTracksMenuView()}
+								${this._getQualityMenuView()}
 								${this._getDownloadButtonView()}
 								<slot name="settings-menu-item"></slot>
 							</d2l-menu>
@@ -867,6 +872,29 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 							value="${this._getTrackIdentifier(track.srclang, track.kind)}"
 						></d2l-menu-item-radio>
 					`)}
+				</d2l-menu>
+			</d2l-menu-item>
+		` : null;
+	}
+
+	_getQualityMenuView() {
+		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+		return this.altSources && Object.keys(this.altSources).length > 0 ? html`
+			<d2l-menu-item text="${this.localize('quality')}">
+				<div slot="supporting">${this._selectedQuality || 'HD'}</div>
+				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(theme)}">
+					${Object.keys(this.altSources).map(quality => html`
+						<d2l-menu-item-radio
+							?selected="${quality === this._selectedQuality}"
+							text="${`${quality}`}"
+							value="${quality}"
+						></d2l-menu-item-radio>
+					`)}
+					<d2l-menu-item-radio
+							?selected="${this._selectedQuality ? this._selectedQuality === DEFAULT_QUALITY : true}"
+							text="${`${DEFAULT_QUALITY}`}"
+							value="${DEFAULT_QUALITY}"
+					></d2l-menu-item-radio>
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
@@ -1196,6 +1224,28 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 		}
 
+	}
+
+	_onQualityMenuItemChange(e) {
+		if (
+			!this.altSources ||
+			!Object.keys(this.altSources) > 0 ||
+			e.target.value === this._selectedQuality ||
+			(e.target.value !== DEFAULT_QUALITY && !(e.target.value in this.altSources))
+		) return;
+
+		this._selectedQuality = e.target.value;
+
+		const time = this.currentTime;
+		this._media.firstElementChild.setAttribute('src', this._selectedQuality == DEFAULT_QUALITY ? this.src : this.altSources[this._selectedQuality]);
+
+		const resumePlay = !this.paused;
+
+		this.pause();
+		this._media.load();
+		this._media.currentTime = time;
+
+		if (resumePlay) this.play();
 	}
 
 	_onVideoClick() {
