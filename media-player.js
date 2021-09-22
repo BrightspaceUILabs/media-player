@@ -636,6 +636,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (this._media.paused) this._togglePlay();
 	}
 
+	load() {
+		if (this._media.paused) this._media.load();
+	}
+
 	requestFullscreen() {
 		if (fullscreenApi.isFullscreen) return;
 
@@ -1241,11 +1245,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		const resumePlay = !this.paused;
 
+		const autoplay = this._media.autoplay;
+		this._media.autoplay = false;
+
 		this.pause();
-		this._media.load();
+		this.load();
 		this._media.currentTime = time;
 
-		if (resumePlay) this.play();
+		if (resumePlay) {
+			this.play();
+			this._media.autoplay = autoplay;
+		}
 	}
 
 	_onVideoClick() {
