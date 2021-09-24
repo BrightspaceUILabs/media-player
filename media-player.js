@@ -433,7 +433,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (!this.src) {
 			const sourceNodes = Array.from(this.getElementsByTagName('source'));
-			if (sourceNodes.length < 1) console.warn('d2l-labs-media-player component requires source tags');
+			if (sourceNodes.length < 1) console.warn('d2l-labs-media-player component requires source tags if src is not set');
 		}
 
 		this._mediaContainer = this.shadowRoot.getElementById('d2l-labs-media-player-media-container');
