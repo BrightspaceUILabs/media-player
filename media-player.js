@@ -15,9 +15,9 @@ import './media-player-audio-bars.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { classMap } from 'lit-html/directives/class-map';
 import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-visible-polyfill-mixin.js';
-import fullscreenApi from './src/fullscreen-api';
+import fullscreenApi from './src/fullscreen-api.js';
 import { ifDefined } from 'lit-html/directives/if-defined';
-import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin';
+import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
@@ -630,16 +630,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._toggleFullscreen();
 	}
 
+	load() {
+		if (this._media.paused) this._media.load();
+	}
+
 	pause() {
 		if (!this._media.paused) this._togglePlay();
 	}
 
 	play() {
 		if (this._media.paused) this._togglePlay();
-	}
-
-	load() {
-		if (this._media.paused) this._media.load();
 	}
 
 	requestFullscreen() {
@@ -784,7 +784,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getMediaAreaView() {
-		if (this._message.type === MESSAGE_TYPES.error || (!this.src && this._sources && Object.keys(this._sources).length < 1)) return null;
+		if (this._message.type === MESSAGE_TYPES.error || (!this.src && this._sources && Object.keys(this._sources).length < 1)) return null;
 
 		const playIcon = `tier3:${this._playing ? 'pause' : 'play'}`;
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
@@ -854,6 +854,24 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_getQualityMenuView() {
+		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+		return !this.src && this._sources && Object.keys(this._sources).length > 1 && this._selectedQuality ? html`
+			<d2l-menu-item text="${this.localize('quality')}">
+				<div slot="supporting">${this._selectedQuality}</div>
+				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(theme)}">
+					${Object.keys(this._sources).map(quality => html`
+						<d2l-menu-item-radio
+							?selected=${this._selectedQuality === quality}
+							text=${quality}
+							value=${quality}
+						></d2l-menu-item-radio>
+					`)}
+				</d2l-menu>
+			</d2l-menu-item>
+		` : null;
+	}
+
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
 		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
 	}
@@ -877,24 +895,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 							?selected="${this._getTrackIdentifier(track.srclang, track.kind) === this._selectedTrackIdentifier}"
 							text="${`${track.label}${track.kind === TRACK_KINDS.captions ? ` (${this.localize('closedCaptionsAcronym')})` : ''}`}"
 							value="${this._getTrackIdentifier(track.srclang, track.kind)}"
-						></d2l-menu-item-radio>
-					`)}
-				</d2l-menu>
-			</d2l-menu-item>
-		` : null;
-	}
-
-	_getQualityMenuView() {
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
-		return !this.src && this._sources && Object.keys(this._sources).length > 1 && this._selectedQuality ? html`
-			<d2l-menu-item text="${this.localize('quality')}">
-				<div slot="supporting">${this._selectedQuality}</div>
-				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(theme)}">
-					${Object.keys(this._sources).map(quality => html`
-						<d2l-menu-item-radio
-							?selected=${this._selectedQuality === quality}
-							text=${quality}
-							value=${quality}
 						></d2l-menu-item-radio>
 					`)}
 				</d2l-menu>
@@ -1076,6 +1076,34 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._media.volume = this._volumeSlider.immediateValue / 100;
 	}
 
+	_onQualityMenuItemChange(e) {
+		if (
+			!this._sources ||
+			!Object.keys(this._sources) > 0 ||
+			e.target.value === this._selectedQuality ||
+			!(e.target.value in this._sources)
+		) return;
+
+		this._selectedQuality = e.target.value;
+
+		const time = this.currentTime;
+		this._media.getElementsByTagName('source')[0].setAttribute('src', this._sources[this._selectedQuality]);
+
+		const resumePlay = !this.paused;
+
+		const autoplay = this._media.autoplay;
+		this._media.autoplay = false;
+
+		this.pause();
+		this.load();
+		this._media.currentTime = time;
+
+		if (resumePlay) {
+			this.play();
+			this._media.autoplay = autoplay;
+		}
+	}
+
 	_onRetryButtonPress() {
 		this._determineSourceType();
 	}
@@ -1234,34 +1262,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	}
 
-	_onQualityMenuItemChange(e) {
-		if (
-			!this._sources ||
-			!Object.keys(this._sources) > 0 ||
-			e.target.value === this._selectedQuality ||
-			!(e.target.value in this._sources)
-		) return;
-
-		this._selectedQuality = e.target.value;
-
-		const time = this.currentTime;
-		this._media.getElementsByTagName('source')[0].setAttribute('src', this._sources[this._selectedQuality]);
-
-		const resumePlay = !this.paused;
-
-		const autoplay = this._media.autoplay;
-		this._media.autoplay = false;
-
-		this.pause();
-		this.load();
-		this._media.currentTime = time;
-
-		if (resumePlay) {
-			this.play();
-			this._media.autoplay = autoplay;
-		}
-	}
-
 	_onVideoClick() {
 		// Given that we are currently not rendering custom controls on the iOS video player,
 		//  we let the native controls/player handle the play/pause toggling
@@ -1392,9 +1392,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_updateSources(sourceNodes) {
 		this._selectedQuality = null;
 		sourceNodes.forEach(node => {
-			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE'){
+			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE') {
 
-				const quality = node.getAttribute("label");
+				const quality = node.getAttribute('label');
 				if (!quality) {
 					console.warn("d2l-labs-media-player component requires 'label' text on source");
 					return;
@@ -1404,16 +1404,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					return;
 				}
 
-				if (node.hasAttribute("default")) {
+				if (node.hasAttribute('default')) {
 					this._selectedQuality = quality;
-				} else if (sourceNodes.length === 1){
+				} else if (sourceNodes.length === 1) {
 					this._selectedQuality = quality;
 				}
 
 				this._sources[quality] = node.src;
 			}
 		});
-		if(!this._selectedQuality) console.warn("d2l-labs-media-player component requires 'default' attribute on one of the source tags");
+		if (!this._selectedQuality) console.warn("d2l-labs-media-player component requires 'default' attribute on one of the source tags");
 	}
 }
 
