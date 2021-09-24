@@ -17,7 +17,9 @@
 
 			<h2>Video Player</h2>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player src="sample-video.mp4" altSources="{&quot;SD&quot;: &quot;sample-video-144p.mp4&quot;}">
+				<d2l-labs-media-player>
+					<source src="sample-video-144p.mp4" label="SD">
+					<source src="sample-video.mp4" label="HD" default>
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
@@ -25,7 +27,8 @@
 
 			<h2>Audio Player</h2>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player src="sample-audio.mp3">
+				<d2l-labs-media-player>
+					<source src="sample-audio.mp3" label="HD">
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>

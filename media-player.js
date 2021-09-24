@@ -52,7 +52,6 @@ const TRACK_KINDS = {
 	captions: 'captions',
 	subtitles: 'subtitles'
 };
-const DEFAULT_QUALITY = 'HD';
 const Url = URL || window.URL;
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
@@ -65,7 +64,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
-			altSources: { type: Object },
 			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -80,6 +78,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_sourceType: { type: String, attribute: false },
 			_trackFontSizeRem: { type: Number, attribute: false },
 			_tracks: { type: Array, attribute: false },
+			_sources: { type: Object, attribute: false },
 			_trackText: { type: String, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
@@ -388,12 +387,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sourceType = SOURCE_TYPES.unknown;
 		this._trackFontSizeRem = 1;
 		this._tracks = [];
+		this._sources = {};
 		this._trackText = null;
 		this._usingVolumeContainer = false;
 		this._videoClicked = false;
 		this._volume = 1;
 		this._heightPixels = null;
-		this._selectedQuality = DEFAULT_QUALITY;
 	}
 
 	get currentTime() {
@@ -432,7 +431,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	firstUpdated(changedProperties) {
 		super.firstUpdated(changedProperties);
 
-		if (!this.src) console.warn('d2l-labs-media-player component requires src text');
+		if (!this.src) {
+			const sourceNodes = Array.from(this.getElementsByTagName('source'));
+			if (sourceNodes.length < 1) console.warn('d2l-labs-media-player component requires source tags');
+		}
 
 		this._mediaContainer = this.shadowRoot.getElementById('d2l-labs-media-player-media-container');
 		this._playButton = this.shadowRoot.getElementById('d2l-labs-media-player-play-button');
@@ -722,7 +724,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getDownloadLink() {
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
-		const attachmentUrl = `${this.src}${this.src?.indexOf('?') === -1 ? '?_' : ''}`;
+		const srcUrl = this.src || this._sources[this._selectedQuality];
+		const attachmentUrl = `${srcUrl}${srcUrl?.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
 		url.searchParams.append('attachment', 'true');
 		return url.toString();
@@ -781,7 +784,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getMediaAreaView() {
-		if (!this.src || this._message.type === MESSAGE_TYPES.error) return null;
+		if (this._message.type === MESSAGE_TYPES.error || (!this.src && this._sources && Object.keys(this._sources).length < 1)) return null;
 
 		const playIcon = `tier3:${this._playing ? 'pause' : 'play'}`;
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
@@ -811,7 +814,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
-						<source src="${this.src}" @error=${this._onError}>
+						<source src="${this.src || this._sources[this._selectedQuality]}" @error=${this._onError}>
 					</video>
 				`;
 			case SOURCE_TYPES.audio:
@@ -833,7 +836,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
-						<source src="${this.src}" @error=${this._onError}></source>
+						<source src="${this.src || this._sources[this._selectedQuality]}" @error=${this._onError}></source>
 					</audio>
 
 					<div id="d2l-labs-media-player-audio-bars-container">
@@ -883,22 +886,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getQualityMenuView() {
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
-		return this.altSources && Object.keys(this.altSources).length > 0 ? html`
+		return !this.src && this._sources && Object.keys(this._sources).length > 1 && this._selectedQuality ? html`
 			<d2l-menu-item text="${this.localize('quality')}">
-				<div slot="supporting">${this._selectedQuality || 'HD'}</div>
+				<div slot="supporting">${this._selectedQuality}</div>
 				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(theme)}">
-					${Object.keys(this.altSources).map(quality => html`
+					${Object.keys(this._sources).map(quality => html`
 						<d2l-menu-item-radio
-							?selected="${quality === this._selectedQuality}"
-							text="${`${quality}`}"
-							value="${quality}"
+							?selected=${this._selectedQuality === quality}
+							text=${quality}
+							value=${quality}
 						></d2l-menu-item-radio>
 					`)}
-					<d2l-menu-item-radio
-							?selected="${this._selectedQuality ? this._selectedQuality === DEFAULT_QUALITY : true}"
-							text="${`${DEFAULT_QUALITY}`}"
-							value="${DEFAULT_QUALITY}"
-					></d2l-menu-item-radio>
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
@@ -1086,6 +1084,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
 		let defaultTrack;
+
+		if (!this.src) {
+			const sourceNodes = nodes.filter(node => node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE');
+			this._updateSources(sourceNodes);
+		}
+
 		for (let i = 0; i < nodes.length; i++) {
 			const node = nodes[i];
 
@@ -1232,16 +1236,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_onQualityMenuItemChange(e) {
 		if (
-			!this.altSources ||
-			!Object.keys(this.altSources) > 0 ||
+			!this._sources ||
+			!Object.keys(this._sources) > 0 ||
 			e.target.value === this._selectedQuality ||
-			(e.target.value !== DEFAULT_QUALITY && !(e.target.value in this.altSources))
+			!(e.target.value in this._sources)
 		) return;
 
 		this._selectedQuality = e.target.value;
 
 		const time = this.currentTime;
-		this._media.firstElementChild.setAttribute('src', this._selectedQuality == DEFAULT_QUALITY ? this.src : this.altSources[this._selectedQuality]);
+		this._media.getElementsByTagName('source')[0].setAttribute('src', this._sources[this._selectedQuality]);
 
 		const resumePlay = !this.paused;
 
@@ -1383,6 +1387,33 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_updateCurrentTimeFromSeekbarProgress() {
 		this.currentTime = this._seekBar.immediateValue * this._duration / 100;
+	}
+
+	_updateSources(sourceNodes) {
+		this._selectedQuality = null;
+		sourceNodes.forEach(node => {
+			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE'){
+
+				const quality = node.getAttribute("label");
+				if (!quality) {
+					console.warn("d2l-labs-media-player component requires 'label' text on source");
+					return;
+				}
+				if (!node.src) {
+					console.warn("d2l-labs-media-player component requires 'src' text on source");
+					return;
+				}
+
+				if (node.hasAttribute("default")) {
+					this._selectedQuality = quality;
+				} else if (sourceNodes.length === 1){
+					this._selectedQuality = quality;
+				}
+
+				this._sources[quality] = node.src;
+			}
+		});
+		if(!this._selectedQuality) console.warn("d2l-labs-media-player component requires 'default' attribute on one of the source tags");
 	}
 }
 
