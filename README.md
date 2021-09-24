@@ -119,7 +119,7 @@ this.document.querySelector('d2l-labs-media-player').addEventListener('loadeddat
 
 ## Multiple qualities using `<source>`
 
-The media player supports switching to different qualities. If multiple `<source>` tags are present, a quality selector will be available in the menu. In this case, do not set `src` on `d2l-labs-media-player`
+The media player supports switching to different qualities. If multiple `<source>` tags are present, a quality selector will be available in the menu. In this case, do not set `src` on `d2l-labs-media-player`.
 
 ```
 <d2l-labs-media-player>
