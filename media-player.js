@@ -1391,7 +1391,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_updateSources(sourceNodes) {
 		this._selectedQuality = null;
-		sourceNodes.forEach(node => {
+		sourceNodes.forEach((node, index) => {
 			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE') {
 
 				const quality = node.getAttribute('label');
@@ -1404,16 +1404,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					return;
 				}
 
-				if (node.hasAttribute('default')) {
-					this._selectedQuality = quality;
-				} else if (sourceNodes.length === 1) {
-					this._selectedQuality = quality;
-				}
+				if (index === 0 || node.hasAttribute('default')) this._selectedQuality = quality;
 
 				this._sources[quality] = node.src;
 			}
 		});
-		if (!this._selectedQuality) console.warn("d2l-labs-media-player component requires 'default' attribute on one of the source tags");
 	}
 }
 
