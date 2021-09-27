@@ -16,6 +16,8 @@ export default {
 	"play": "Play",
 	"playbackSpeed": "Playback speed",
 	"retry": "Retry",
+	"showSearchInput": "Show search input",
+	"searchPlaceholder": "Search...",
 	"seekSlider": "seek slider",
 	"settings": "settings",
 	"speed": "speed",

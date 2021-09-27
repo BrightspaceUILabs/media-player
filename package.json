@@ -48,8 +48,11 @@
   "dependencies": {
     "@brightspace-ui/core": "^1",
     "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^1",
+    "fuse.js": "^6.4.6",
     "lit-element": "^2",
+    "lodash-es": "^4.17.21",
     "parse-srt": "^1.0.0-alpha",
-    "resize-observer-polyfill": "^1"
+    "resize-observer-polyfill": "^1",
+    "webvtt-parser": "^2.1.2"
   }
 }
