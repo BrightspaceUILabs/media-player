@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"quality": "Quality",
 	"closedCaptionsAcronym": "CC",
 	"default": "Default",
 	"download": "Download",

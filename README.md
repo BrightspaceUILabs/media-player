@@ -56,7 +56,7 @@ npm install @brightspace-ui-labs/media-player
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
-| src | String, required |  | URL of the media to play. |
+| src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
 | allow-download-on-error | Boolean |  | If set, display the download button in the error view. |
 
 ```
@@ -116,6 +116,27 @@ this.document.querySelector('d2l-labs-media-player').addEventListener('loadeddat
 	console.log('loadeddata event has been dispatched');
 });
 ```
+
+## Multiple qualities using `<source>`
+
+The media player supports switching to different qualities. If multiple `<source>` tags are present, a quality selector will be available in the menu. In this case, do not set `src` on `d2l-labs-media-player`.
+
+```
+<d2l-labs-media-player>
+  <source src="sample-video-144p.mp4" label="SD">
+  <source src="sample-video.mp4" label="HD" default>
+</d2l-labs-media-player
+```
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|--|--|--|--|
+| label | String, required | The label for the track, displayed to the user for selection.
+| src | String, required | The URL of the source file.
+| default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
+
+
 
 ## Captions and Subtitles Using `<track>`
 

@@ -16,8 +16,20 @@
 		<d2l-demo-page page-title="d2l-media-player">
 
 			<h2>Video Player</h2>
+
+			<h5>Single quality source</h5>
 			<d2l-demo-snippet>
 				<d2l-labs-media-player src="sample-video.mp4">
+					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
+					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
+				</d2l-labs-media-player>
+			</d2l-demo-snippet>
+
+			<h5>Multiple qualities</h5>
+			<d2l-demo-snippet>
+				<d2l-labs-media-player>
+					<source src="sample-video-144p.mp4" label="SD">
+					<source src="sample-video.mp4" label="HD" default>
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
