@@ -339,6 +339,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 2.75rem;
 			}
 
+			#d2l-labs-media-player-search-container {
+				align-items: center;
+				display: flex;
+			}
+			#d2l-labs-media-player-search-container.d2l-labs-media-player-search-container-hidden {
+				display: none;
+			}
+
 			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input {
 				border-color: rgba(48, 52, 54, 0.1);
 				border-radius: 20px;
@@ -362,11 +370,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input:active {
 				box-shadow: rgb(24 26 27) 0 0 1px;
 				outline-color: initial;
-			}
-
-			#d2l-labs-media-player-search-container {
-				align-items: center;
-				display: flex;
 			}
 
 			#d2l-labs-media-player-search-container:hover #d2l-labs-media-player-search-input,
@@ -569,6 +572,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const mediaControlsClass = { 'd2l-labs-media-player-hidden': this._hidingCustomControls() };
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		const volumeLevelContainerClass = { 'd2l-labs-media-player-hidden': !this._usingVolumeContainer || this._hidingCustomControls() };
+		const searchContainerClass = { 'd2l-labs-media-player-search-container-hidden' : !this._searchInstances[this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)] };
 
 		const fullscreenButton = this._sourceType === SOURCE_TYPES.video ? html`<d2l-button-icon
 			class="d2l-dropdown-opener"
@@ -668,6 +672,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					<div
 						@mouseenter=${this._onSearchContainerHover}
 						@mouseleave=${this._onSearchContainerHover}
+						class=${classMap(searchContainerClass)}
 						id="d2l-labs-media-player-search-container"
 					><d2l-button-icon
 							icon="tier1:search"
