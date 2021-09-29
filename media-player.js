@@ -11,11 +11,14 @@ import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
 import '@d2l/seek-bar/d2l-seek-bar.js';
+import 'webvtt-parser';
 import './media-player-audio-bars.js';
 import { css, html, LitElement } from 'lit-element/lit-element.js';
 import { classMap } from 'lit-html/directives/class-map';
+import { debounce } from 'lodash-es';
 import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-visible-polyfill-mixin.js';
 import fullscreenApi from './src/fullscreen-api.js';
+import Fuse from 'fuse.js';
 import { ifDefined } from 'lit-html/directives/if-defined';
 import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
@@ -53,6 +56,13 @@ const TRACK_KINDS = {
 	subtitles: 'subtitles'
 };
 const Url = URL || window.URL;
+const FUSE_OPTIONS = options => ({
+	keys: ['text'],
+	ignoreLocation: true,
+	threshold: 0.1,
+	...options
+});
+const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hover';
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
 
@@ -72,6 +82,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
 			_recentlyShowedCustomControls: { type: Boolean, attribute: false },
+			_searchResults: { type: Array, attribute: false },
 			_selectedSpeed: { type: String, attribute: false },
 			_selectedQuality: { type: String, attribute: false },
 			_selectedTrackIdentifier: { type: String, attribute: false },
@@ -328,6 +339,69 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 2.75rem;
 			}
 
+			#d2l-labs-media-player-search-container {
+				align-items: center;
+				display: flex;
+			}
+			#d2l-labs-media-player-search-container.d2l-labs-media-player-search-container-hidden {
+				display: none;
+			}
+
+			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input {
+				border-color: rgba(48, 52, 54, 0.1);
+				border-radius: 20px;
+				color: var(--d2l-color-ferrite);
+				font-size: 1rem;
+				opacity: 0;
+				outline: 0;
+				padding: 0;
+				position: relative;
+				transition: width 0.4s, opacity 0.4s, visibility 0s;
+				visibility: hidden;
+				width: 0;
+			}
+
+			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input[theme="dark"] {
+				background-color: rgba(24, 26, 27, 0.15);
+				color: rgb(206, 216, 225);
+			}
+
+			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input:focus,
+			#d2l-labs-media-player-search-container #d2l-labs-media-player-search-input:active {
+				box-shadow: rgb(24 26 27) 0 0 1px;
+				outline-color: initial;
+			}
+
+			#d2l-labs-media-player-search-container:hover #d2l-labs-media-player-search-input,
+			#d2l-labs-media-player-search-container.d2l-labs-media-player-search-container-hover #d2l-labs-media-player-search-input {
+				height: 1.2rem;
+				opacity: 1;
+				padding: 0 0.35rem;
+				visibility: visible;
+				width: 6rem;
+			}
+
+			#d2l-labs-media-player-search-markers-container {
+				position: absolute;
+				top: -9px;
+				transition: all 0.2s;
+				width: 100%;
+			}
+
+			.d2l-labs-media-player-search-marker {
+				color: var(--d2l-color-ferrite);
+				cursor: pointer;
+				height: 5px;
+				position: absolute;
+				top: 4px;
+				width: 5px;
+				z-index: 2;
+			}
+
+			.d2l-labs-media-player-search-marker[theme="dark"] {
+				color: white;
+			}
+
 			#d2l-labs-media-player-settings-menu {
 				bottom: calc(1.8rem + 18px);
 				left: calc(0.2rem + 14px);
@@ -393,6 +467,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._videoClicked = false;
 		this._volume = 1;
 		this._heightPixels = null;
+
+		this._webVTTParser = new window.WebVTTParser();
+		this._searchInstances = {};
+		this._searchResults = [];
+		this._searchInputFocused = false;
 	}
 
 	get currentTime() {
@@ -442,6 +521,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._settingsMenu = this.shadowRoot.getElementById('d2l-labs-media-player-settings-menu');
 		this._speedLevelBackground = this.shadowRoot.getElementById('d2l-labs-media-player-speed-level-background');
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
+		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
+		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
 
 		this._startUpdatingCurrentTime();
 
@@ -491,6 +572,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const mediaControlsClass = { 'd2l-labs-media-player-hidden': this._hidingCustomControls() };
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		const volumeLevelContainerClass = { 'd2l-labs-media-player-hidden': !this._usingVolumeContainer || this._hidingCustomControls() };
+		const searchContainerClass = { 'd2l-labs-media-player-search-container-hidden' : !this._searchInstances[this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)] };
 
 		const fullscreenButton = this._sourceType === SOURCE_TYPES.video ? html`<d2l-button-icon
 			class="d2l-dropdown-opener"
@@ -523,6 +605,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				`}
 
 			<div class=${classMap(mediaControlsClass)} id="d2l-labs-media-player-media-controls" @mouseenter=${this._startHoveringControls} @mouseleave=${this._stopHoveringControls}>
+				<div id="d2l-labs-media-player-search-markers-container">
+					${this._getSearchResultsView()}
+				</div>
 				<d2l-seek-bar
 					id="d2l-labs-media-player-seek-bar"
 					fullWidth
@@ -584,6 +669,27 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 					<div class="d2l-labs-media-player-flex-filler"></div>
 
+					<div
+						@mouseenter=${this._onSearchContainerHover}
+						@mouseleave=${this._onSearchContainerHover}
+						class=${classMap(searchContainerClass)}
+						id="d2l-labs-media-player-search-container"
+					><d2l-button-icon
+							icon="tier1:search"
+							id="d2l-labs-media-player-search-button"
+							label=${this.localize('showSearchInput')}
+							theme="${ifDefined(theme)}"
+						></d2l-button-icon>
+						<input
+							@blur=${this._onSearchInputBlur}
+							@focus=${this._onSearchInputFocus}
+							@input=${debounce(this._onSearchInputChanged, 500)}
+							id="d2l-labs-media-player-search-input"
+							placeholder="${this.localize('searchPlaceholder')}"
+							theme="${ifDefined(theme)}"
+							type="text"
+						></input>
+					</div>
 					<d2l-dropdown>
 						<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
 						<d2l-dropdown-menu id="d2l-labs-media-player-settings-menu" no-pointer theme="${ifDefined(theme)}">
@@ -854,6 +960,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_getPercentageTime(time) {
+		return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+	}
+
 	_getQualityMenuView() {
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		return !this.src && this._sources && Object.keys(this._sources).length > 1 && this._selectedQuality ? html`
@@ -870,6 +980,21 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
+	}
+
+	_getSearchResultsView() {
+		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+		return this._searchResults.map(result => {
+			return html`
+				<d2l-icon
+					@click=${this._onSearchMarkerClick(result)}
+					class="d2l-labs-media-player-search-marker"
+					icon="tier1:subscribe-filled"
+					theme="${ifDefined(theme)}"
+					style=${styleMap({ left: this._getPercentageTime(result) })}
+				></d2l-icon>
+			`;
+		});
 	}
 
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
@@ -908,6 +1033,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_listenForKeyboard(e) {
+		if (this._searchInputFocused) {
+			return;
+		}
 		this._showControls(true);
 		switch (e.key) {
 			case KEY_BINDINGS.play:
@@ -1108,6 +1236,46 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._determineSourceType();
 	}
 
+	_onSearchButtonPress() {
+		if (this._searchContainer.classList.includes((SEARCH_CONTAINER_HOVER_CLASS))) {
+			this._searchContainer.classList.remove(SEARCH_CONTAINER_HOVER_CLASS);
+		} else {
+			this._onSearchContainerHover(true);
+		}
+	}
+
+	_onSearchContainerHover() {
+		if (this._searchInput.value === '') {
+			this._searchContainer.classList.remove(SEARCH_CONTAINER_HOVER_CLASS);
+		} else {
+			this._searchContainer.classList.add(SEARCH_CONTAINER_HOVER_CLASS);
+		}
+	}
+
+	_onSearchInputBlur() {
+		this._searchInputFocused = false;
+	}
+
+	_onSearchInputChanged() {
+		this._onSearchContainerHover();
+		if (this._searchInput.value.length < 2) {
+			this._searchResults = [];
+			return;
+		}
+		const srclang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
+		const searcher = this._searchInstances[srclang];
+		this._searchResults = searcher.search(this._searchInput.value)
+			.map(result => result.item.startTime || result.item.start);
+	}
+
+	_onSearchInputFocus() {
+		this._searchInputFocused = true;
+	}
+
+	_onSearchMarkerClick(time) {
+		return () => this.currentTime = time;
+	}
+
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
@@ -1164,7 +1332,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				label: node.label,
 				src: node.src,
 				srclang: node.srclang,
-				srt: node.srt
+				srt: node.srt,
+				text
 			});
 
 			if (node.default) {
@@ -1197,6 +1366,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				track.cues.forEach(cue => {
 					trackElement.addCue(new VTTCue(cue.start, cue.end, cue.text));
 				});
+
+				this._searchInstances[track.srclang] = new Fuse(track.cues, FUSE_OPTIONS({
+					sortFn: (a, b) => a.start - b.start
+				}));
 			} else {
 				const trackElement = document.createElement('track');
 				trackElement.src = track.src;
@@ -1208,6 +1381,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				trackElement.addEventListener('load', () => {
 					this.dispatchEvent(new CustomEvent('trackloaded'));
 				});
+
+				const { cues } = this._webVTTParser.parse(track.text, 'metadata');
+				this._searchInstances[track.srclang] = new Fuse(cues, FUSE_OPTIONS({
+					sortFn: (a, b) => a.startTime - b.startTime,
+				}));
 			}
 		});
 
@@ -1259,7 +1437,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				this._media.textTracks[i].mode = 'disabled';
 			}
 		}
-
+		this._onSearchInputChanged();
 	}
 
 	_onVideoClick() {
@@ -1315,7 +1493,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._recentlyShowedCustomControls = true;
 		clearTimeout(this._showControlsTimeout);
 
-		if (temporarily) {
+		if (temporarily && !this._searchInput.value) {
 			this._showControlsTimeout = setTimeout(() => {
 				this._recentlyShowedCustomControls = false;
 			}, HIDE_DELAY_MS);

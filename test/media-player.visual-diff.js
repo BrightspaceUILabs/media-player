@@ -21,12 +21,29 @@ describe('d2l-labs-media-player', () => {
 
 	after(async() => await browser.close());
 
+	async function getShadowElem(id, selector) {
+		return await page.evaluateHandle(
+			`document.querySelector('${id}').shadowRoot.querySelector('${selector}')`
+		);
+	}
+
 	[
 		'video',
 		'video-with-poster',
 		'audio',
 	].forEach((id) => {
 		it(id, async function() {
+			const rect = await visualDiff.getRect(page, `#${id}`);
+			await visualDiff.screenshotAndCompare(page, this.test.fullTitle(), { clip: rect });
+		});
+	});
+
+	[
+		'video-with-search',
+		'audio-with-search'
+	].forEach((id) => {
+		it(id, async function() {
+			await getShadowElem(`#${id}`, '#d2l-labs-media-player-search-container');
 			const rect = await visualDiff.getRect(page, `#${id}`);
 			await visualDiff.screenshotAndCompare(page, this.test.fullTitle(), { clip: rect });
 		});
