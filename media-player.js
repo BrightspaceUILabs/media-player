@@ -1366,6 +1366,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				track.cues.forEach(cue => {
 					trackElement.addCue(new VTTCue(cue.start, cue.end, cue.text));
 				});
+				this.dispatchEvent(new CustomEvent('trackloaded'));
 
 				this._searchInstances[track.srclang] = new Fuse(track.cues, FUSE_OPTIONS({
 					sortFn: (a, b) => a.start - b.start
