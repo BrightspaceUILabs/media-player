@@ -394,29 +394,29 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 
 			#d2l-labs-media-player-thumbnails-preview-container {
-				position: absolute;
 				bottom: 60px;
+				position: absolute;
 				transform: translateX(-50%);
 				transition: all 0.2s;
 				z-index: 2;
 			}
 
 			#d2l-labs-media-player-thumbnails-preview-time {
-				position: absolute;
+				bottom: 3px;
 				font-size: 14px;
+				left: 0;
+				position: absolute;
 				text-align: center;
 				text-shadow: 0 0 4px rgb(0 0 0 / 75%);
-				bottom: 3px;
-				left: 0;
 				width: 100%;
 				z-index: 2;
 			}
 
 			#d2l-labs-media-player-thumbnails-preview-image {
-				position: relative;
 				background-repeat: no-repeat;
-				width: 100%;
 				height: 100%;
+				position: relative;
+				width: 100%;
 				z-index: 2;
 			}
 
