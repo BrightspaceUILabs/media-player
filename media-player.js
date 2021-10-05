@@ -1049,21 +1049,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (!this.thumbnails || !this._thumnailsImage) return;
 
 		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
-		const widthIndex = thumbStr.indexOf('w');
-		const heightIndex = thumbStr.indexOf('h');
-		const intervalIndex = thumbStr.indexOf('i');
-
-		if (widthIndex === -1 || heightIndex === -1 || intervalIndex === -1) return;
-
-		const widthMatch = thumbStr.substr(widthIndex).match(/\d+/);
-		const heightMatch = thumbStr.substr(heightIndex).match(/\d+/);
-		const intervalMatch = thumbStr.substr(intervalIndex).match(/\d+/);
+		const widthMatch = thumbStr.match(/w(\d+)/);
+		const heightMatch = thumbStr.match(/h(\d+)/);
+		const intervalMatch = thumbStr.match(/i(\d+)/);
 
 		if (!(widthMatch && heightMatch && intervalMatch)) return;
 
-		const interval = parseInt(intervalMatch[0]);
-		const thumbWidth = parseInt(widthMatch[0]);
-		const thumbHeight = parseInt(heightMatch[0]);
+		const interval = parseInt(intervalMatch[1]);
+		const thumbWidth = parseInt(widthMatch[1]);
+		const thumbHeight = parseInt(heightMatch[1]);
 
 		const width = this._thumnailsImage.width;
 		const height = this._thumnailsImage.height;
