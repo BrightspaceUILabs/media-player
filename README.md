@@ -57,6 +57,7 @@ npm install @brightspace-ui-labs/media-player
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
+| thumbnails | String |  | If set, will show thumbnails on preview. See below for required format. |
 | allow-download-on-error | Boolean |  | If set, display the download button in the error view. |
 
 ```
@@ -136,6 +137,15 @@ The media player supports switching to different qualities. If multiple `<source
 | src | String, required | The URL of the source file.
 | default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
 
+## Showing thumbnails preview with `thumbnails` attribute
+
+The thumbnails sprite image is a grid of images taken from the video at a set interval.
+> e.g. sample video thumbnails sprite
+![Example thumbnails sprite](demo/tw160h90i5-samplevideo.png)
+
+Provide the thumbnails sprite image signed url, the url name must use the following format `tw<width>h<height>i<interval>-<hash>.[png|jpg]` e.g. `tw160h90i5-samplevideo.png`.
+
+Where `width` and `height` are the width/height px of each individual thumbnail, and `interval` is how many seconds apart each thumbnail is, for example a sprite with a url of `tw160h90i5-samplevideo.png` has the thumbnails 5 seconds apart with width 160px and height 90px.
 
 
 ## Captions and Subtitles Using `<track>`

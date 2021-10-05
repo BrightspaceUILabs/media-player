@@ -74,6 +74,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
+			thumbnails: { type: String },
 			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -93,7 +94,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_trackText: { type: String, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
-			_heightPixels: { type: Number, attribute: false }
+			_heightPixels: { type: Number, attribute: false },
+			_hovering: { type: Boolean, attribute: false },
+			_thumbnailPreviewOffset: { type: Number, attribute: false },
+			_hoverTime: { type: Number, attribute: false },
+			_thumnailsImage: { type: Image, attribute: false }
 		};
 	}
 
@@ -388,6 +393,33 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 100%;
 			}
 
+			#d2l-labs-media-player-thumbnails-preview-container {
+				position: absolute;
+				bottom: 60px;
+				transform: translateX(-50%);
+				transition: all 0.2s;
+				z-index: 2;
+			}
+
+			#d2l-labs-media-player-thumbnails-preview-time {
+				position: absolute;
+				font-size: 14px;
+				text-align: center;
+				text-shadow: 0 0 4px rgb(0 0 0 / 75%);
+				bottom: 3px;
+				left: 0;
+				width: 100%;
+				z-index: 2;
+			}
+
+			#d2l-labs-media-player-thumbnails-preview-image {
+				position: relative;
+				background-repeat: no-repeat;
+				width: 100%;
+				height: 100%;
+				z-index: 2;
+			}
+
 			.d2l-labs-media-player-search-marker {
 				color: var(--d2l-color-ferrite);
 				cursor: pointer;
@@ -472,6 +504,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchInstances = {};
 		this._searchResults = [];
 		this._searchInputFocused = false;
+		this._hovering = false;
+		this._thumbnailPreviewOffset = 10;
+		this._hoverTime = 0;
 	}
 
 	get currentTime() {
@@ -523,6 +558,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+
+		if (this.thumbnails) {
+			this._thumnailsImage = new Image();
+			this._thumnailsImage.src = this.thumbnails;
+		}
 
 		this._startUpdatingCurrentTime();
 
@@ -605,6 +645,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				`}
 
 			<div class=${classMap(mediaControlsClass)} id="d2l-labs-media-player-media-controls" @mouseenter=${this._startHoveringControls} @mouseleave=${this._stopHoveringControls}>
+				${this._getThumbnailPreview()}
 				<div id="d2l-labs-media-player-search-markers-container">
 					${this._getSearchResultsView()}
 				</div>
@@ -622,6 +663,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					@drag-start=${this._onDragStartSeek}
 					@drag-end=${this._onDragEndSeek}
 					@position-change=${this._onPositionChangeSeek}
+					@hovering-move=${this._onHoverMove}
+					@hovering-start=${this._onHoverStart}
+					@hovering-end=${this._onHoverEnd}
 				></d2l-seek-bar>
 				<div id="d2l-labs-media-player-buttons">
 					<d2l-button-icon icon="${playIcon}" text="${playTooltip}"  @click="${this._togglePlay}" theme="${ifDefined(theme)}"></d2l-button-icon>
@@ -1001,6 +1045,51 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
 	}
 
+	_getThumbnailPreview() {
+		if (!this.thumbnails || !this._thumnailsImage) return;
+
+		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
+		const widthIndex = thumbStr.indexOf('w');
+		const heightIndex = thumbStr.indexOf('h');
+		const intervalIndex = thumbStr.indexOf('i');
+
+		if (widthIndex === -1 || heightIndex === -1 || intervalIndex === -1) return;
+
+		const widthMatch = thumbStr.substr(widthIndex).match(/\d+/);
+		const heightMatch = thumbStr.substr(heightIndex).match(/\d+/);
+		const intervalMatch = thumbStr.substr(intervalIndex).match(/\d+/);
+
+		if (!(widthMatch && heightMatch && intervalMatch)) return;
+
+		const interval = parseInt(intervalMatch[0]);
+		const thumbWidth = parseInt(widthMatch[0]);
+		const thumbHeight = parseInt(heightMatch[0]);
+
+		const width = this._thumnailsImage.width;
+		const height = this._thumnailsImage.height;
+
+		const rows = width / thumbWidth;
+		const columns = height / thumbHeight;
+
+		let thumbNum = Math.floor(this._hoverTime / interval);
+		if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
+
+		const row = Math.floor(thumbNum / rows);
+		const column = thumbNum % columns;
+
+		return this._hovering ? html`
+			<div id="d2l-labs-media-player-thumbnails-preview-container"
+				style="width: ${thumbWidth}px; height: ${thumbHeight}px; left: ${this._thumbnailPreviewOffset}%;">
+				<div
+					id="d2l-labs-media-player-thumbnails-preview-image"
+					style="background: url(${this._thumnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
+				>
+					<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
+				</div>
+			</div>
+		` : null;
+	}
+
 	_getTrackIdentifier(srclang, kind) {
 		return JSON.stringify({
 			kind,
@@ -1119,6 +1208,30 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._loading = false;
 		this._setLoadErrorMessage();
 		this.dispatchEvent(new CustomEvent('error'));
+	}
+
+	_onHoverEnd() {
+		this._hovering = false;
+	}
+
+	_onHoverMove() {
+		if (this._hovering && this._seekBar) {
+
+			this._hoverTime = this._seekBar.hoverValue * this._duration / 100;
+
+			let offset = this._seekBar.hoverValue;
+			if (offset < 10) {
+				offset = 10;
+			} else if (offset > 90) {
+				offset = 90;
+			}
+
+			this._thumbnailPreviewOffset = offset;
+		}
+	}
+
+	_onHoverStart() {
+		this._hovering = true;
 	}
 
 	_onLoadedData() {
