@@ -63,6 +63,8 @@ const FUSE_OPTIONS = options => ({
 	...options
 });
 const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hover';
+const DEFAULT_PREVIEW_WIDTH = 160;
+const DEFAULT_PREVIEW_HEIGHT = 90;
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
 
@@ -1053,11 +1055,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const heightMatch = thumbStr.match(/h(\d+)/);
 		const intervalMatch = thumbStr.match(/i(\d+)/);
 
-		if (!(widthMatch && heightMatch && intervalMatch)) return;
+		if (!intervalMatch) return;
 
 		const interval = parseInt(intervalMatch[1]);
-		const thumbWidth = parseInt(widthMatch[1]);
-		const thumbHeight = parseInt(heightMatch[1]);
+		const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
+		const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
 
 		const width = this._thumnailsImage.width;
 		const height = this._thumnailsImage.height;

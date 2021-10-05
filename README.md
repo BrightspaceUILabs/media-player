@@ -147,6 +147,12 @@ Provide the thumbnails sprite image signed url, the url name must use the follow
 
 Where `width` and `height` are the width/height px of each individual thumbnail, and `interval` is how many seconds apart each thumbnail is, for example a sprite with a url of `tw160h90i5-samplevideo.png` has the thumbnails 5 seconds apart with width 160px and height 90px.
 
+| Attribute | Required | Default | Description |
+|--|--|--|--|
+| interval | required | | Interval in seconds between each thumbnail.
+| width | optional | 160px | Width px of each individual thumbnail in the sprite.
+| height | optional | 90px | Height px of each individual thumbnail in the sprite.
+| hash | optional |  |
 
 ## Captions and Subtitles Using `<track>`
 
