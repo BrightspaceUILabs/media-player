@@ -71,36 +71,36 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	static get properties() {
 		return {
 			allowDownload: { type: Boolean, attribute: 'allow-download', reflect: true },
+			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
 			loop: { type: Boolean },
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
-			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
+			_heightPixels: { type: Number, attribute: false },
+			_hoverTime: { type: Number, attribute: false },
+			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
 			_recentlyShowedCustomControls: { type: Boolean, attribute: false },
 			_searchResults: { type: Array, attribute: false },
-			_selectedSpeed: { type: String, attribute: false },
 			_selectedQuality: { type: String, attribute: false },
+			_selectedSpeed: { type: String, attribute: false },
 			_selectedTrackIdentifier: { type: String, attribute: false },
 			_sourceType: { type: String, attribute: false },
-			_trackFontSizeRem: { type: Number, attribute: false },
-			_tracks: { type: Array, attribute: false },
 			_sources: { type: Object, attribute: false },
-			_trackText: { type: String, attribute: false },
-			_usingVolumeContainer: { type: Boolean, attribute: false },
-			_volume: { type: Number, attribute: false },
-			_heightPixels: { type: Number, attribute: false },
-			_hovering: { type: Boolean, attribute: false },
 			_thumbnailPreviewOffset: { type: Number, attribute: false },
-			_hoverTime: { type: Number, attribute: false },
-			_thumnailsImage: { type: Image, attribute: false }
+			_thumbnailsImage: { type: Image, attribute: false },
+			_trackFontSizeRem: { type: Number, attribute: false },
+			_trackText: { type: String, attribute: false },
+			_tracks: { type: Array, attribute: false },
+			_usingVolumeContainer: { type: Boolean, attribute: false },
+			_volume: { type: Number, attribute: false }
 		};
 	}
 
@@ -478,9 +478,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.allowDownload = false;
 		this.autoplay = false;
 		this.loop = false;
+
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
+		this._heightPixels = null;
+		this._hoverTime = 0;
+		this._hovering = false;
 		this._hoveringMediaControls = false;
 		this._loading = false;
 		this._message = {
@@ -491,24 +495,20 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._playing = false;
 		this._recentlyShowedCustomControls = false;
 		this._recentlyToggledFullscreen = false;
+		this._searchInputFocused = false;
+		this._searchInstances = {};
+		this._searchResults = [];
 		this._settingsMenu = null;
 		this._sourceType = SOURCE_TYPES.unknown;
-		this._trackFontSizeRem = 1;
-		this._tracks = [];
 		this._sources = {};
+		this._thumbnailPreviewOffset = 10;
+		this._trackFontSizeRem = 1;
 		this._trackText = null;
+		this._tracks = [];
 		this._usingVolumeContainer = false;
 		this._videoClicked = false;
 		this._volume = 1;
-		this._heightPixels = null;
-
 		this._webVTTParser = new window.WebVTTParser();
-		this._searchInstances = {};
-		this._searchResults = [];
-		this._searchInputFocused = false;
-		this._hovering = false;
-		this._thumbnailPreviewOffset = 10;
-		this._hoverTime = 0;
 	}
 
 	get currentTime() {
@@ -562,8 +562,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
 
 		if (this.thumbnails) {
-			this._thumnailsImage = new Image();
-			this._thumnailsImage.src = this.thumbnails;
+			this._thumbnailsImage = new Image();
+			this._thumbnailsImage.src = this.thumbnails;
 		}
 
 		this._startUpdatingCurrentTime();
@@ -1048,7 +1048,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getThumbnailPreview() {
-		if (!this.thumbnails || !this._thumnailsImage) return;
+		if (!this.thumbnails || !this._thumbnailsImage) return;
 
 		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
 		const widthMatch = thumbStr.match(/w(\d+)/);
@@ -1061,8 +1061,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
 		const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
 
-		const width = this._thumnailsImage.width;
-		const height = this._thumnailsImage.height;
+		const width = this._thumbnailsImage.width;
+		const height = this._thumbnailsImage.height;
 
 		const rows = width / thumbWidth;
 		const columns = height / thumbHeight;
@@ -1078,7 +1078,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				style="width: ${thumbWidth}px; height: ${thumbHeight}px; left: ${this._thumbnailPreviewOffset}%;">
 				<div
 					id="d2l-labs-media-player-thumbnails-preview-image"
-					style="background: url(${this._thumnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
+					style="background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
 				>
 					<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
 				</div>

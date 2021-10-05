@@ -52,13 +52,13 @@ npm install @brightspace-ui-labs/media-player
 | Attribute | Type | Default | Description |
 |--|--|--|--|
 | allow-download| Boolean | false | If set, will allow the media to be downloaded.
+| allow-download-on-error | Boolean | false | If set, display the download button in the error view. |
 | autoplay | Boolean | false | If set, will play the media as soon as it has been loaded. |
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
 | thumbnails | String |  | If set, will show thumbnails on preview. See below for required format. |
-| allow-download-on-error | Boolean |  | If set, display the download button in the error view. |
 
 ```
 <!-- Render a media player with a source file and loop the media when it reaches the end -->
@@ -139,20 +139,26 @@ The media player supports switching to different qualities. If multiple `<source
 
 ## Showing thumbnails preview with `thumbnails` attribute
 
-The thumbnails sprite image is a grid of images taken from the video at a set interval.
+Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
+
 > e.g. sample video thumbnails sprite
 ![Example thumbnails sprite](demo/tw160h90i5-samplevideo.png)
 
-Provide the thumbnails sprite image signed url, the url name must use the following format `tw<width>h<height>i<interval>-<hash>.[png|jpg]` e.g. `tw160h90i5-samplevideo.png`.
+The thumbnail file name must use the following format:
+`tw<width>h<height>i<interval>-<hash>.[png|jpg]`
 
-Where `width` and `height` are the width/height px of each individual thumbnail, and `interval` is how many seconds apart each thumbnail is, for example a sprite with a url of `tw160h90i5-samplevideo.png` has the thumbnails 5 seconds apart with width 160px and height 90px.
+- `width` and `height` are the width/height px of each individual thumbnail
+- `interval` indicates how many seconds apart each thumbnail is
+
+For example, a sprite image named `tw160h90i5-<hash>png` has the thumbnails 5 seconds apart, with width 160px and height 90px.
 
 | Attribute | Required | Default | Description |
 |--|--|--|--|
+| hash | optional |  |
+| height | optional | 90px | Height px of each individual thumbnail in the sprite.
 | interval | required | | Interval in seconds between each thumbnail.
 | width | optional | 160px | Width px of each individual thumbnail in the sprite.
-| height | optional | 90px | Height px of each individual thumbnail in the sprite.
-| hash | optional |  |
+
 
 ## Captions and Subtitles Using `<track>`
 
