@@ -135,9 +135,7 @@ The media player supports switching to different qualities. If multiple `<source
 |--|--|--|--|
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
-| default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set. If D2L.MediaPlayer.Preferences.Track is defined in local storage, then it will take precedence over this attribute.
-| default-ignore-preferences | Boolean | false | Same as default, but if D2L.MediaPlayer.Preferences.Track is defined, it will be ignored and this track will be selected instead.
-
+| default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
 ## Showing thumbnails preview with `thumbnails` attribute
 
 Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
@@ -183,7 +181,9 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
 | srclang | String, required | The language's code.
-| default | Boolean | false | The track to be selected by default. The user's local storage value will take precendence over the default.
+| default | Boolean | false | The track to be selected by default. If D2L.MediaPlayer.Preferences.Track is defined in local storage, then it will take precedence over this attribute.
+| default-ignore-preferences | Boolean | false | Same as default, but if D2L.MediaPlayer.Preferences.Track is defined, it will be ignored and this track will be selected instead.
+
 ## Local Storage
 
 The media player uses local storage to persist the user's playback speed and track selections.
