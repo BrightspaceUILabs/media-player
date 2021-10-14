@@ -1442,14 +1442,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				src: node.src,
 				srclang: node.srclang,
 				srt: node.srt,
+				default: node.default || node['default-ignore-preferences'],
 				text
 			});
 
-			if (node.default) {
+			const defaultIgnorePreferences = node.attributes['default-ignore-preferences'];
+			if (node.default || defaultIgnorePreferences) {
 				// Stringified to be parsed in initializeTracks
 				defaultTrack = JSON.stringify({
 					srclang: node.srclang,
-					kind: node.kind
+					kind: node.kind,
+					ignorePreferences: !!defaultIgnorePreferences,
 				});
 			}
 		}
@@ -1486,6 +1489,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				trackElement.label = track.label;
 				trackElement.kind = track.kind;
 				trackElement.srclang = track.srclang;
+				trackElement.default = track.default ? '' : undefined;
 				trackElement.oncuechange = this._onCueChange.bind(this);
 				this._media.appendChild(trackElement);
 				trackElement.addEventListener('load', () => {
@@ -1505,7 +1509,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// Needs to be caught right away, since the cuechange event can be emitted immediately
 		// Set default track to 'hidden'
 		const initializeTracks = (() => {
-			this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
+			if (defaultTrack && defaultTrack.ignorePreferences) {
+				this._selectedTrackIdentifier = defaultTrack;
+			} else {
+				this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
+			}
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
 				const textTrack = this._media.textTracks[i];
