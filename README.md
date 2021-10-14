@@ -181,8 +181,8 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
 | srclang | String, required | The language's code.
-| default | Boolean | false | The track to be selected by default. The user's local storage value will take precendence over the default.
-| default-ignore-preferences | Boolean | false | Same as default, but will always take precedence over the user's local storage value.
+| default | Boolean | false | The track to be selected by default. If D2L.MediaPlayer.Preferences.Track is defined in local storage, then it will take precedence over this attribute.
+| default-ignore-preferences | Boolean | false | Same as default, but if D2L.MediaPlayer.Preferences.Track is defined, it will be ignored and this track will be selected instead.
 
 ## Local Storage
 
