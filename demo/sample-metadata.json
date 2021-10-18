@@ -1,5 +1,10 @@
 {
-    "cuts": [],
+    "cuts": [
+        {
+            "in": 45,
+            "out": 80
+        }
+    ],
     "chapters": [
       {
         "time": 0,
