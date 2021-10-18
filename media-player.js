@@ -1590,6 +1590,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			const res = await fetch(node.src);
 			if (res.status !== 200) {
 				console.warn(`d2l-labs-media-player component could not load track from '${node.src}'`);
+				this.dispatchEvent(new CustomEvent('trackloadfailed'));
 				continue;
 			}
 
@@ -1710,6 +1711,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onTracksMenuItemChange(e) {
+		setTimeout(() => {
+			this.dispatchEvent(new CustomEvent('tracksmenuitemchanged'));
+		}, 0);
 		this._trackText = null;
 
 		this._selectedTrackIdentifier = e.target.value;
