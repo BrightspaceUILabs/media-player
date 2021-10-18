@@ -110,7 +110,7 @@ this.document.querySelector('d2l-labs-media-player').pause();
 | pause | Dispatched when the media is paused. |
 | timeupdate | Dispatched when the currentTime of the media player has been updated. |
 | trackloaded | Dispatched when a track element has loaded. |
-| tracknotloaded | Dispatched when a track element could not be loaded from the provided src attribute. |
+| trackloadfailed | Dispatched when a track element could not be loaded from the provided src attribute. |
 | tracksmenuitemchanged | Dispatched when the tracks menu item has changed. |
 ```
 // Listen for the loadeddata event

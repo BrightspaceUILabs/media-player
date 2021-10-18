@@ -1423,7 +1423,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			const res = await fetch(node.src);
 			if (res.status !== 200) {
 				console.warn(`d2l-labs-media-player component could not load track from '${node.src}'`);
-				this.dispatchEvent(new CustomEvent('tracknotloaded'));
+				this.dispatchEvent(new CustomEvent('trackloadfailed'));
 				continue;
 			}
 
