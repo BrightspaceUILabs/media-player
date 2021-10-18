@@ -932,8 +932,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 		}
 
-		return Object.keys(this._chapters).map(time => {
-			const highlight = this._hovering && (time === start || time === end);
+		return chapterTimes.map(time => {
+			const highlight = this._hovering && this._hoverTime >= chapterTimes[0] && (time === start || time === end);
 			return parseInt(time) > 0 ? html`
 				<d2l-icon
 					@click=${this._onTimelineMarkerClick(time)}
@@ -1093,7 +1093,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const res = await fetch(this.metadata);
 		const data = await res.json();
 
-		if (!(data && data.chapters && data.chapters.length > 1)) return;
+		if (!(data && data.chapters && data.chapters.length > 0)) return;
 
 		let chapters = {};
 		data.chapters.forEach(e => {
@@ -1101,10 +1101,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		});
 
 		const chapterTimes = Object.keys(chapters).sort((a, b) => a - b);
-		if (chapterTimes[0] !== 0) {
-			chapters[0] = chapters[chapterTimes[0]];
-			chapterTimes[0] = 0;
-		}
 
 		chapters = chapterTimes.reduce(
 			(obj, chapterTime) => {
@@ -1116,22 +1112,23 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
+			const newChapters = {};
 			for (const chapterTime in chapters) {
 				const cutIn = cut.in - cutDiff;
 				const cutOut = cut.out - cutDiff;
 
 				if (chapterTime > cutIn && chapterTime <= cutOut) {
-					chapters[cutIn] = chapters[chapterTime];
-					delete chapters[chapterTime];
+					newChapters[cutIn] = chapters[chapterTime];
 				} else if (chapterTime > cutOut) {
 					const newTime = chapterTime - (cutOut - cutIn);
-					chapters[newTime] = chapters[chapterTime];
-					delete chapters[chapterTime];
+					newChapters[newTime] = chapters[chapterTime];
+				} else {
+					newChapters[chapterTime] = chapters[chapterTime];
 				}
 			}
 			cutDiff += (cut.out - cut.in);
+			chapters = newChapters;
 		}
-
 		this._chapters = chapters;
 	}
 
@@ -1178,7 +1175,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getTimelinePreview() {
 		let chapterTitleLabel;
-		if (this._chapters) {
+		if (this._chapters && this._hoverTime >= Object.keys(this._chapters)[0]) {
 			const chapterTimes = Object.keys(this._chapters);
 			let chapterTitle;
 
