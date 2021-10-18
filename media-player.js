@@ -21,6 +21,7 @@ import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
 import { ifDefined } from 'lit-html/directives/if-defined';
 import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin.js';
+import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
@@ -81,7 +82,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
-			_chapters: { type: Array, attribute: false },
+			_chapters: { type: Object, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -109,7 +110,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	static get styles() {
-		return css`
+		return [ labelStyles, css`
 			:host {
 				display: block;
 			}
@@ -432,9 +433,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 
 			#d2l-labs-media-player-thumbnails-preview-chapter {
-				font-size: 14px;
-				font-weight: 700;
-				line-height: 14px;
+				background: #00000072;
 				position: absolute;
 				text-align: center;
 				text-shadow: 0 0 5px rgb(0 0 0 / 75%);
@@ -443,6 +442,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 
 			#d2l-labs-media-player-thumbnails-preview-time {
+				background: #00000042;
 				bottom: 3px;
 				font-size: 14px;
 				left: 0;
@@ -507,7 +507,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				font-size: 1rem;
 				line-height: 2.1rem;
 			}
-		`;
+		` ];
 	}
 
 	constructor() {
@@ -920,14 +920,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (Math.floor(this._duration) in this._chapters) delete this._chapters[Math.floor(this._duration)];
 		const chapterTimes = Object.keys(this._chapters);
 
-		for (const [i, e] of chapterTimes.entries()) {
-			if (i === chapterTimes.length - 1) {
-				start = e;
+		for (const [index, chapterTime] of chapterTimes.entries()) {
+			if (index === chapterTimes.length - 1) {
+				start = chapterTime;
 				break;
 			}
-			else if (this._hoverTime >= e && this._hoverTime < chapterTimes[i + 1]) {
-				start = e;
-				end = chapterTimes[i + 1];
+			else if (this._hoverTime >= chapterTime && this._hoverTime < chapterTimes[index + 1]) {
+				start = chapterTime;
+				end = chapterTimes[index + 1];
 				break;
 			}
 		}
@@ -1087,54 +1087,52 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
-	_getMetadata() {
-		if (this.metadata) {
-			fetch(this.metadata)
-				.then(response => response.json())
-				.then(data => {
-					if (data && data.chapters && data.chapters.length > 1) {
-						let chapters = {};
-						data.chapters.forEach(e => {
-							chapters[e.time] = e.title;
-						});
+	async _getMetadata() {
+		if (!this.metadata) return;
 
-						const chapterTimes = Object.keys(chapters).sort();
-						if (chapterTimes[0] !== 0) {
-							chapters[0] = chapters[chapterTimes[0]];
-							chapterTimes[0] = 0;
-						}
+		const res = await fetch(this.metadata);
+		const data = await res.json();
 
-						chapters = chapterTimes.reduce(
-							(obj, key) => {
-								obj[key] = chapters[key];
-								return obj;
-							},
-							{}
-						);
+		if (!(data && data.chapters && data.chapters.length > 1)) return;
 
-						let cutDiff = 0;
-						Object.values(data.cuts).forEach(cut => {
-							for (const chapter in chapters) {
-								const chapterTime = parseInt(chapter);
-								const cutIn = cut.in - cutDiff;
-								const cutOut = cut.out - cutDiff;
+		let chapters = {};
+		data.chapters.forEach(e => {
+			chapters[parseInt(e.time)] = e.title;
+		});
 
-								if (chapterTime > cutIn && chapterTime <= cutOut) {
-									chapters[cutIn] = chapters[chapterTime];
-									delete chapters[chapterTime];
-								} else if (chapterTime > cutOut) {
-									const newTime = chapterTime - (cutOut - cutIn);
-									chapters[newTime] = chapters[chapterTime];
-									delete chapters[chapterTime];
-								}
-							}
-							cutDiff += (cut.out - cut.in);
-						});
-
-						this._chapters = chapters;
-					}
-				});
+		const chapterTimes = Object.keys(chapters).sort((a, b) => a - b);
+		if (chapterTimes[0] !== 0) {
+			chapters[0] = chapters[chapterTimes[0]];
+			chapterTimes[0] = 0;
 		}
+
+		chapters = chapterTimes.reduce(
+			(obj, chapterTime) => {
+				obj[chapterTime] = chapters[chapterTime];
+				return obj;
+			},
+			{}
+		);
+
+		let cutDiff = 0;
+		for (const cut of data.cuts) {
+			for (const chapterTime in chapters) {
+				const cutIn = cut.in - cutDiff;
+				const cutOut = cut.out - cutDiff;
+
+				if (chapterTime > cutIn && chapterTime <= cutOut) {
+					chapters[cutIn] = chapters[chapterTime];
+					delete chapters[chapterTime];
+				} else if (chapterTime > cutOut) {
+					const newTime = chapterTime - (cutOut - cutIn);
+					chapters[newTime] = chapters[chapterTime];
+					delete chapters[chapterTime];
+				}
+			}
+			cutDiff += (cut.out - cut.in);
+		}
+
+		this._chapters = chapters;
 	}
 
 	_getPercentageTime(time) {
@@ -1184,13 +1182,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			const chapterTimes = Object.keys(this._chapters);
 			let chapterTitle;
 
-			for (const [i, e] of chapterTimes.entries()) {
-				if (i === chapterTimes.length - 1) {
-					chapterTitle = this._chapters[e];
+			for (const [index, chapterTime] of chapterTimes.entries()) {
+				if (index === chapterTimes.length - 1) {
+					chapterTitle = this._chapters[chapterTime];
 					break;
 				}
-				else if (this._hoverTime >= e && this._hoverTime < chapterTimes[i + 1]) {
-					chapterTitle = this._chapters[e];
+				else if (this._hoverTime >= chapterTime && this._hoverTime < chapterTimes[index + 1]) {
+					chapterTitle = this._chapters[chapterTime];
 					break;
 				}
 			}
@@ -1240,7 +1238,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
 					</div>
 					${chapterTitleLabel &&
-						html`<span id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
+						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
 				</div>
 			` : null;
 		} else {
@@ -1253,7 +1251,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
 					</div>
 					${chapterTitleLabel &&
-						html`<span id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
+						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
 				</div>
 			` : null;
 		}
