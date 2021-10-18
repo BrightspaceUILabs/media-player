@@ -65,6 +65,7 @@ const FUSE_OPTIONS = options => ({
 const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hover';
 const DEFAULT_PREVIEW_WIDTH = 160;
 const DEFAULT_PREVIEW_HEIGHT = 90;
+const DEFAULT_LOCALE = 'en';
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
 
@@ -74,10 +75,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
+			locale: { type: String },
 			loop: { type: Boolean },
+			metadata: { type: String },
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
+			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -94,8 +98,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_selectedTrackIdentifier: { type: String, attribute: false },
 			_sourceType: { type: String, attribute: false },
 			_sources: { type: Object, attribute: false },
-			_thumbnailPreviewOffset: { type: Number, attribute: false },
 			_thumbnailsImage: { type: Image, attribute: false },
+			_timelinePreviewOffset: { type: Number, attribute: false },
 			_trackFontSizeRem: { type: Number, attribute: false },
 			_trackText: { type: String, attribute: false },
 			_tracks: { type: Array, attribute: false },
@@ -346,6 +350,30 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 2.75rem;
 			}
 
+			.d2l-labs-media-player-chapter-marker {
+				color: var(--d2l-color-ferrite);
+				cursor: pointer;
+				height: 7px;
+				position: absolute;
+				top: 3px;
+				width: 6px;
+				z-index: 2;
+			}
+
+			.d2l-labs-media-player-chapter-marker-highlight {
+				color: var(--d2l-color-celestine-minus-1);
+				cursor: pointer;
+				height: 7px;
+				position: absolute;
+				top: 3px;
+				width: 6px;
+				z-index: 2;
+			}
+
+			.d2l-labs-media-player-chapter-marker[theme="dark"] {
+				color: white;
+			}
+
 			#d2l-labs-media-player-search-container {
 				align-items: center;
 				display: flex;
@@ -388,7 +416,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 6rem;
 			}
 
-			#d2l-labs-media-player-search-markers-container {
+			#d2l-labs-media-player-timeline-markers-container {
 				position: absolute;
 				top: -9px;
 				transition: all 0.2s;
@@ -400,6 +428,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				position: absolute;
 				transform: translateX(-50%);
 				transition: all 0.2s;
+				z-index: 2;
+			}
+
+			#d2l-labs-media-player-thumbnails-preview-chapter {
+				font-size: 14px;
+				font-weight: 700;
+				line-height: 14px;
+				position: absolute;
+				text-align: center;
+				text-shadow: 0 0 5px rgb(0 0 0 / 75%);
+				width: 100%;
 				z-index: 2;
 			}
 
@@ -416,7 +455,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 			#d2l-labs-media-player-thumbnails-preview-image {
 				background-repeat: no-repeat;
-				height: 100%;
 				position: relative;
 				width: 100%;
 				z-index: 2;
@@ -479,6 +517,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.autoplay = false;
 		this.loop = false;
 
+		this._chapters = {};
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
@@ -501,7 +540,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._settingsMenu = null;
 		this._sourceType = SOURCE_TYPES.unknown;
 		this._sources = {};
-		this._thumbnailPreviewOffset = 10;
+		this._timelinePreviewOffset = 10;
 		this._trackFontSizeRem = 1;
 		this._trackText = null;
 		this._tracks = [];
@@ -565,6 +604,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			this._thumbnailsImage = new Image();
 			this._thumbnailsImage.src = this.thumbnails;
 		}
+
+		if (!this.locale) {
+			this.locale = DEFAULT_LOCALE;
+		} else {
+			this.locale = this.locale.toLowerCase();
+		}
+
+		this._getMetadata();
 
 		this._startUpdatingCurrentTime();
 
@@ -647,9 +694,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				`}
 
 			<div class=${classMap(mediaControlsClass)} id="d2l-labs-media-player-media-controls" @mouseenter=${this._startHoveringControls} @mouseleave=${this._stopHoveringControls}>
-				${this._getThumbnailPreview()}
-				<div id="d2l-labs-media-player-search-markers-container">
+				${this._getTimelinePreview()}
+				<div id="d2l-labs-media-player-timeline-markers-container">
 					${this._getSearchResultsView()}
+					${this._getChapterMarkersView()}
 				</div>
 				<d2l-seek-bar
 					id="d2l-labs-media-player-seek-bar"
@@ -865,6 +913,39 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return a.href;
 	}
 
+	_getChapterMarkersView() {
+		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+		let start, end;
+
+		if (Math.floor(this._duration) in this._chapters) delete this._chapters[Math.floor(this._duration)];
+		const chapterTimes = Object.keys(this._chapters);
+
+		for (const [i, e] of chapterTimes.entries()) {
+			if (i === chapterTimes.length - 1) {
+				start = e;
+				break;
+			}
+			else if (this._hoverTime >= e && this._hoverTime < chapterTimes[i + 1]) {
+				start = e;
+				end = chapterTimes[i + 1];
+				break;
+			}
+		}
+
+		return Object.keys(this._chapters).map(time => {
+			const highlight = this._hovering && (time === start || time === end);
+			return parseInt(time) > 0 ? html`
+				<d2l-icon
+					@click=${this._onTimelineMarkerClick(time)}
+					class=${highlight ? 'd2l-labs-media-player-chapter-marker-highlight' : 'd2l-labs-media-player-chapter-marker'}
+					icon="tier1:bookmark-filled"
+					theme="${ifDefined(theme)}"
+					style=${styleMap({ left: this._getPercentageTime(time) })}
+				></d2l-icon>
+			` : null;
+		});
+	}
+
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
@@ -1006,8 +1087,58 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_getMetadata() {
+		if (this.metadata) {
+			fetch(this.metadata)
+				.then(response => response.json())
+				.then(data => {
+					if (data && data.chapters && data.chapters.length > 1) {
+						let chapters = {};
+						data.chapters.forEach(e => {
+							chapters[e.time] = e.title;
+						});
+
+						const chapterTimes = Object.keys(chapters).sort();
+						if (chapterTimes[0] !== 0) {
+							chapters[0] = chapters[chapterTimes[0]];
+							chapterTimes[0] = 0;
+						}
+
+						chapters = chapterTimes.reduce(
+							(obj, key) => {
+								obj[key] = chapters[key];
+								return obj;
+							},
+							{}
+						);
+
+						let cutDiff = 0;
+						Object.values(data.cuts).forEach(cut => {
+							for (const chapter in chapters) {
+								const chapterTime = parseInt(chapter);
+								const cutIn = cut.in - cutDiff;
+								const cutOut = cut.out - cutDiff;
+
+								if (chapterTime > cutIn && chapterTime <= cutOut) {
+									chapters[cutIn] = chapters[chapterTime];
+									delete chapters[chapterTime];
+								} else if (chapterTime > cutOut) {
+									const newTime = chapterTime - (cutOut - cutIn);
+									chapters[newTime] = chapters[chapterTime];
+									delete chapters[chapterTime];
+								}
+							}
+							cutDiff += (cut.out - cut.in);
+						});
+
+						this._chapters = chapters;
+					}
+				});
+		}
+	}
+
 	_getPercentageTime(time) {
-		return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
 	}
 
 	_getQualityMenuView() {
@@ -1033,7 +1164,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this._searchResults.map(result => {
 			return html`
 				<d2l-icon
-					@click=${this._onSearchMarkerClick(result)}
+					@click=${this._onTimelineMarkerClick(result)}
 					class="d2l-labs-media-player-search-marker"
 					icon="tier1:subscribe-filled"
 					theme="${ifDefined(theme)}"
@@ -1047,43 +1178,85 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
 	}
 
-	_getThumbnailPreview() {
-		if (!this.thumbnails || !this._thumbnailsImage) return;
+	_getTimelinePreview() {
+		let chapterTitleLabel;
+		if (this._chapters) {
+			const chapterTimes = Object.keys(this._chapters);
+			let chapterTitle;
 
-		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
-		const widthMatch = thumbStr.match(/w(\d+)/);
-		const heightMatch = thumbStr.match(/h(\d+)/);
-		const intervalMatch = thumbStr.match(/i(\d+)/);
+			for (const [i, e] of chapterTimes.entries()) {
+				if (i === chapterTimes.length - 1) {
+					chapterTitle = this._chapters[e];
+					break;
+				}
+				else if (this._hoverTime >= e && this._hoverTime < chapterTimes[i + 1]) {
+					chapterTitle = this._chapters[e];
+					break;
+				}
+			}
 
-		if (!intervalMatch) return;
+			if (chapterTitle) {
+				if (this.locale in chapterTitle) {
+					chapterTitleLabel = chapterTitle[this.locale];
+				} else if (this.locale.split('-')[0] in chapterTitle) {
+					chapterTitleLabel = chapterTitle[this.locale.split('-')[0]];
+				} else if (DEFAULT_LOCALE in chapterTitle) {
+					chapterTitleLabel = chapterTitle[DEFAULT_LOCALE];
+				}
+			}
+		}
 
-		const interval = parseInt(intervalMatch[1]);
-		const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
-		const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
+		if (this.thumbnails && this._thumbnailsImage) {
+			const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
+			const widthMatch = thumbStr.match(/w(\d+)/);
+			const heightMatch = thumbStr.match(/h(\d+)/);
+			const intervalMatch = thumbStr.match(/i(\d+)/);
 
-		const width = this._thumbnailsImage.width;
-		const height = this._thumbnailsImage.height;
+			if (!intervalMatch) return;
 
-		const rows = width / thumbWidth;
-		const columns = height / thumbHeight;
+			const interval = parseInt(intervalMatch[1]);
+			const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
+			const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
 
-		let thumbNum = Math.floor(this._hoverTime / interval);
-		if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
+			const width = this._thumbnailsImage.width;
+			const height = this._thumbnailsImage.height;
 
-		const row = Math.floor(thumbNum / rows);
-		const column = thumbNum % columns;
+			const rows = width / thumbWidth;
+			const columns = height / thumbHeight;
 
-		return this._hovering ? html`
-			<div id="d2l-labs-media-player-thumbnails-preview-container"
-				style="width: ${thumbWidth}px; height: ${thumbHeight}px; left: ${this._thumbnailPreviewOffset}%;">
-				<div
-					id="d2l-labs-media-player-thumbnails-preview-image"
-					style="background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
-				>
-					<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
+			let thumbNum = Math.floor(this._hoverTime / interval);
+			if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
+
+			const row = Math.floor(thumbNum / rows);
+			const column = thumbNum % columns;
+
+			return this._hovering ? html`
+				<div id="d2l-labs-media-player-thumbnails-preview-container"
+					style="width: ${thumbWidth}px; left: ${this._timelinePreviewOffset}%;">
+					<div
+						id="d2l-labs-media-player-thumbnails-preview-image"
+						style="height: ${thumbHeight}px; background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
+					>
+						<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
+					</div>
+					${chapterTitleLabel &&
+						html`<span id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
 				</div>
-			</div>
-		` : null;
+			` : null;
+		} else {
+			return this._hovering ? html`
+				<div id="d2l-labs-media-player-thumbnails-preview-container"
+					style="width: ${DEFAULT_PREVIEW_WIDTH}px; left: ${this._timelinePreviewOffset}%;">
+					<div
+						id="d2l-labs-media-player-thumbnails-preview-image"
+					>
+						<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
+					</div>
+					${chapterTitleLabel &&
+						html`<span id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
+				</div>
+			` : null;
+		}
 	}
 
 	_getTrackIdentifier(srclang, kind) {
@@ -1222,7 +1395,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				offset = 90;
 			}
 
-			this._thumbnailPreviewOffset = offset;
+			this._timelinePreviewOffset = offset;
 		}
 	}
 
@@ -1381,10 +1554,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchInputFocused = true;
 	}
 
-	_onSearchMarkerClick(time) {
-		return () => this.currentTime = time;
-	}
-
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
@@ -1520,6 +1689,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		initializeTracks();
 		setTimeout(initializeTracks, 0);
+	}
+
+	_onTimelineMarkerClick(time) {
+		return () => this.currentTime = time;
 	}
 
 	_onTimeUpdate() {
