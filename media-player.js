@@ -945,17 +945,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
-		let chapterTitle;
-		for (let i = 0; i < this._chapters.length; i++) {
-			if (i === this._chapters.length - 1) {
-				chapterTitle = this._chapters[i].title;
-				break;
-			}
-			else if (this._hoverTime >= this._chapters[0].time && this._hoverTime < this._chapters[i + 1].time) {
-				chapterTitle = this._chapters[i].title;
-				break;
-			}
-		}
+		const chapterTitle = this._chapters.find((_chapter, index, chapters) => {
+			return index === chapters.length - 1 || (this._hoverTime >= chapters[0].time && this._hoverTime < chapters[index + 1].time);
+		})?.title;
 
 		if (!chapterTitle) return;
 
