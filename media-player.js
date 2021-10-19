@@ -605,12 +605,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			this._thumbnailsImage.src = this.thumbnails;
 		}
 
-		if (!this.locale) {
-			this.locale = DEFAULT_LOCALE;
-		} else {
-			this.locale = this.locale.toLowerCase();
-		}
-
+		this.locale = !this.locale ? DEFAULT_LOCALE : this.locale.toLowerCase();
 		this._getMetadata();
 
 		this._startUpdatingCurrentTime();
