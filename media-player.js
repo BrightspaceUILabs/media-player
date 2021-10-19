@@ -909,28 +909,28 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getChapterMarkersView() {
-		if (!(this._chapters?.length > 0)) return;
+		if (this._chapters.length === 0) return;
 
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 
 		let start, end;
 		if (this._chapters[this._chapters.length - 1].time === Math.floor(this._duration)) this._chapters.pop();
 
-		this._chapters.some((chapter, index) => {
-			if (index === this._chapters.length - 1) {
-				start = chapter.time;
-				return true;
+		for (let i = 0; i < this._chapters.length; i++) {
+			if (i === this._chapters.length - 1) {
+				start = this._chapters[i].time;
+				break;
 			}
-			else if (this._hoverTime >= chapter.time && this._hoverTime < this._chapters[index + 1].time) {
-				start = chapter.time;
-				end = this._chapters[index + 1].time;
-				return true;
+			else if (this._hoverTime >= this._chapters[i].time && this._hoverTime < this._chapters[i + 1].time) {
+				start = this._chapters[i].time;
+				end = this._chapters[i + 1].time;
+				break;
 			}
-		});
+		}
 
 		return this._chapters.map(chapter => {
 			const highlight = this._hovering && this._hoverTime >= this._chapters[0].time && (chapter.time === start || chapter.time === end);
-			return parseInt(chapter.time) > 0 ? html`
+			return chapter.time > 0 ? html`
 				<d2l-icon
 					@click=${this._onTimelineMarkerClick(chapter.time)}
 					class=${highlight ? 'd2l-labs-media-player-chapter-marker-highlight' : 'd2l-labs-media-player-chapter-marker'}
@@ -940,6 +940,32 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				></d2l-icon>
 			` : null;
 		});
+	}
+
+	_getChapterTitle() {
+		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
+
+		let chapterTitle;
+		for (let i = 0; i < this._chapters.length; i++) {
+			if (i === this._chapters.length - 1) {
+				chapterTitle = this._chapters[i].title;
+				break;
+			}
+			else if (this._hoverTime >= this._chapters[0].time && this._hoverTime < this._chapters[i + 1].time) {
+				chapterTitle = this._chapters[i].title;
+				break;
+			}
+		}
+
+		if (!chapterTitle) return;
+
+		if (this.locale in chapterTitle) {
+			return chapterTitle[this.locale];
+		} else if (this.locale.split('-')[0] in chapterTitle) {
+			return chapterTitle[this.locale.split('-')[0]];
+		} else if (DEFAULT_LOCALE in chapterTitle) {
+			return chapterTitle[DEFAULT_LOCALE];
+		}
 	}
 
 	_getDownloadButtonView() {
@@ -1172,70 +1198,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getTimelinePreview() {
-		let chapterTitleLabel;
-		if (this._chapters?.length > 0 && this._hoverTime >= this._chapters[0].time) {
-			let chapterTitle;
-			this._chapters.some((chapter, index) => {
-				if (index === this._chapters.length - 1) {
-					chapterTitle = chapter.title;
-					return true;
-				}
-				else if (this._hoverTime >= chapter.time && this._hoverTime < this._chapters[index + 1].time) {
-					chapterTitle = chapter.title;
-					return true;
-				}
-			});
+		if (!this._hovering) return;
+		const chapterTitleLabel = this._getChapterTitle();
 
-			if (chapterTitle) {
-				if (this.locale in chapterTitle) {
-					chapterTitleLabel = chapterTitle[this.locale];
-				} else if (this.locale.split('-')[0] in chapterTitle) {
-					chapterTitleLabel = chapterTitle[this.locale.split('-')[0]];
-				} else if (DEFAULT_LOCALE in chapterTitle) {
-					chapterTitleLabel = chapterTitle[DEFAULT_LOCALE];
-				}
-			}
-		}
-
-		if (this.thumbnails && this._thumbnailsImage) {
-			const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
-			const widthMatch = thumbStr.match(/w(\d+)/);
-			const heightMatch = thumbStr.match(/h(\d+)/);
-			const intervalMatch = thumbStr.match(/i(\d+)/);
-
-			if (!intervalMatch) return;
-
-			const interval = parseInt(intervalMatch[1]);
-			const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
-			const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
-
-			const width = this._thumbnailsImage.width;
-			const height = this._thumbnailsImage.height;
-
-			const rows = width / thumbWidth;
-			const columns = height / thumbHeight;
-
-			let thumbNum = Math.floor(this._hoverTime / interval);
-			if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
-
-			const row = Math.floor(thumbNum / rows);
-			const column = thumbNum % columns;
-
-			return this._hovering ? html`
-				<div id="d2l-labs-media-player-thumbnails-preview-container"
-					style="width: ${thumbWidth}px; left: ${this._timelinePreviewOffset}%;">
-					<div
-						id="d2l-labs-media-player-thumbnails-preview-image"
-						style="height: ${thumbHeight}px; background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
-					>
-						<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
-					</div>
-					${chapterTitleLabel &&
-						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
-				</div>
-			` : null;
-		} else {
-			return this._hovering ? html`
+		if (!(this.thumbnails && this._thumbnailsImage))
+			return html`
 				<div id="d2l-labs-media-player-thumbnails-preview-container"
 					style="width: ${DEFAULT_PREVIEW_WIDTH}px; left: ${this._timelinePreviewOffset}%;">
 					<div
@@ -1246,8 +1213,44 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					${chapterTitleLabel &&
 						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
 				</div>
-			` : null;
-		}
+			`;
+
+		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
+		const widthMatch = thumbStr.match(/w(\d+)/);
+		const heightMatch = thumbStr.match(/h(\d+)/);
+		const intervalMatch = thumbStr.match(/i(\d+)/);
+
+		if (!intervalMatch) return;
+
+		const interval = parseInt(intervalMatch[1]);
+		const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
+		const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
+
+		const width = this._thumbnailsImage.width;
+		const height = this._thumbnailsImage.height;
+
+		const rows = width / thumbWidth;
+		const columns = height / thumbHeight;
+
+		let thumbNum = Math.floor(this._hoverTime / interval);
+		if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
+
+		const row = Math.floor(thumbNum / rows);
+		const column = thumbNum % columns;
+
+		return html`
+			<div id="d2l-labs-media-player-thumbnails-preview-container"
+				style="width: ${thumbWidth}px; left: ${this._timelinePreviewOffset}%;">
+				<div
+					id="d2l-labs-media-player-thumbnails-preview-image"
+					style="height: ${thumbHeight}px; background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
+				>
+					<span id="d2l-labs-media-player-thumbnails-preview-time">${MediaPlayer._formatTime(this._hoverTime)}</span>
+				</div>
+				${chapterTitleLabel &&
+					html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
+			</div>
+		`;
 	}
 
 	_getTrackIdentifier(srclang, kind) {
