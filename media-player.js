@@ -945,9 +945,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
-		const chapterTitle = this._chapters.find((_chapter, index, chapters) => {
-			return index === chapters.length - 1 || (this._hoverTime >= chapters[0].time && this._hoverTime < chapters[index + 1].time);
-		})?.title;
+		const chapterTitle = this._chapters.find((_chapter, index, chapters) => (
+			index === chapters.length - 1 || (this._hoverTime >= chapters[0].time && this._hoverTime < chapters[index + 1].time)
+		))?.title;
 
 		if (!chapterTitle) return;
 
@@ -1135,9 +1135,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			}
 
 			cutDiff += (cut.out - cut.in);
-			chapters = [...newChapters].map(([chapterTime, chapterTitle]) => {
-				return { time: chapterTime, title: chapterTitle };
-			});
+			chapters = [...newChapters].map(([chapterTime, chapterTitle]) => ({
+				time: chapterTime,
+				title: chapterTitle
+			}));
 		}
 		this._chapters = chapters;
 	}
