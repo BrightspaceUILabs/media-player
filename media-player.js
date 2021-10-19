@@ -1124,34 +1124,28 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			};
 		}).sort((a, b) => a.time - b.time);
 
-		// updating the chapter times based on the cuts
+		// updating the chapter times based on the cuts, loops over all chapters per cut because it can change multiple chapters
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
-			const newChapters = [];
+			const newChapters = new Map(); // using map to preserve sort ordering
 			for (const chapter of chapters) {
 				const cutIn = cut.in - cutDiff;
 				const cutOut = cut.out - cutDiff;
 
+				let newTime = chapter.time;
 				if (chapter.time > cutIn && chapter.time <= cutOut) {
-					newChapters.push({
-						time: cutIn,
-						title: chapter.title
-					});
+					newTime = cutIn;
 				} else if (chapter.time > cutOut) {
-					const newTime = chapter.time - (cutOut - cutIn);
-					newChapters.push({
-						time: newTime,
-						title: chapter.title
-					});
-				} else {
-					newChapters.push({
-						time: chapter.time,
-						title: chapter.title
-					});
+					newTime = chapter.time - (cutOut - cutIn);
 				}
+
+				newChapters.set(newTime, chapter.title);
 			}
+
 			cutDiff += (cut.out - cut.in);
-			chapters = newChapters.sort((a, b) => a.time - b.time);
+			chapters = [...newChapters].map(([chapterTime, chapterTitle]) => {
+				return { time: chapterTime, title: chapterTitle };
+			});
 		}
 		this._chapters = chapters;
 	}
