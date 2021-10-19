@@ -82,7 +82,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
-			_chapters: { type: Object, attribute: false },
+			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -517,7 +517,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.autoplay = false;
 		this.loop = false;
 
-		this._chapters = {};
+		this._chapters = [];
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
@@ -914,33 +914,34 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getChapterMarkersView() {
+		if (!(this._chapters?.length > 0)) return;
+
 		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+
 		let start, end;
+		if (this._chapters[this._chapters.length - 1].time === Math.floor(this._duration)) this._chapters.pop();
 
-		if (Math.floor(this._duration) in this._chapters) delete this._chapters[Math.floor(this._duration)];
-		const chapterTimes = Object.keys(this._chapters);
-
-		for (const [index, chapterTime] of chapterTimes.entries()) {
-			if (index === chapterTimes.length - 1) {
-				start = chapterTime;
-				break;
+		this._chapters.some((chapter, index) => {
+			if (index === this._chapters.length - 1) {
+				start = chapter.time;
+				return true;
 			}
-			else if (this._hoverTime >= chapterTime && this._hoverTime < chapterTimes[index + 1]) {
-				start = chapterTime;
-				end = chapterTimes[index + 1];
-				break;
+			else if (this._hoverTime >= chapter.time && this._hoverTime < this._chapters[index + 1].time) {
+				start = chapter.time;
+				end = this._chapters[index + 1].time;
+				return true;
 			}
-		}
+		});
 
-		return chapterTimes.map(time => {
-			const highlight = this._hovering && this._hoverTime >= chapterTimes[0] && (time === start || time === end);
-			return parseInt(time) > 0 ? html`
+		return this._chapters.map(chapter => {
+			const highlight = this._hovering && this._hoverTime >= this._chapters[0].time && (chapter.time === start || chapter.time === end);
+			return parseInt(chapter.time) > 0 ? html`
 				<d2l-icon
-					@click=${this._onTimelineMarkerClick(time)}
+					@click=${this._onTimelineMarkerClick(chapter.time)}
 					class=${highlight ? 'd2l-labs-media-player-chapter-marker-highlight' : 'd2l-labs-media-player-chapter-marker'}
 					icon="tier1:bookmark-filled"
 					theme="${ifDefined(theme)}"
-					style=${styleMap({ left: this._getPercentageTime(time) })}
+					style=${styleMap({ left: this._getPercentageTime(chapter.time) })}
 				></d2l-icon>
 			` : null;
 		});
@@ -1095,39 +1096,41 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (!(data && data.chapters && data.chapters.length > 0)) return;
 
-		let chapters = {};
-		data.chapters.forEach(e => {
-			chapters[parseInt(e.time)] = e.title;
-		});
+		let chapters = data.chapters.map(({ time, title }) => {
+			return {
+				time: parseInt(time),
+				title
+			};
+		}).sort((a, b) => a.time - b.time);
 
-		const chapterTimes = Object.keys(chapters).sort((a, b) => a - b);
-
-		chapters = chapterTimes.reduce(
-			(obj, chapterTime) => {
-				obj[chapterTime] = chapters[chapterTime];
-				return obj;
-			},
-			{}
-		);
-
+		// updating the chapter times based on the cuts
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
-			const newChapters = {};
-			for (const chapterTime in chapters) {
+			const newChapters = [];
+			for (const chapter of chapters) {
 				const cutIn = cut.in - cutDiff;
 				const cutOut = cut.out - cutDiff;
 
-				if (chapterTime > cutIn && chapterTime <= cutOut) {
-					newChapters[cutIn] = chapters[chapterTime];
-				} else if (chapterTime > cutOut) {
-					const newTime = chapterTime - (cutOut - cutIn);
-					newChapters[newTime] = chapters[chapterTime];
+				if (chapter.time > cutIn && chapter.time <= cutOut) {
+					newChapters.push({
+						time: cutIn,
+						title: chapter.title
+					});
+				} else if (chapter.time > cutOut) {
+					const newTime = chapter.time - (cutOut - cutIn);
+					newChapters.push({
+						time: newTime,
+						title: chapter.title
+					});
 				} else {
-					newChapters[chapterTime] = chapters[chapterTime];
+					newChapters.push({
+						time: chapter.time,
+						title: chapter.title
+					});
 				}
 			}
 			cutDiff += (cut.out - cut.in);
-			chapters = newChapters;
+			chapters = newChapters.sort((a, b) => a.time - b.time);
 		}
 		this._chapters = chapters;
 	}
@@ -1175,20 +1178,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getTimelinePreview() {
 		let chapterTitleLabel;
-		if (this._chapters && this._hoverTime >= Object.keys(this._chapters)[0]) {
-			const chapterTimes = Object.keys(this._chapters);
+		if (this._chapters?.length > 0 && this._hoverTime >= this._chapters[0].time) {
 			let chapterTitle;
-
-			for (const [index, chapterTime] of chapterTimes.entries()) {
-				if (index === chapterTimes.length - 1) {
-					chapterTitle = this._chapters[chapterTime];
-					break;
+			this._chapters.some((chapter, index) => {
+				if (index === this._chapters.length - 1) {
+					chapterTitle = chapter.title;
+					return true;
 				}
-				else if (this._hoverTime >= chapterTime && this._hoverTime < chapterTimes[index + 1]) {
-					chapterTitle = this._chapters[chapterTime];
-					break;
+				else if (this._hoverTime >= chapter.time && this._hoverTime < this._chapters[index + 1].time) {
+					chapterTitle = chapter.title;
+					return true;
 				}
-			}
+			});
 
 			if (chapterTitle) {
 				if (this.locale in chapterTitle) {
