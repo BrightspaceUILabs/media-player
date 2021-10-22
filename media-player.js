@@ -1226,13 +1226,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const width = this._thumbnailsImage.width;
 		const height = this._thumbnailsImage.height;
 
-		const rows = width / thumbWidth;
-		const columns = height / thumbHeight;
+		const rows = height / thumbHeight;
+		const columns = width / thumbWidth;
 
 		let thumbNum = Math.floor(this._hoverTime / interval);
 		if (thumbNum >= rows * columns) thumbNum = rows * columns - 1;
 
-		const row = Math.floor(thumbNum / rows);
+		const row = Math.floor(thumbNum / columns);
 		const column = thumbNum % columns;
 
 		return html`
