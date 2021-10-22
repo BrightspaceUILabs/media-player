@@ -1180,6 +1180,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		});
 	}
 
+	_getSelectedTextTrack() {
+		const selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
+		for (let i = 0; i < this._media.textTracks.length; i++) {
+			if (this._media.textTracks[i].language === selectedTrackSrcLang) {
+				return this._media.textTracks[i];
+			}
+		}
+		return null;
+	}
+
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
 		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
 	}
@@ -1630,6 +1640,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					trackElement.addCue(new VTTCue(cue.start, cue.end, cue.text));
 				});
 				this.dispatchEvent(new CustomEvent('trackloaded'));
+				if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)) {
+					this._syncDisplayedTrackTextToSelectedTrack();
+				}
 
 				this._searchInstances[track.srclang] = new Fuse(track.cues, FUSE_OPTIONS({
 					sortFn: (a, b) => a.start - b.start
@@ -1645,6 +1658,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				this._media.appendChild(trackElement);
 				trackElement.addEventListener('load', () => {
 					this.dispatchEvent(new CustomEvent('trackloaded'));
+					if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)) {
+						this._syncDisplayedTrackTextToSelectedTrack();
+					}
 				});
 
 				const { cues } = this._webVTTParser.parse(track.text, 'metadata');
@@ -1804,6 +1820,23 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		setTimeout(() => {
 			this._usingVolumeContainer = false;
 		}, 0);
+	}
+
+	_syncDisplayedTrackTextToSelectedTrack() {
+		this._trackText = null;
+		const selectedTextTrack = this._getSelectedTextTrack();
+
+		if (!selectedTextTrack) return;
+
+		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
+			const cue = selectedTextTrack.cues[i];
+			if (
+				(cue.startTime <= this.currentTime) &&
+				(cue.endTime >= this.currentTime)
+			) {
+				this._trackText = cue.text;
+			}
+		}
 	}
 
 	_toggleFullscreen() {
