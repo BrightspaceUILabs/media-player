@@ -557,6 +557,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	set currentTime(time) {
 		this._currentTime = time;
 		this._media.currentTime = time;
+		this._syncDisplayedTrackTextToSelectedTrack();
 	}
 
 	get duration() {
