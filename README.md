@@ -73,6 +73,7 @@ npm install @brightspace-ui-labs/media-player
 | Property | Type | Get/Set | Description |
 |--|--|--|--|
 | currentTime | Number | Get & Set | Current time playback time of the media in seconds. |
+| activeCue | Object | Get | VTTCue instance for the currently-displayed captions cue. If no cue is currently displayed, the value is null. |
 | duration | Number | Get | Total duration of the media in seconds. |
 | ended | Boolean | Get | Whether or not the video has ended. |
 | paused | Boolean | Get | Whether or not the video is currently paused. |
@@ -104,6 +105,7 @@ this.document.querySelector('d2l-labs-media-player').pause();
 
 | Event | Description |
 |--|--|
+| cuechange | Dispatched when the currently-displayed captions cue changes. |
 | ended | Dispatched when the media has reached the end of its duration. |
 | error | Dispatched when the media failed to load. |
 | loadeddata | Dispatched when the media at the current playback position has finished loading. Often the first frame. |

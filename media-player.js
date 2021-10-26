@@ -560,6 +560,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._syncDisplayedTrackTextToSelectedTrack();
 	}
 
+	get activeCue() {
+		for (let i = 0; i < this._media.textTracks.length; i++) {
+			if (this._media.textTracks[i].mode === 'hidden') {
+				return this._media?.textTracks?.[0].activeCues?.[0] || null;
+			}
+		}
+		return null;
+	}
+
 	get duration() {
 		return this._duration;
 	}
@@ -1310,6 +1319,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				if (this._media.textTracks[i].activeCues.length > 0) {
 					this._trackText = this._media.textTracks[i].activeCues[0].text.replace('<br />', '\n');
 				} else this._trackText = null;
+
+				this.dispatchEvent(new CustomEvent('cuechange'));
 			}
 		}
 	}
