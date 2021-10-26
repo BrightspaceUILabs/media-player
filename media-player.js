@@ -1847,6 +1847,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				(cue.endTime >= this.currentTime)
 			) {
 				this._trackText = cue.text;
+				this.dispatchEvent(new CustomEvent('cuechange'));
 			}
 		}
 	}
