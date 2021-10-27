@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Bijschriften",
+	"quality": "Kwaliteit",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standaard",
 	"download": "Downloaden",
@@ -15,6 +16,8 @@ export default {
 	"play": "Afspelen",
 	"playbackSpeed": "Afspeelsnelheid",
 	"retry": "Opnieuw proberen",
+	"showSearchInput": "Zoekopties tonen",
+	"searchPlaceholder": "Zoeken...",
 	"seekSlider": "zoekschuifregelaar",
 	"settings": "settings",
 	"speed": "snelheid",

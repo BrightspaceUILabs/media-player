@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Sous-titres",
+	"quality": "Qualité",
 	"closedCaptionsAcronym": "Cc",
 	"default": "Par défaut",
 	"download": "Télécharger",
@@ -15,6 +16,8 @@ export default {
 	"play": "Lire",
 	"playbackSpeed": "Vitesse de lecture",
 	"retry": "Réessayer",
+	"showSearchInput": "Afficher l’entrée de recherche",
+	"searchPlaceholder": "Recherche en cours…",
 	"seekSlider": "curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",

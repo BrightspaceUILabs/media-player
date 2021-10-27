@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Leyendas",
+	"quality": "Calidad",
 	"closedCaptionsAcronym": "CC",
 	"default": "Predeterminado",
 	"download": "Descargar",
@@ -15,6 +16,8 @@ export default {
 	"play": "Reproducir",
 	"playbackSpeed": "Velocidad de reproducción",
 	"retry": "Volver a intentar",
+	"showSearchInput": "Mostrar entrada de búsqueda",
+	"searchPlaceholder": "Buscar…",
 	"seekSlider": "busque el control deslizante",
 	"settings": "settings",
 	"speed": "velocidad",
