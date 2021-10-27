@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Penawdau",
+	"quality": "Ansawdd",
 	"closedCaptionsAcronym": "CC",
 	"default": "Diofyn",
 	"download": "Lawrlwytho",
@@ -15,6 +16,8 @@ export default {
 	"play": "Chwarae",
 	"playbackSpeed": "Cyflymder chwarae",
 	"retry": "Rhoi cynnig arall arni",
+	"showSearchInput": "Dangos y mewnbwn chwilio",
+	"searchPlaceholder": "Chwilio…",
 	"seekSlider": "llithrydd chwilio",
 	"settings": "settings",
 	"speed": "cyflymder",

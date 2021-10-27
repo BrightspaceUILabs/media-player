@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Bildtexter",
+	"quality": "Kvalitet",
 	"closedCaptionsAcronym": "Kopia",
 	"default": "Standard",
 	"download": "Ladda ned",
@@ -15,6 +16,8 @@ export default {
 	"play": "Spela",
 	"playbackSpeed": "Uppspelningshastighet",
 	"retry": "Försök igen",
+	"showSearchInput": "Visa sökinmatning",
+	"searchPlaceholder": "Sök ...",
 	"seekSlider": "sökskjutreglage",
 	"settings": "settings",
 	"speed": "hastighet",
