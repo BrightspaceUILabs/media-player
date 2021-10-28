@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Beschriftungen",
+	"quality": "Qualität",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Herunterladen",
@@ -15,6 +16,8 @@ export default {
 	"play": "Wiedergeben",
 	"playbackSpeed": "Wiedergabegeschwindigkeit",
 	"retry": "Erneut versuchen",
+	"showSearchInput": "Sucheingabe einblenden",
+	"searchPlaceholder": "Suchen ...",
 	"seekSlider": "Suchregler",
 	"settings": "settings",
 	"speed": "Geschwindigkeit",
