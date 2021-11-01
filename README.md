@@ -57,7 +57,7 @@ npm install @brightspace-ui-labs/media-player
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
 | locale | String | en | If set, will display chapter titles in the given locale when possible. |
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
-| metadata | String | false | URL of the metadata JSON of the video, contains chapters data. |
+| metadata | JSON | false | Metadata JSON of the video, contains chapters and cuts data. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
 | thumbnails | String |  | If set, will show thumbnails on preview. See below for required format. |
@@ -164,14 +164,17 @@ For example, a sprite image named `tw160h90i5-<hash>png` has the thumbnails 5 se
 | interval | required | | Interval in seconds between each thumbnail.
 | width | optional | 160px | Width px of each individual thumbnail in the sprite.
 
-## Chapters  with `metadata` attribute
+## Chapters with `metadata` attribute
 
-Provide a url to the metadata JSON file e.g. [getMetadata endpoint](http://d2l-content-service-docs.s3-website-us-east-1.amazonaws.com/#operation/getMetadata)
+Provide metadata JSON e.g. [getMetadata endpoint](http://d2l-content-service-docs.s3-website-us-east-1.amazonaws.com/#operation/getMetadata)
 
 Example format:
 ```
 {
-    "cuts": [],
+    "cuts": [
+      "in": 20,
+      "out": 30
+    ],
     "chapters": [
       {
         "time": 0,
@@ -197,8 +200,6 @@ Example format:
     ]
 }
 ```
-
-
 
 
 ## Captions and Subtitles Using `<track>`

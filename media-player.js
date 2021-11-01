@@ -827,6 +827,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (changedProperties.has('src')) {
 			this._determineSourceType();
 		}
+
+		if (changedProperties.has('metadata')) {
+			this._getMetadata();
+		}
 	}
 
 	exitFullscreen() {
@@ -1111,12 +1115,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
-	async _getMetadata() {
+	_getMetadata() {
 		if (!this.metadata) return;
 
-		const res = await fetch(this.metadata);
-		const data = await res.json();
-
+		const data = this.metadata;
 		if (!(data && data.chapters && data.chapters.length > 0)) return;
 
 		let chapters = data.chapters.map(({ time, title }) => {
