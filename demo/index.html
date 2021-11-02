@@ -19,20 +19,52 @@
 
 			<h5>Single quality source</h5>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player src="sample-video.mp4" thumbnails="ti5.png" metadata="sample-metadata.json">
+				<d2l-labs-media-player src="sample-video.mp4" thumbnails="ti5.png" id="single-quality">
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
+				<script>
+					// setting metadata JSON
+					const singleQualityMetadata = () => {
+						const singleQualityDemo = document.getElementById('single-quality');
+						if (!singleQualityDemo) {
+							setTimeout(singleQualityMetadata, 0);
+							return;
+						}
+						fetch('sample-metadata.json')
+							.then(response => response.json())
+							.then(metadata => {
+								singleQualityDemo.metadata = metadata;
+							});
+					};
+					singleQualityMetadata();
+				</script>
 			</d2l-demo-snippet>
 
 			<h5>Multiple qualities</h5>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player thumbnails="ti5.png" metadata="sample-metadata.json">
+				<d2l-labs-media-player thumbnails="ti5.png" id="multiple-quality">
 					<source src="sample-video-144p.mp4" label="SD">
 					<source src="sample-video.mp4" label="HD" default>
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
+				<script>
+					// setting metadata JSON
+					const multipleQualityMetadata = () => {
+						const multipleQualityDemo = document.getElementById('multiple-quality');
+						if (!multipleQualityDemo) {
+							setTimeout(multipleQualityMetadata, 0);
+							return;
+						}
+						fetch('sample-metadata.json')
+							.then(response => response.json())
+							.then(metadata => {
+								multipleQualityDemo.metadata = metadata;
+							});
+					};
+					multipleQualityMetadata();
+				</script>
 			</d2l-demo-snippet>
 
 			<h2>Audio Player</h2>
@@ -42,7 +74,6 @@
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
 			</d2l-demo-snippet>
-
 		</d2l-demo-page>
 	</body>
 </html>
