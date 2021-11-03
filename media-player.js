@@ -76,6 +76,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
+			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
 			locale: { type: String },
 			loop: { type: Boolean },
 			metadata: { type: String },
@@ -704,24 +705,26 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					${this._getSearchResultsView()}
 					${this._getChapterMarkersView()}
 				</div>
-				<d2l-seek-bar
-					id="d2l-labs-media-player-seek-bar"
-					fullWidth
-					solid
-					value="${Math.floor(this.currentTime / this._duration * 100)}"
-					aria-label="${this.localize('seekSlider')}"
-					aria-orientation="horizontal"
-					aria-valuemin="0"
-					aria-valuemax="100"
-					aria-valuenow="${Math.floor(this.currentTime / this._duration * 100)}"
-					title="${this.localize('seekSlider')}"
-					@drag-start=${this._onDragStartSeek}
-					@drag-end=${this._onDragEndSeek}
-					@position-change=${this._onPositionChangeSeek}
-					@hovering-move=${this._onHoverMove}
-					@hovering-start=${this._onHoverStart}
-					@hovering-end=${this._onHoverEnd}
-				></d2l-seek-bar>
+				${this.hideSeekBar ? '' : html`
+					<d2l-seek-bar
+						id="d2l-labs-media-player-seek-bar"
+						fullWidth
+						solid
+						value="${Math.floor(this.currentTime / this._duration * 100)}"
+						aria-label="${this.localize('seekSlider')}"
+						aria-orientation="horizontal"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						aria-valuenow="${Math.floor(this.currentTime / this._duration * 100)}"
+						title="${this.localize('seekSlider')}"
+						@drag-start=${this._onDragStartSeek}
+						@drag-end=${this._onDragEndSeek}
+						@position-change=${this._onPositionChangeSeek}
+						@hovering-move=${this._onHoverMove}
+						@hovering-start=${this._onHoverStart}
+						@hovering-end=${this._onHoverEnd}
+					></d2l-seek-bar>
+				`}
 				<div id="d2l-labs-media-player-buttons">
 					<d2l-button-icon icon="${playIcon}" text="${playTooltip}"  @click="${this._togglePlay}" theme="${ifDefined(theme)}"></d2l-button-icon>
 
