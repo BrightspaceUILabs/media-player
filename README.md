@@ -55,6 +55,7 @@ npm install @brightspace-ui-labs/media-player
 | allow-download-on-error | Boolean | false | If set, display the download button in the error view. |
 | autoplay | Boolean | false | If set, will play the media as soon as it has been loaded. |
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
+| hide-seek-bar | Boolean | false | If set, the seek bar will not be shown. |
 | locale | String | en | If set, will display chapter titles in the given locale when possible. |
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | metadata | JSON | false | Metadata JSON of the video, contains chapters and cuts data. |
