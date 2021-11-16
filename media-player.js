@@ -35,10 +35,6 @@ const KEY_BINDINGS = {
 	mute: 'm',
 	fullscreen: 'f'
 };
-const MESSAGE_TYPES = {
-	error: 1,
-	success: 2
-};
 const MIN_TRACK_WIDTH_PX = 250;
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.platform);
 const PLAYBACK_SPEEDS = ['0.25', '0.5', '0.75', DEFAULT_SPEED, '1.25', '1.5', '2.0'];
@@ -847,7 +843,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	load() {
 		if (this._media.paused) {
- 			this._media.load();
+			this._media.load();
 		}
 	}
 
@@ -977,6 +973,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		} else if (DEFAULT_LOCALE in chapterTitle) {
 			return chapterTitle[DEFAULT_LOCALE];
 		}
+	}
+
+	_getCurrentSource() {
+		return this.src || this._sources[this._selectedQuality];
 	}
 
 	_getDownloadButtonView() {
@@ -1120,6 +1120,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getPercentageTime(time) {
 		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+	}
+
+	_getQualityFromNode(node) {
+		return node.getAttribute('label');
 	}
 
 	_getQualityMenuView() {
@@ -1439,30 +1443,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._media.volume = this._volumeSlider.immediateValue / 100;
 	}
 
-	_getCurrentSource() {
-		return this.src || this._sources[this._selectedQuality];
-	}
-
-	_reloadSource() {
-		this._loading = true;
-
-		const time = this.currentTime;
-		this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
-
-		// Maintain the height while loading the new source to prevent
-		// the video object from resizing temporarily
-		this._maintainHeight = this._media.clientHeight;
-
-		this._stateBeforeLoad = {
-			paused: this.paused,
-			autoplay: this._media.autoplay,
-			currentTime: this.currentTime
-		};
-
-		this.pause();
-		this.load();
-	}
-
 	_onQualityMenuItemChange(e) {
 		if (
 			!this._sources ||
@@ -1532,7 +1512,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				});
 			});
 			sourceNodes.map(node => {
-				observer.observe(node, {attributes: true});
+				observer.observe(node, { attributes: true });
 			});
 			this._updateSources(sourceNodes);
 		}
@@ -1749,6 +1729,43 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_parseSourceNode(node, index) {
+		const quality = this._getQualityFromNode(node);
+		if (!quality) {
+			console.warn("d2l-labs-media-player component requires 'label' text on source");
+			return;
+		}
+		if (!node.src) {
+			console.warn("d2l-labs-media-player component requires 'src' text on source");
+			return;
+		}
+
+		if (this._selectedQuality === null && ((index !== undefined && index === 0) || node.hasAttribute('default'))) {
+			this._selectedQuality = quality;
+		}
+
+		this._sources[quality] = node.src;
+	}
+
+	_reloadSource() {
+		this._loading = true;
+
+		this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
+
+		// Maintain the height while loading the new source to prevent
+		// the video object from resizing temporarily
+		this._maintainHeight = this._media.clientHeight;
+
+		this._stateBeforeLoad = {
+			paused: this.paused,
+			autoplay: this._media.autoplay,
+			currentTime: this.currentTime
+		};
+
+		this.pause();
+		this.load();
+	}
+
 	_showControls(temporarily) {
 		this._recentlyShowedCustomControls = true;
 		clearTimeout(this._showControlsTimeout);
@@ -1843,28 +1860,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_updateCurrentTimeFromSeekbarProgress() {
 		this.currentTime = this._seekBar.immediateValue * this._duration / 100;
-	}
-
-	_getQualityFromNode(node) {
-		return node.getAttribute('label');
-	}
-
-	_parseSourceNode(node, index) {
-		const quality = this._getQualityFromNode(node);
-		if (!quality) {
-			console.warn("d2l-labs-media-player component requires 'label' text on source");
-			return;
-		}
-		if (!node.src) {
-			console.warn("d2l-labs-media-player component requires 'src' text on source");
-			return;
-		}
-
-		if (this._selectedQuality === null && ((index !== undefined && index === 0) || node.hasAttribute('default'))) {
-			this._selectedQuality = quality;
-		}
-
-		this._sources[quality] = node.src;
 	}
 
 	_updateSources(nodes) {
