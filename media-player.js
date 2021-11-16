@@ -1034,7 +1034,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
 						@pause=${this._onPause}
-						@loadedmetadata=${this._onLoadedMetadataVideo}
+						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
@@ -1056,7 +1056,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
 						@pause=${this._onPause}
-						@loadedmetadata=${this._onLoadedMetadataAudio}
+						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
@@ -1397,18 +1397,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		});
 
 		this.dispatchEvent(new CustomEvent('loadedmetadata'));
-	}
-
-	_onLoadedMetadataAudio() {
-		if (this._sourceType === SOURCE_TYPES.audio) {
-			this._onLoadedMetadata();
-		}
-	}
-
-	_onLoadedMetadataVideo() {
-		if (this._sourceType === SOURCE_TYPES.video) {
-			this._onLoadedMetadata();
-		}
 	}
 
 	_onPause() {
