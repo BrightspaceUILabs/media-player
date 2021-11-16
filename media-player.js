@@ -143,9 +143,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				display: block;
 				height: 100%;
 				max-height: 100vh;
+				min-height: 100%;
 				position: relative;
 				width: 100%;
-				min-height: 100%;
 			}
 
 			#d2l-labs-media-player-media-controls {
@@ -489,10 +489,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				display: flex;
 				height: 100%;
 				justify-content: center;
-				width: 100%;
 				position: absolute;
-				top: 0;
 				left: 0;
+				top: 0;
+				width: 100%;
 				z-index: 2;
 			}
 
