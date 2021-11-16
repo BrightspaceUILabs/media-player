@@ -489,8 +489,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				display: flex;
 				height: 100%;
 				justify-content: center;
-				position: absolute;
 				left: 0;
+				position: absolute;
 				top: 0;
 				width: 100%;
 				z-index: 2;
