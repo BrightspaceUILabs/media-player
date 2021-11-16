@@ -110,7 +110,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return [ labelStyles, css`
 			:host {
 				display: block;
-				min-height: 300px;
+				min-height: 140px;
 				position: relative;
 			}
 
