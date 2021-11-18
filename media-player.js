@@ -28,6 +28,7 @@ import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
 import { styleMap } from 'lit-html/directives/style-map';
 
 const DEFAULT_SPEED = '1.0';
+const DEFAULT_VOLUME = '1.0';
 const FULLSCREEN_ENABLED = fullscreenApi.isEnabled;
 const HIDE_DELAY_MS = 3000;
 const KEY_BINDINGS = {
@@ -41,6 +42,7 @@ const PLAYBACK_SPEEDS = ['0.25', '0.5', '0.75', DEFAULT_SPEED, '1.25', '1.5', '2
 const PREFERENCES_KEY_PREFIX = 'D2L.MediaPlayer.Preferences';
 const PREFERENCES_SPEED_KEY = `${PREFERENCES_KEY_PREFIX}.Speed`;
 const PREFERENCES_TRACK_IDENTIFIER_KEY = `${PREFERENCES_KEY_PREFIX}.Track`;
+const PREFERENCES_VOLUME_KEY = `${PREFERENCES_KEY_PREFIX}.Volume`;
 const SEEK_BAR_UPDATE_PERIOD_MS = 0;
 const SOURCE_TYPES = {
 	audio: 'audio',
@@ -597,6 +599,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this._media.textTracks;
 	}
 
+	get volume() {
+		return this._media.volume;
+	}
+
+	set volume(volume) {
+		this._media.volume = volume;
+		this._setPreference(PREFERENCES_VOLUME_KEY, volume);
+	}
+
 	firstUpdated(changedProperties) {
 		super.firstUpdated(changedProperties);
 
@@ -888,6 +899,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this.localize('off');
 	}
 
+	_clearPreference(preferenceKey) {
+		localStorage.removeItem(preferenceKey);
+	}
+
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -1120,6 +1135,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getPercentageTime(time) {
 		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+	}
+
+	_getPreference(preferenceKey, defaultValue) {
+		return localStorage.getItem(preferenceKey) ? localStorage.getItem(preferenceKey) : defaultValue;
 	}
 
 	_getQualityFromNode(node) {
@@ -1392,13 +1411,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._maintainHeight = null;
 		this._loading = false;
 
-		const speed = localStorage.getItem(PREFERENCES_SPEED_KEY) ? localStorage.getItem(PREFERENCES_SPEED_KEY) : DEFAULT_SPEED;
-
+		const speed = this._getPreference(PREFERENCES_SPEED_KEY, DEFAULT_SPEED);
 		this._onPlaybackSpeedsMenuItemChange({
 			target: {
 				value: speed
 			}
 		});
+
+		const volume = this._getPreference(PREFERENCES_VOLUME_KEY, DEFAULT_VOLUME);
+		this.volume = volume;
 
 		this.dispatchEvent(new CustomEvent('loadedmetadata'));
 	}
@@ -1417,7 +1438,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const speed = e.target.value;
 		this._media.playbackRate = speed;
 		this._selectedSpeed = speed;
-		localStorage.setItem(PREFERENCES_SPEED_KEY, speed);
+		this._setPreference(PREFERENCES_SPEED_KEY, speed);
 	}
 
 	_onPlayerTimeBlur(event) {
@@ -1440,7 +1461,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onPositionChangeVolume() {
-		this._media.volume = this._volumeSlider.immediateValue / 100;
+		this.volume = this._volumeSlider.immediateValue / 100;
 	}
 
 	_onQualityMenuItemChange(e) {
@@ -1508,8 +1529,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			const observer = new MutationObserver(mutationList => {
 				mutationList.forEach(mutation => {
 					this._parseSourceNode(mutation.target);
-					this._reloadSource();
 				});
+
+				this._reloadSource();
 			});
 			sourceNodes.map(node => {
 				observer.observe(node, { attributes: true });
@@ -1641,7 +1663,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			if (defaultTrack && defaultTrack.ignorePreferences) {
 				this._selectedTrackIdentifier = defaultTrack;
 			} else {
-				this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
+				this._selectedTrackIdentifier = this._getPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, defaultTrack);
 			}
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1679,8 +1701,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		this._selectedTrackIdentifier = e.target.value;
 
-		if (this._selectedTrackIdentifier) localStorage.setItem(PREFERENCES_TRACK_IDENTIFIER_KEY, this._selectedTrackIdentifier);
-		else localStorage.removeItem(PREFERENCES_TRACK_IDENTIFIER_KEY);
+		if (this._selectedTrackIdentifier) {
+			this._setPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, this._selectedTrackIdentifier);
+		} else {
+			this._clearPreference(PREFERENCES_TRACK_IDENTIFIER_KEY);
+		}
 
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			const track = this._media.textTracks[i];
@@ -1722,7 +1747,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onVolumeChange() {
-		this._volume = this._media.volume;
+		this._volume = this.volume;
 
 		if (this._volume > 0) {
 			this._muted = false;
@@ -1740,7 +1765,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			return;
 		}
 
-		if (this._selectedQuality === null && ((index !== undefined && index === 0) || node.hasAttribute('default'))) {
+		if ((index !== undefined && index === 0) || node.hasAttribute('default')) {
 			this._selectedQuality = quality;
 		}
 
@@ -1750,20 +1775,26 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_reloadSource() {
 		this._loading = true;
 
-		this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
+		if (this._media) {
+			this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
 
-		// Maintain the height while loading the new source to prevent
-		// the video object from resizing temporarily
-		this._maintainHeight = this._media.clientHeight;
+			// Maintain the height while loading the new source to prevent
+			// the video object from resizing temporarily
+			this._maintainHeight = this._media.clientHeight;
 
-		this._stateBeforeLoad = {
-			paused: this.paused,
-			autoplay: this._media.autoplay,
-			currentTime: this.currentTime
-		};
+			this._stateBeforeLoad = {
+				paused: this.paused,
+				autoplay: this._media.autoplay,
+				currentTime: this.currentTime
+			};
 
-		this.pause();
-		this.load();
+			this.pause();
+			this.load();
+		}
+	}
+
+	_setPreference(preferenceKey, value) {
+		localStorage.setItem(preferenceKey, value);
 	}
 
 	_showControls(temporarily) {
@@ -1841,10 +1872,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_toggleMute() {
 		if (this._muted) {
-			this._media.volume = this.preMuteVolume;
+			this.volume = this.preMuteVolume;
 		} else {
-			this.preMuteVolume = this._media.volume;
-			this._media.volume = 0;
+			this.preMuteVolume = this.volume;
+			this.volume = 0;
 		}
 
 		this._muted = !this._muted;
