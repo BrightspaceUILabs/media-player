@@ -24,12 +24,6 @@ A LitElement based media player component, designed for similarity across browse
 > Displaying audio
 ![Example of audio](demo/example-audio.gif)
 
-> Loading media
-![Example of loading](demo/example-loading.gif)
-
-> Media Error
-![Example of error](demo/example-error.png)
-
 ## Installation
 
 To install from NPM:
@@ -52,7 +46,6 @@ npm install @brightspace-ui-labs/media-player
 | Attribute | Type | Default | Description |
 |--|--|--|--|
 | allow-download| Boolean | false | If set, will allow the media to be downloaded.
-| allow-download-on-error | Boolean | false | If set, display the download button in the error view. |
 | autoplay | Boolean | false | If set, will play the media as soon as it has been loaded. |
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
 | hide-seek-bar | Boolean | false | If set, the seek bar will not be shown. |
@@ -143,6 +136,7 @@ The media player supports switching to different qualities. If multiple `<source
 | label | String, required | The label for the track, displayed to the user for selection.
 | src | String, required | The URL of the source file.
 | default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
+
 ## Showing thumbnails preview with `thumbnails` attribute
 
 Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
@@ -202,7 +196,6 @@ Example format:
 }
 ```
 
-
 ## Captions and Subtitles Using `<track>`
 
 The media player supports captions and subtitles, provided as `.srt` or `.vtt` files. If any valid tracks are present, a captions menu will be presented in the settings menu with an item for each track.
@@ -230,7 +223,7 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 
 ## Local Storage
 
-The media player uses local storage to persist the user's playback speed and track selections.
+The media player uses local storage to persist the user's playback speed, track selections, and volume.
 
 **Items**
 
@@ -238,6 +231,7 @@ The media player uses local storage to persist the user's playback speed and tra
 | -- | -- |
 | D2L.MediaPlayer.Preferences.Speed | Playback speed that was last selected.
 | D2L.MediaPlayer.Preferences.Track | Identifier for the kind and language of the track that was last selected.
+| D2L.MediaPlayer.Preferences.Volume | Volume that was last selected.
 
 ## Accessibility
 

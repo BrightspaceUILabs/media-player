@@ -28,6 +28,7 @@ import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
 import { styleMap } from 'lit-html/directives/style-map';
 
 const DEFAULT_SPEED = '1.0';
+const DEFAULT_VOLUME = '1.0';
 const FULLSCREEN_ENABLED = fullscreenApi.isEnabled;
 const HIDE_DELAY_MS = 3000;
 const KEY_BINDINGS = {
@@ -35,16 +36,13 @@ const KEY_BINDINGS = {
 	mute: 'm',
 	fullscreen: 'f'
 };
-const MESSAGE_TYPES = {
-	error: 1,
-	success: 2
-};
 const MIN_TRACK_WIDTH_PX = 250;
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.platform);
 const PLAYBACK_SPEEDS = ['0.25', '0.5', '0.75', DEFAULT_SPEED, '1.25', '1.5', '2.0'];
 const PREFERENCES_KEY_PREFIX = 'D2L.MediaPlayer.Preferences';
 const PREFERENCES_SPEED_KEY = `${PREFERENCES_KEY_PREFIX}.Speed`;
 const PREFERENCES_TRACK_IDENTIFIER_KEY = `${PREFERENCES_KEY_PREFIX}.Track`;
+const PREFERENCES_VOLUME_KEY = `${PREFERENCES_KEY_PREFIX}.Volume`;
 const SEEK_BAR_UPDATE_PERIOD_MS = 0;
 const SOURCE_TYPES = {
 	audio: 'audio',
@@ -73,7 +71,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	static get properties() {
 		return {
 			allowDownload: { type: Boolean, attribute: 'allow-download', reflect: true },
-			allowDownloadOnError: { type: Boolean, attribute: 'allow-download-on-error' },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
@@ -90,6 +87,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_hoverTime: { type: Number, attribute: false },
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
+			_maintainHeight: { type: Number, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -114,6 +112,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return [ labelStyles, css`
 			:host {
 				display: block;
+				min-height: 140px;
+				position: relative;
 			}
 
 			:host([hidden]) {
@@ -145,6 +145,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				display: block;
 				height: 100%;
 				max-height: 100vh;
+				min-height: 100%;
 				position: relative;
 				width: 100%;
 			}
@@ -485,12 +486,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				right: -0.8rem;
 			}
 
-			.d2l-labs-media-player-full-area-centred {
+			.d2l-labs-media-player-full-area-centered {
 				align-items: center;
 				display: flex;
 				height: 100%;
 				justify-content: center;
+				left: 0;
+				position: absolute;
+				top: 0;
 				width: 100%;
+				z-index: 2;
 			}
 
 			#d2l-labs-media-player-alert-inner {
@@ -561,6 +566,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._syncDisplayedTrackTextToSelectedTrack();
 	}
 
+	get volume() {
+		return this._media.volume;
+	}
+
+	set volume(volume) {
+		this._media.volume = volume;
+		this._setPreference(PREFERENCES_VOLUME_KEY, volume);
+	}
+
 	get activeCue() {
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
@@ -583,7 +597,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get paused() {
-		return this._media.paused;
+		return this._media && this._media.paused;
 	}
 
 	get sourceType() {
@@ -654,12 +668,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
 		const volumeTooltip = `${this._muted ? this.localize('unmute') : this.localize('mute')} (${KEY_BINDINGS.mute})`;
 
+		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() || this._sourceType === SOURCE_TYPES.unknown ? 'auto' : 'none',
-			display: this._loading || this._sourceType === SOURCE_TYPES.unknown ? 'none' : 'flex',
+			display: this._sourceType === SOURCE_TYPES.unknown ? 'none' : 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
-			height: this._heightPixels ? `${this._heightPixels}px` : '100%'
+			height,
 		};
+
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
 		const trackSpanStyle = { fontSize: `${this._trackFontSizeRem}rem`, lineHeight: `${this._trackFontSizeRem * 1.2}rem` };
 
@@ -678,12 +694,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		return html`
 		<slot @slotchange=${this._onSlotChange}></slot>
-
-		<d2l-offscreen>
-			<span role="alert">${this._message.text}</span>
-		</d2l-offscreen>
-
-		${this._getErrorAlertView()}
 
 		${this._getLoadingSpinnerView()}
 
@@ -828,7 +838,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src')) {
-			this._determineSourceType();
+			this._reloadSource();
 		}
 
 		if (changedProperties.has('locale')) {
@@ -847,19 +857,27 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	load() {
-		if (this._media.paused) this._media.load();
+		if (this._media.paused) {
+			this._media.load();
+		}
 	}
 
 	pause() {
-		if (!this._media.paused) this._togglePlay();
+		if (!this._media.paused) {
+			this._togglePlay();
+		}
 	}
 
 	play() {
-		if (this._media.paused) this._togglePlay();
+		if (this._media.paused) {
+			this._togglePlay();
+		}
 	}
 
 	requestFullscreen() {
-		if (fullscreenApi.isFullscreen) return;
+		if (fullscreenApi.isFullscreen) {
+			return;
+		}
 
 		this._toggleFullscreen();
 	}
@@ -885,13 +903,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this.localize('off');
 	}
 
-	_determineSourceType() {
-		this._loading = true;
-		this._message = {
-			text: null,
-			type: null
-		};
-		this._sourceType = SOURCE_TYPES.unknown;
+	_clearPreference(preferenceKey) {
+		localStorage.removeItem(preferenceKey);
 	}
 
 	static _formatTime(totalSeconds) {
@@ -981,6 +994,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_getCurrentSource() {
+		return this.src || this._sources[this._selectedQuality];
+	}
+
 	_getDownloadButtonView() {
 		if (!this.allowDownload) return null;
 
@@ -991,52 +1008,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getDownloadLink() {
-		const srcUrl = this.src || this._sources[this._selectedQuality];
+		const srcUrl = this._getCurrentSource();
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
 		const attachmentUrl = `${srcUrl}${srcUrl?.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
 		url.searchParams.append('attachment', 'true');
 		return url.toString();
-	}
-
-	_getErrorAlertView() {
-		return this._message.type === MESSAGE_TYPES.error ? html`
-			<div class="d2l-labs-media-player-full-area-centred">
-				<d2l-alert type="critical">
-					<div id="d2l-labs-media-player-alert-inner">
-						<svg width="33" height="31" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<defs>
-								<path d="M4 0h22a4 4 0 014 4v16l-4 1-5-3-5 1-4-3-5 1-4-3-3 1V4a4 4 0 014-4z" id="a"/>
-								<path d="M4 13h22a4 4 0 004-4V6l-4 1-5-3-5 1-4-3-5 1-4-3-3 1v8a4 4 0 004 4z" id="c"/>
-							</defs>
-							<g fill="none" fill-rule="evenodd">
-								<g transform="rotate(-3 35.094 -27.188)">
-									<mask id="b" fill="#fff">
-									<use xlink:href="#a"/>
-									</mask>
-									<path stroke="#494C4E" d="M26 .5c.966 0 1.841.392 2.475 1.025A3.489 3.489 0 0129.5 4h0v15.61l-3.42.855-4.989-2.993-4.97.994-4-3-5 1-4.03-3.023-2.591.863V4c0-.966.392-1.841 1.025-2.475A3.489 3.489 0 014 .5h0z"/>
-									<path d="M26 2c1.103 0 2 .897 2 2v22c0 1.103-.897 2-2 2H4c-1.103 0-2-.897-2-2V4c0-1.103.897-2 2-2h22m0-2H4C1.8 0 0 1.8 0 4v22c0 2.2 1.8 4 4 4h22c2.2 0 4-1.8 4-4V4c0-2.2-1.8-4-4-4z" fill="#494C4E" fill-rule="nonzero" mask="url(#b)"/>
-									<path d="M12 9l9 6-9 6V9m0-2a2 2 0 00-2 2v12a2 2 0 003.11 1.664l9-6a2 2 0 00-.001-3.328l-9-6A1.998 1.998 0 0012 7z" fill="#494C4E" fill-rule="nonzero" mask="url(#b)"/>
-								</g>
-								<g transform="translate(0 18)">
-									<mask id="d" fill="#fff">
-										<use xlink:href="#c"/>
-									</mask>
-									<path stroke="#494C4E" d="M2.91.557l3.969 2.977 5-1 4 3 5.03-1.006 5.011 3.007 3.58-.895V9c0 .966-.392 1.841-1.025 2.475A3.489 3.489 0 0126 12.5h0H4a3.489 3.489 0 01-2.475-1.025A3.489 3.489 0 01.5 9h0V1.36L2.91.557z"/>
-									<path d="M26-15c1.103 0 2 .897 2 2V9c0 1.103-.897 2-2 2H4c-1.103 0-2-.897-2-2v-22c0-1.103.897-2 2-2h22m0-2H4c-2.2 0-4 1.8-4 4V9c0 2.2 1.8 4 4 4h22c2.2 0 4-1.8 4-4v-22c0-2.2-1.8-4-4-4z" fill="#494C4E" fill-rule="nonzero" mask="url(#d)"/>
-									<path d="M12-8l9 6-9 6V-8m0-2a2 2 0 00-2 2V4a2 2 0 003.11 1.664l9-6a2 2 0 00-.001-3.328l-9-6A1.998 1.998 0 0012-10z" fill="#494C4E" fill-rule="nonzero" mask="url(#d)"/>
-								</g>
-							</g>
-						</svg>
-
-						<span>${this._message.text}</span>
-
-						<d2l-button-subtle text="${this.localize('retry')}" @click=${this._onRetryButtonPress}></d2l-button-subtle>
-						${this.allowDownloadOnError ? html`<d2l-button-subtle text="${this.localize('download')}" @click=${this._onDownloadButtonPress}></d2l-button-subtle>` : ''}
-					</div>
-				</d2l-alert>
-			</div>
-		` : null;
 	}
 
 	_getKindFromTrackIdentifier(trackIdentifier) {
@@ -1045,21 +1022,19 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getLoadingSpinnerView() {
 		return this._loading ? html`
-			<div class="d2l-labs-media-player-full-area-centred">
+			<div class="d2l-labs-media-player-full-area-centered">
 				<d2l-loading-spinner size="100"></d2l-loading-spinner>
 			</div>
 		` : null;
 	}
 
 	_getMediaAreaView() {
-		if (this._message.type === MESSAGE_TYPES.error || (!this.src && this._sources && Object.keys(this._sources).length < 1)) return null;
-
 		const playIcon = `tier3:${this._playing ? 'pause' : 'play'}`;
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
 
 		switch (this._sourceType) {
 			case SOURCE_TYPES.unknown:
-				this._determineSourceType();
+				this._loading = true;
 			case SOURCE_TYPES.video: // eslint-disable-line no-fallthrough
 				return html`
 					<video
@@ -1075,14 +1050,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@durationchange=${this._onDurationChange}
 						@ended=${this._onEnded}
 						@error=${this._onError}
-						@loadeddata=${this._onLoadedDataVideo}
+						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
+						@playing=${this._onPlaying}
 						@pause=${this._onPause}
-						@loadedmetadata=${this._onLoadedMetadataVideo}
+						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
-						<source src="${this.src || this._sources[this._selectedQuality]}" @error=${this._onError}>
+						<source src="${this._getCurrentSource()}" @error=${this._onError}>
 					</video>
 				`;
 			case SOURCE_TYPES.audio:
@@ -1097,10 +1073,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@durationchange=${this._onDurationChange}
 						@ended=${this._onEnded}
 						@error=${this._onError}
-						@loadeddata=${this._onLoadedDataAudio}
+						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
+						@playing=${this._onPlaying}
 						@pause=${this._onPause}
-						@loadedmetadata=${this._onLoadedMetadataAudio}
+						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
@@ -1164,6 +1141,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getPercentageTime(time) {
 		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+	}
+
+	_getPreference(preferenceKey, defaultValue) {
+		return localStorage.getItem(preferenceKey) ? localStorage.getItem(preferenceKey) : defaultValue;
+	}
+
+	_getQualityFromNode(node) {
+		return node.getAttribute('label');
 	}
 
 	_getQualityMenuView() {
@@ -1349,8 +1334,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (this._seekBar) {
 			this._updateCurrentTimeFromSeekbarProgress();
 
-			if (this._pausedForSeekDrag) this._media.play();
-			this._pausedForSeekDrag = false;
+			if (this._pausedForSeekDrag) {
+				this._media.play();
+			}
 			this._dragging = false;
 		}
 	}
@@ -1386,8 +1372,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onError() {
-		this._loading = false;
-		this._setLoadErrorMessage();
 		this.dispatchEvent(new CustomEvent('error'));
 	}
 
@@ -1419,43 +1403,32 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
 
-	_onLoadedDataAudio() {
-		if (this._sourceType === SOURCE_TYPES.audio) {
-			this._onLoadedData();
-		}
-	}
-
-	_onLoadedDataVideo() {
-		if (this._sourceType === SOURCE_TYPES.video) {
-			this._onLoadedData();
-		}
-	}
-
 	_onLoadedMetadata() {
+		if (this._stateBeforeLoad) {
+			this.currentTime = this._stateBeforeLoad.currentTime;
+			this._media.autoplay = this._stateBeforeLoad.autoplay;
+
+			if (!this._stateBeforeLoad.paused) {
+				this.play();
+			}
+
+			this._stateBeforeLoad = null;
+		}
+
+		this._maintainHeight = null;
 		this._loading = false;
-		this._setLoadSuccessMessage();
 
-		const speed = localStorage.getItem(PREFERENCES_SPEED_KEY) ? localStorage.getItem(PREFERENCES_SPEED_KEY) : DEFAULT_SPEED;
-
+		const speed = this._getPreference(PREFERENCES_SPEED_KEY, DEFAULT_SPEED);
 		this._onPlaybackSpeedsMenuItemChange({
 			target: {
 				value: speed
 			}
 		});
 
+		const volume = this._getPreference(PREFERENCES_VOLUME_KEY, DEFAULT_VOLUME);
+		this.volume = volume;
+
 		this.dispatchEvent(new CustomEvent('loadedmetadata'));
-	}
-
-	_onLoadedMetadataAudio() {
-		if (this._sourceType === SOURCE_TYPES.audio) {
-			this._onLoadedMetadata();
-		}
-	}
-
-	_onLoadedMetadataVideo() {
-		if (this._sourceType === SOURCE_TYPES.video) {
-			this._onLoadedMetadata();
-		}
 	}
 
 	_onPause() {
@@ -1464,7 +1437,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onPlay() {
-		this._playing = true;
 		this.dispatchEvent(new CustomEvent('play'));
 	}
 
@@ -1472,7 +1444,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const speed = e.target.value;
 		this._media.playbackRate = speed;
 		this._selectedSpeed = speed;
-		localStorage.setItem(PREFERENCES_SPEED_KEY, speed);
+		this._setPreference(PREFERENCES_SPEED_KEY, speed);
 	}
 
 	_onPlayerTimeBlur(event) {
@@ -1489,13 +1461,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		}
 	}
 
+	_onPlaying() {
+		this._playing = true;
+		this._pausedForSeekDrag = false;
+	}
+
 	_onPositionChangeSeek() {
 		this._updateCurrentTimeFromSeekbarProgress();
 		this._showControls(true);
 	}
 
 	_onPositionChangeVolume() {
-		this._media.volume = this._volumeSlider.immediateValue / 100;
+		this.volume = this._volumeSlider.immediateValue / 100;
 	}
 
 	_onQualityMenuItemChange(e) {
@@ -1507,27 +1484,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		) return;
 
 		this._selectedQuality = e.target.value;
-
-		const time = this.currentTime;
-		this._media.getElementsByTagName('source')[0].setAttribute('src', this._sources[this._selectedQuality]);
-
-		const resumePlay = !this.paused;
-
-		const autoplay = this._media.autoplay;
-		this._media.autoplay = false;
-
-		this.pause();
-		this.load();
-		this._media.currentTime = time;
-
-		if (resumePlay) {
-			this.play();
-			this._media.autoplay = autoplay;
-		}
+		this._reloadSource();
 	}
 
 	_onRetryButtonPress() {
-		this._determineSourceType();
+		this._loading = true;
 	}
 
 	_onSearchButtonPress() {
@@ -1571,8 +1532,21 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const nodes = e.target.assignedNodes();
 		let defaultTrack;
 
+		// this.src case is handled in updated() event
 		if (!this.src) {
+			// The onSlotChange event does not monitor changes to slot children, so we need
+			// to detect the change to the <source> element via a MutationObserver
 			const sourceNodes = nodes.filter(node => node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE');
+			const observer = new MutationObserver(mutationList => {
+				mutationList.forEach(mutation => {
+					this._parseSourceNode(mutation.target);
+				});
+
+				this._reloadSource();
+			});
+			sourceNodes.map(node => {
+				observer.observe(node, { attributes: true });
+			});
 			this._updateSources(sourceNodes);
 		}
 
@@ -1700,7 +1674,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			if (defaultTrack && defaultTrack.ignorePreferences) {
 				this._selectedTrackIdentifier = defaultTrack;
 			} else {
-				this._selectedTrackIdentifier = localStorage.getItem(PREFERENCES_TRACK_IDENTIFIER_KEY) || defaultTrack;
+				this._selectedTrackIdentifier = this._getPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, defaultTrack);
 			}
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1738,8 +1712,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		this._selectedTrackIdentifier = e.target.value;
 
-		if (this._selectedTrackIdentifier) localStorage.setItem(PREFERENCES_TRACK_IDENTIFIER_KEY, this._selectedTrackIdentifier);
-		else localStorage.removeItem(PREFERENCES_TRACK_IDENTIFIER_KEY);
+		if (this._selectedTrackIdentifier) {
+			this._setPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, this._selectedTrackIdentifier);
+		} else {
+			this._clearPreference(PREFERENCES_TRACK_IDENTIFIER_KEY);
+		}
 
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			const track = this._media.textTracks[i];
@@ -1781,25 +1758,54 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onVolumeChange() {
-		this._volume = this._media.volume;
+		this._volume = this.volume;
 
 		if (this._volume > 0) {
 			this._muted = false;
 		}
 	}
 
-	_setLoadErrorMessage() {
-		this._message = {
-			text: this.localize('loadErrorMessage'),
-			type: MESSAGE_TYPES.error
-		};
+	_parseSourceNode(node, index) {
+		const quality = this._getQualityFromNode(node);
+		if (!quality) {
+			console.warn("d2l-labs-media-player component requires 'label' text on source");
+			return;
+		}
+		if (!node.src) {
+			console.warn("d2l-labs-media-player component requires 'src' text on source");
+			return;
+		}
+
+		if ((index !== undefined && index === 0) || node.hasAttribute('default')) {
+			this._selectedQuality = quality;
+		}
+
+		this._sources[quality] = node.src;
 	}
 
-	_setLoadSuccessMessage() {
-		this._message = {
-			text: this.localize('loadSuccessMessage'),
-			type: MESSAGE_TYPES.success
-		};
+	_reloadSource() {
+		this._loading = true;
+
+		if (this._media) {
+			this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
+
+			// Maintain the height while loading the new source to prevent
+			// the video object from resizing temporarily
+			this._maintainHeight = this._media.clientHeight;
+
+			this._stateBeforeLoad = {
+				paused: !this._pausedForSeekDrag && this.paused,
+				autoplay: this._media.autoplay,
+				currentTime: this.currentTime
+			};
+
+			this.pause();
+			this.load();
+		}
+	}
+
+	_setPreference(preferenceKey, value) {
+		localStorage.setItem(preferenceKey, value);
 	}
 
 	_showControls(temporarily) {
@@ -1877,10 +1883,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_toggleMute() {
 		if (this._muted) {
-			this._media.volume = this.preMuteVolume;
+			this.volume = this.preMuteVolume;
 		} else {
-			this.preMuteVolume = this._media.volume;
-			this._media.volume = 0;
+			this.preMuteVolume = this.volume;
+			this.volume = 0;
 		}
 
 		this._muted = !this._muted;
@@ -1902,24 +1908,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.locale = !this.locale ? DEFAULT_LOCALE : this.locale.toLowerCase();
 	}
 
-	_updateSources(sourceNodes) {
+	_updateSources(nodes) {
 		this._selectedQuality = null;
-		sourceNodes.forEach((node, index) => {
+		nodes.forEach((node, index) => {
 			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE') {
-
-				const quality = node.getAttribute('label');
-				if (!quality) {
-					console.warn("d2l-labs-media-player component requires 'label' text on source");
-					return;
-				}
-				if (!node.src) {
-					console.warn("d2l-labs-media-player component requires 'src' text on source");
-					return;
-				}
-
-				if (index === 0 || node.hasAttribute('default')) this._selectedQuality = quality;
-
-				this._sources[quality] = node.src;
+				this._parseSourceNode(node, index);
 			}
 		});
 	}
