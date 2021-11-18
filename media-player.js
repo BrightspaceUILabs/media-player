@@ -616,7 +616,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			this._thumbnailsImage.src = this.thumbnails;
 		}
 
-		this.locale = !this.locale ? DEFAULT_LOCALE : this.locale.toLowerCase();
+		this._updateLocale();
 		this._getMetadata();
 
 		this._startUpdatingCurrentTime();
@@ -829,6 +829,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (changedProperties.has('src')) {
 			this._determineSourceType();
+		}
+
+		if (changedProperties.has('locale')) {
+			this._updateLocale();
 		}
 
 		if (changedProperties.has('metadata')) {
@@ -1892,6 +1896,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_updateCurrentTimeFromSeekbarProgress() {
 		this.currentTime = this._seekBar.immediateValue * this._duration / 100;
+	}
+
+	_updateLocale() {
+		this.locale = !this.locale ? DEFAULT_LOCALE : this.locale.toLowerCase();
 	}
 
 	_updateSources(sourceNodes) {
