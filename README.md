@@ -223,7 +223,7 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 
 ## Local Storage
 
-The media player uses local storage to persist the user's playback speed and track selections.
+The media player uses local storage to persist the user's playback speed, track selections, and volume.
 
 **Items**
 
@@ -231,6 +231,7 @@ The media player uses local storage to persist the user's playback speed and tra
 | -- | -- |
 | D2L.MediaPlayer.Preferences.Speed | Playback speed that was last selected.
 | D2L.MediaPlayer.Preferences.Track | Identifier for the kind and language of the track that was last selected.
+| D2L.MediaPlayer.Preferences.Volume | Volume that was last selected.
 
 ## Accessibility
 

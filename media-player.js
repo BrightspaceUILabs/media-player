@@ -588,7 +588,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get paused() {
-		return this._media.paused;
+		return this._media && this._media.paused;
 	}
 
 	get sourceType() {
@@ -1048,6 +1048,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@error=${this._onError}
 						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
+						@playing=${this._onPlaying}
 						@pause=${this._onPause}
 						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
@@ -1070,6 +1071,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@error=${this._onError}
 						@loadeddata=${this._onLoadedData}
 						@play=${this._onPlay}
+						@playing=${this._onPlaying}
 						@pause=${this._onPause}
 						@loadedmetadata=${this._onLoadedMetadata}
 						@timeupdate=${this._onTimeUpdate}
@@ -1328,8 +1330,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (this._seekBar) {
 			this._updateCurrentTimeFromSeekbarProgress();
 
-			if (this._pausedForSeekDrag) this._media.play();
-			this._pausedForSeekDrag = false;
+			if (this._pausedForSeekDrag) {
+				this._media.play();
+			}
 			this._dragging = false;
 		}
 	}
@@ -1430,8 +1433,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onPlay() {
-		this._playing = true;
 		this.dispatchEvent(new CustomEvent('play'));
+	}
+
+	_onPlaying() {
+		this._playing = true;
+		this._pausedForSeekDrag = false;
 	}
 
 	_onPlaybackSpeedsMenuItemChange(e) {
@@ -1783,7 +1790,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			this._maintainHeight = this._media.clientHeight;
 
 			this._stateBeforeLoad = {
-				paused: this.paused,
+				paused: !this._pausedForSeekDrag && this.paused,
 				autoplay: this._media.autoplay,
 				currentTime: this.currentTime
 			};
