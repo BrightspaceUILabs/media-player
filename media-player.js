@@ -566,6 +566,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._syncDisplayedTrackTextToSelectedTrack();
 	}
 
+	get volume() {
+		return this._media.volume;
+	}
+
+	set volume(volume) {
+		this._media.volume = volume;
+		this._setPreference(PREFERENCES_VOLUME_KEY, volume);
+	}
+
 	get activeCue() {
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
@@ -597,15 +606,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	get textTracks() {
 		return this._media.textTracks;
-	}
-
-	get volume() {
-		return this._media.volume;
-	}
-
-	set volume(volume) {
-		this._media.volume = volume;
-		this._setPreference(PREFERENCES_VOLUME_KEY, volume);
 	}
 
 	firstUpdated(changedProperties) {
@@ -1440,11 +1440,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this.dispatchEvent(new CustomEvent('play'));
 	}
 
-	_onPlaying() {
-		this._playing = true;
-		this._pausedForSeekDrag = false;
-	}
-
 	_onPlaybackSpeedsMenuItemChange(e) {
 		const speed = e.target.value;
 		this._media.playbackRate = speed;
@@ -1464,6 +1459,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			event.target.setAttribute('aria-live', 'polite');
 			event.target.removeAttribute('aria-hidden');
 		}
+	}
+
+	_onPlaying() {
+		this._playing = true;
+		this._pausedForSeekDrag = false;
 	}
 
 	_onPositionChangeSeek() {
