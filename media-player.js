@@ -75,7 +75,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
 			locale: { type: String },
 			loop: { type: Boolean },
-			mediaType: { type: String , attribute: 'media-type' },
+			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: String },
 			poster: { type: String },
 			src: { type: String },
