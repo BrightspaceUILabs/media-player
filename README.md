@@ -143,7 +143,7 @@ The media player supports switching to different qualities. If multiple `<source
 Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
 
 > e.g. sample video thumbnails sprite
-![Example thumbnails sprite](demo/ti5.png)
+![Example thumbnails sprite](demo/tw160h90i5-samplevideo.png)
 
 The thumbnail file name must use the following format:
 `tw<width>h<height>i<interval>-<hash>.[png|jpg]`
