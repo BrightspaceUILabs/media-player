@@ -764,7 +764,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					<div id="d2l-labs-media-player-time"
 						aria-live="off"
 						aria-hidden="true"
-						tabindex="0"
+						tabindex="-1"
 						@focus=${this._onPlayerTimeFocus}
 						@blur=${this._onPlayerTimeBlur}>
 						${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
