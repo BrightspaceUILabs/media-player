@@ -829,7 +829,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
-			this._reloadSource();
+			this._reloadSource(!changedProperties['src']);
 		}
 
 		if (changedProperties.has('locale')) {
@@ -1031,7 +1031,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						?loop="${this.loop}"
 						crossorigin="${ifDefined(this.crossorigin)}"
 						poster="${ifDefined(this.poster)}"
-						preload="${this.poster ? 'metadata' : 'auto'}"
+						preload="${this.poster ? 'none' : 'auto'}"
 						@click=${this._onVideoClick}
 						@contextmenu=${this._onContextMenu}
 						@durationchange=${this._onDurationChange}
@@ -1769,8 +1769,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sources[quality] = node.src;
 	}
 
-	_reloadSource() {
-		this._loading = true;
+	_reloadSource(initialLoad = false) {
+		if (!initialLoad) {
+			this._loading = true;
+		}
 
 		if (this._media) {
 			this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
@@ -1785,8 +1787,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				currentTime: this.currentTime
 			};
 
-			this.pause();
-			this.load();
+			if (!initialLoad) {
+				this.pause();
+				this.load();
+			}
 		}
 	}
 
