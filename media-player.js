@@ -46,7 +46,6 @@ const PREFERENCES_VOLUME_KEY = `${PREFERENCES_KEY_PREFIX}.Volume`;
 const SEEK_BAR_UPDATE_PERIOD_MS = 0;
 const SOURCE_TYPES = {
 	audio: 'audio',
-	unknown: 'unknown',
 	video: 'video'
 };
 const TIMEOUT_FOR_DOUBLE_CLICK_MS = 500;
@@ -76,6 +75,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
 			locale: { type: String },
 			loop: { type: Boolean },
+			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: String },
 			poster: { type: String },
 			src: { type: String },
@@ -96,7 +96,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_selectedQuality: { type: String, attribute: false },
 			_selectedSpeed: { type: String, attribute: false },
 			_selectedTrackIdentifier: { type: String, attribute: false },
-			_sourceType: { type: String, attribute: false },
 			_sources: { type: Object, attribute: false },
 			_thumbnailsImage: { type: Image, attribute: false },
 			_timelinePreviewOffset: { type: Number, attribute: false },
@@ -137,9 +136,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				color: #ffffff;
 			}
 
-			.d2l-labs-media-player-type-is-unknown {
-				display: none;
-			}
 
 			#d2l-labs-media-player-video {
 				display: block;
@@ -544,7 +540,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchInstances = {};
 		this._searchResults = [];
 		this._settingsMenu = null;
-		this._sourceType = SOURCE_TYPES.unknown;
 		this._sources = {};
 		this._timelinePreviewOffset = 10;
 		this._trackFontSizeRem = 1;
@@ -593,15 +588,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get isIOSVideo() {
-		return IS_IOS && this._sourceType === SOURCE_TYPES.video;
+		return IS_IOS && this.mediaType === SOURCE_TYPES.video;
 	}
 
 	get paused() {
 		return this._media && this._media.paused;
-	}
-
-	get sourceType() {
-		return this._sourceType;
 	}
 
 	get textTracks() {
@@ -670,8 +661,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
 		const mediaContainerStyle = {
-			cursor: !this._hidingCustomControls() || this._sourceType === SOURCE_TYPES.unknown ? 'auto' : 'none',
-			display: this._sourceType === SOURCE_TYPES.unknown ? 'none' : 'flex',
+			cursor: !this._hidingCustomControls() || 'none',
+			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
 		};
@@ -679,13 +670,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
 		const trackSpanStyle = { fontSize: `${this._trackFontSizeRem}rem`, lineHeight: `${this._trackFontSizeRem * 1.2}rem` };
 
-		const mediaContainerClass = { 'd2l-labs-media-player-type-is-audio': this._sourceType === SOURCE_TYPES.audio, 'd2l-labs-media-player-type-is-video': this._sourceType === SOURCE_TYPES.video, 'd2l-labs-media-player-type-is-unknown': this._sourceType === SOURCE_TYPES.unknown };
+		const mediaContainerClass = { 'd2l-labs-media-player-type-is-audio': this.mediaType === SOURCE_TYPES.audio, 'd2l-labs-media-player-type-is-video': this.mediaType === SOURCE_TYPES.video };
 		const mediaControlsClass = { 'd2l-labs-media-player-hidden': this._hidingCustomControls() };
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
+		const theme = this.mediaType === SOURCE_TYPES.video ? 'dark' : undefined;
 		const volumeLevelContainerClass = { 'd2l-labs-media-player-hidden': !this._usingVolumeContainer || this._hidingCustomControls() };
 		const searchContainerClass = { 'd2l-labs-media-player-search-container-hidden' : !this._searchInstances[this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)] };
 
-		const fullscreenButton = this._sourceType === SOURCE_TYPES.video ? html`<d2l-button-icon
+		const fullscreenButton = this.mediaType === SOURCE_TYPES.video ? html`<d2l-button-icon
 			class="d2l-dropdown-opener"
 			icon="${fullscreenIcon}"
 			text="${fullscreenTooltip}"
@@ -773,7 +764,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					<div id="d2l-labs-media-player-time"
 						aria-live="off"
 						aria-hidden="true"
-						tabindex="0"
+						tabindex="-1"
 						@focus=${this._onPlayerTimeFocus}
 						@blur=${this._onPlayerTimeBlur}>
 						${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
@@ -837,8 +828,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	updated(changedProperties) {
 		super.updated(changedProperties);
 
-		if (changedProperties.has('src')) {
-			this._reloadSource();
+		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
+			this._reloadSource(!changedProperties['src']);
 		}
 
 		if (changedProperties.has('locale')) {
@@ -883,7 +874,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get _media() {
-		switch (this._sourceType) {
+		switch (this.mediaType) {
 			case SOURCE_TYPES.audio:
 				return this.shadowRoot.getElementById('d2l-labs-media-player-audio');
 			case SOURCE_TYPES.video:
@@ -945,8 +936,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getChapterMarkersView() {
 		if (this._chapters.length === 0) return;
 
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
-
 		let start, end;
 		if (this._chapters[this._chapters.length - 1].time === Math.floor(this._duration)) this._chapters.pop();
 
@@ -969,7 +958,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					@click=${this._onTimelineMarkerClick(chapter.time)}
 					class=${highlight ? 'd2l-labs-media-player-chapter-marker-highlight' : 'd2l-labs-media-player-chapter-marker'}
 					icon="tier1:bookmark-filled"
-					theme="${ifDefined(theme)}"
+					theme="${ifDefined(this._getTheme())}"
 					style=${styleMap({ left: this._getPercentageTime(chapter.time) })}
 				></d2l-icon>
 			` : null;
@@ -1032,9 +1021,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const playIcon = `tier3:${this._playing ? 'pause' : 'play'}`;
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
 
-		switch (this._sourceType) {
-			case SOURCE_TYPES.unknown:
-				this._loading = true;
+		switch (this.mediaType) {
 			case SOURCE_TYPES.video: // eslint-disable-line no-fallthrough
 				return html`
 					<video
@@ -1044,7 +1031,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						?loop="${this.loop}"
 						crossorigin="${ifDefined(this.crossorigin)}"
 						poster="${ifDefined(this.poster)}"
-						preload="${this.poster ? 'metadata' : 'auto'}"
+						preload="${this.poster ? 'none' : 'auto'}"
 						@click=${this._onVideoClick}
 						@contextmenu=${this._onContextMenu}
 						@durationchange=${this._onDurationChange}
@@ -1152,11 +1139,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getQualityMenuView() {
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		return !this.src && this._sources && Object.keys(this._sources).length > 1 && this._selectedQuality ? html`
 			<d2l-menu-item text="${this.localize('quality')}">
 				<div slot="supporting">${this._selectedQuality}</div>
-				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(theme)}">
+				<d2l-menu @d2l-menu-item-change=${this._onQualityMenuItemChange} theme="${ifDefined(this._getTheme())}">
 					${Object.keys(this._sources).map(quality => html`
 						<d2l-menu-item-radio
 							?selected=${this._selectedQuality === quality}
@@ -1170,14 +1156,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getSearchResultsView() {
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		return this._searchResults.map(result => {
 			return html`
 				<d2l-icon
 					@click=${this._onTimelineMarkerClick(result)}
 					class="d2l-labs-media-player-search-marker"
 					icon="tier1:subscribe-filled"
-					theme="${ifDefined(theme)}"
+					theme="${ifDefined(this._getTheme())}"
 					style=${styleMap({ left: this._getPercentageTime(result) })}
 				></d2l-icon>
 			`;
@@ -1196,6 +1181,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
 		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
+	}
+
+	_getTheme() {
+		return this.mediaType === SOURCE_TYPES.video ? 'dark' : undefined;
 	}
 
 	_getTimelinePreview() {
@@ -1262,11 +1251,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getTracksMenuView() {
-		const theme = this._sourceType === SOURCE_TYPES.video ? 'dark' : undefined;
 		return this._tracks.length > 0 ? html`
 			<d2l-menu-item text="${this.localize('captions')}">
 				<div slot="supporting">${this._selectedTrackLabel}</div>
-				<d2l-menu @d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(theme)}">
+				<d2l-menu @d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
 					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>
 					${this._tracks.map(track => html`
 						<d2l-menu-item-radio
@@ -1282,7 +1270,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_hidingCustomControls() {
 		const settingsMenuOpened = this._settingsMenu && this._settingsMenu.opened;
-		return this.isIOSVideo || (this._playing && !this._recentlyShowedCustomControls && !this._hoveringMediaControls && !settingsMenuOpened && !this._usingVolumeContainer && this._sourceType === SOURCE_TYPES.video) || this._sourceType === SOURCE_TYPES.unknown;
+		return this.isIOSVideo || (this._playing && !this._recentlyShowedCustomControls && !this._hoveringMediaControls && !settingsMenuOpened && !this._usingVolumeContainer && this.mediaType === SOURCE_TYPES.video);
 	}
 
 	_listenForKeyboard(e) {
@@ -1360,10 +1348,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onDurationChange(e) {
-		if (this._sourceType === SOURCE_TYPES.unknown) {
-			this._sourceType = this.shadowRoot.getElementById('d2l-labs-media-player-video').videoHeight === 0 ? SOURCE_TYPES.audio : SOURCE_TYPES.video;
-		}
-
 		this._duration = e.target.duration;
 	}
 
@@ -1701,7 +1685,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onTrackContainerClick() {
-		if (this._sourceType === SOURCE_TYPES.video) this._onVideoClick();
+		if (this.mediaType === SOURCE_TYPES.video) {
+			this._onVideoClick();
+		}
 	}
 
 	_onTracksMenuItemChange(e) {
@@ -1783,8 +1769,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sources[quality] = node.src;
 	}
 
-	_reloadSource() {
-		this._loading = true;
+	_reloadSource(initialLoad = false) {
+		if (!initialLoad) {
+			this._loading = true;
+		}
 
 		if (this._media) {
 			this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
@@ -1799,8 +1787,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				currentTime: this.currentTime
 			};
 
-			this.pause();
-			this.load();
+			if (!initialLoad) {
+				this.pause();
+				this.load();
+			}
 		}
 	}
 
@@ -1870,7 +1860,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_toggleFullscreen() {
 		if (!FULLSCREEN_ENABLED) return;
 
-		if (this._sourceType !== SOURCE_TYPES.video) return;
+		if (this.mediaType !== SOURCE_TYPES.video) return;
 
 		this._recentlyToggledFullscreen = true;
 
