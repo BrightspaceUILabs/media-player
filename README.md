@@ -51,7 +51,6 @@ npm install @brightspace-ui-labs/media-player
 | hide-seek-bar | Boolean | false | If set, the seek bar will not be shown. |
 | locale | String | en | If set, will display chapter titles in the given locale when possible. |
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
-| media-type | ["video", "audio"] | null | Whether the video or audio player should be rendered. If not set, a loading indicator will be displayed until set.
 | metadata | JSON | false | Metadata JSON of the video, contains chapters and cuts data. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
@@ -134,8 +133,8 @@ The media player supports switching to different qualities. If multiple `<source
 
 | Attribute | Type | Default | Description |
 |--|--|--|--|
-| label | String, required | | The label for the track, displayed to the user for selection.
-| src | String, required | | The URL of the source file.
+| label | String, required | The label for the track, displayed to the user for selection.
+| src | String, required | The URL of the source file.
 | default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
 
 ## Showing thumbnails preview with `thumbnails` attribute
@@ -215,10 +214,10 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 
 | Attribute | Type | Default | Description |
 |--|--|--|--|
-| kind | ["captions", "subtitles"], required | | The kind of track.
-| label | String, required | | The label for the track, displayed to the user for selection.
-| src | String, required | | The URL of the source file.
-| srclang | String, required | | The language's code.
+| kind | ["captions", "subtitles"], required | The kind of track.
+| label | String, required | The label for the track, displayed to the user for selection.
+| src | String, required | The URL of the source file.
+| srclang | String, required | The language's code.
 | default | Boolean | false | The track to be selected by default. If D2L.MediaPlayer.Preferences.Track is defined in local storage, then it will take precedence over this attribute.
 | default-ignore-preferences | Boolean | false | Same as default, but if D2L.MediaPlayer.Preferences.Track is defined, it will be ignored and this track will be selected instead.
 
