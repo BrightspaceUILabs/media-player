@@ -573,7 +573,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	get activeCue() {
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
-				return this._media?.textTracks?.[0].activeCues?.[0] || null;
+				if (this._media &&
+					this._media.textTracks &&
+					this._media.textTracks[0] &&
+					this._media.textTracks[0].activeCues &&
+					this._media.textTracks[0].activeCues[0]) {
+					return this._media.textTracks[0].activeCues[0];
+				} else {
+					return null;
+				}
 			}
 		}
 		return null;
@@ -968,9 +976,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
-		const chapterTitle = this._chapters.find((_chapter, index, chapters) => (
+		const chapter = this._chapters.find((_chapter, index, chapters) => (
 			index === chapters.length - 1 || (this._hoverTime >= chapters[0].time && this._hoverTime < chapters[index + 1].time)
-		))?.title;
+		));
+		const chapterTitle = chapter && chapter.title;
 
 		if (!chapterTitle) return;
 
@@ -999,7 +1008,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getDownloadLink() {
 		const srcUrl = this._getCurrentSource();
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
-		const attachmentUrl = `${srcUrl}${srcUrl?.indexOf('?') === -1 ? '?_' : ''}`;
+		const attachmentUrl = `${srcUrl}${srcUrl && srcUrl.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
 		url.searchParams.append('attachment', 'true');
 		return url.toString();
