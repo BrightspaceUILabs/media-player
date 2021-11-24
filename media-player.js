@@ -847,6 +847,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (changedProperties.has('metadata')) {
 			this._getMetadata();
 		}
+
+		if (changedProperties.has('thumbnails')) {
+			this._getThumbnails();
+		}
 	}
 
 	exitFullscreen() {
@@ -1196,6 +1200,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this.mediaType === SOURCE_TYPES.video ? 'dark' : undefined;
 	}
 
+	_getThumbnails() {
+		if (!this.thumbnails) return;
+		this._thumbnailsImage = new Image();
+		this._thumbnailsImage.src = this.thumbnails;
+	}
+
 	_getTimelinePreview() {
 		if (!this._hovering) return;
 		const chapterTitleLabel = this._getChapterTitle();
@@ -1213,8 +1223,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
 				</div>
 			`;
+		
+		// format of the thumbnail is [url]/tw<width>h<height>i<interval>-<hash>.[png|jpg]
+		// i.e. we want the first 't' character before the last '-'
+		const thumbArr = this.thumbnails.split('-');
+		const imageName = thumbArr[thumbArr.length - 2].toLowerCase();
 
-		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
+		const thumbMatch = imageName.match(/t[^t]*$/);
+		if (!thumbMatch) {
+			return;
+		}
+		const thumbStr = thumbMatch[0];
 		const widthMatch = thumbStr.match(/w(\d+)/);
 		const heightMatch = thumbStr.match(/h(\d+)/);
 		const intervalMatch = thumbStr.match(/i(\d+)/);
