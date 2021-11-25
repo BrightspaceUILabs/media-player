@@ -1220,15 +1220,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			`;
 
 		// format of the thumbnail is [url]/tw<width>h<height>i<interval>-<hash>.[png|jpg]
-		// i.e. we want the first 't' character before the last '-'
-		const thumbArr = this.thumbnails.split('-');
-		const imageName = thumbArr[thumbArr.length - 2].toLowerCase();
+		const imageName = this.thumbnails.split('/').pop();
+		if (!imageName) return;
 
-		const thumbMatch = imageName.match(/t[^t]*$/);
-		if (!thumbMatch) {
-			return;
-		}
-		const thumbStr = thumbMatch[0];
+		const thumbStr = imageName.split('-')[0].toLowerCase();
 		const widthMatch = thumbStr.match(/w(\d+)/);
 		const heightMatch = thumbStr.match(/h(\d+)/);
 		const intervalMatch = thumbStr.match(/i(\d+)/);
