@@ -624,11 +624,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
 
-		if (this.thumbnails) {
-			this._thumbnailsImage = new Image();
-			this._thumbnailsImage.src = this.thumbnails;
-		}
-
 		this._updateLocale();
 		this._getMetadata();
 
