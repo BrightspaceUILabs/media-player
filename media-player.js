@@ -1218,7 +1218,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${DEFAULT_PREVIEW_HEIGHT - 60}px">${chapterTitleLabel}</span>`}
 				</div>
 			`;
-		
+
 		// format of the thumbnail is [url]/tw<width>h<height>i<interval>-<hash>.[png|jpg]
 		// i.e. we want the first 't' character before the last '-'
 		const thumbArr = this.thumbnails.split('-');
