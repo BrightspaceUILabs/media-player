@@ -624,11 +624,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
 
-		if (this.thumbnails) {
-			this._thumbnailsImage = new Image();
-			this._thumbnailsImage.src = this.thumbnails;
-		}
-
 		this._updateLocale();
 		this._getMetadata();
 
@@ -846,6 +841,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (changedProperties.has('metadata')) {
 			this._getMetadata();
+		}
+
+		if (changedProperties.has('thumbnails')) {
+			this._getThumbnails();
 		}
 	}
 
@@ -1196,6 +1195,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		return this.mediaType === SOURCE_TYPES.video ? 'dark' : undefined;
 	}
 
+	_getThumbnails() {
+		if (!this.thumbnails) return;
+		this._thumbnailsImage = new Image();
+		this._thumbnailsImage.src = this.thumbnails;
+	}
+
 	_getTimelinePreview() {
 		if (!this._hovering) return;
 		const chapterTitleLabel = this._getChapterTitle();
@@ -1214,16 +1219,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				</div>
 			`;
 
-		const thumbStr = this.thumbnails.split('-')[0].toLowerCase();
-		const widthMatch = thumbStr.match(/w(\d+)/);
-		const heightMatch = thumbStr.match(/h(\d+)/);
-		const intervalMatch = thumbStr.match(/i(\d+)/);
-
-		if (!intervalMatch) return;
-
-		const interval = parseInt(intervalMatch[1]);
-		const thumbWidth = widthMatch ? parseInt(widthMatch[1]) : DEFAULT_PREVIEW_WIDTH;
-		const thumbHeight = heightMatch ? parseInt(heightMatch[1]) : DEFAULT_PREVIEW_HEIGHT;
+		// format of the thumbnail is [url]/th<height>w<height>i<interval>-<hash>.[png|jpg]
+		const matches = this.thumbnails.match(/th(\d+)w(\d+)i(\d+)[^/]*$/i);
+		if (matches.length !== 4) return;
+		const [ , thumbHeight, thumbWidth, interval] = matches;
 
 		const width = this._thumbnailsImage.width;
 		const height = this._thumbnailsImage.height;
