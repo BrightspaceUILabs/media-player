@@ -1220,9 +1220,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			`;
 
 		// format of the thumbnail is [url]/th<height>w<height>i<interval>-<hash>.[png|jpg]
-		const matches = this.thumbnails.match(/th(\d+)w(\d+)i(\d+)[^\/]*$/i);
-		if (matches.length != 4) return; 
-		const [_, thumbHeight, thumbWidth, interval] = matches
+		const matches = this.thumbnails.match(/th(\d+)w(\d+)i(\d+)[^/]*$/i);
+		if (matches.length !== 4) return;
+		const [ , thumbHeight, thumbWidth, interval] = matches;
 
 		const width = this._thumbnailsImage.width;
 		const height = this._thumbnailsImage.height;
