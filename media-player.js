@@ -1110,22 +1110,35 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// updating the chapter times based on the cuts, loops over all chapters per cut because it can change multiple chapters
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
-			const newChapters = new Map(); // using map to preserve sort ordering
-			for (const chapter of chapters) {
-				const cutIn = cut.in - cutDiff;
-				const cutOut = cut.out - cutDiff;
+			if (!cut.in || cut.in === cut.out) continue;
+			const cutIn = cut.in - cutDiff;
 
-				let newTime = chapter.time;
-				if (chapter.time > cutIn && chapter.time <= cutOut) {
-					newTime = cutIn;
-				} else if (chapter.time > cutOut) {
-					newTime = chapter.time - (cutOut - cutIn);
+			const newChapters = new Map(); // using map to preserve sort ordering
+
+			if (!cut.out) { // if cut is until the end of the video
+				for (const chapter of chapters) {
+					if (chapter.time < cutIn) {
+						newChapters.set(chapter.time, chapter.title);
+					}
+				}
+			} else {
+				const cutOut = cut.out - cutDiff;
+				const cutLength = cutOut - cutIn;
+
+				for (const chapter of chapters) {
+					let newTime = chapter.time;
+					if (chapter.time > cutIn && chapter.time <= cutOut) {
+						newTime = cutIn;
+					} else if (chapter.time > cutOut) {
+						newTime = chapter.time - cutLength;
+					}
+
+					newChapters.set(newTime, chapter.title);
 				}
 
-				newChapters.set(newTime, chapter.title);
+				cutDiff += cutLength;
 			}
 
-			cutDiff += (cut.out - cut.in);
 			chapters = [...newChapters].map(([chapterTime, chapterTitle]) => ({
 				time: chapterTime,
 				title: chapterTitle
