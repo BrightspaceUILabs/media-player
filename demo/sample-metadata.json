@@ -1,8 +1,8 @@
 {
     "cuts": [
         {
-            "in": 45,
-            "out": 80
+            "in": 3,
+            "out": 5
         }
     ],
     "chapters": [
@@ -15,7 +15,7 @@
         }
       },
       {
-        "time": 30,
+        "time": 3,
         "title": {
           "en": "Chapter Two",
           "fr": "Chapitre Deux",
@@ -23,27 +23,11 @@
         }
       },
       {
-        "time": 70,
+        "time": 7,
         "title": {
           "en": "Chapter Three",
           "fr": "Chapitre Trois",
           "fr-ca": "Chapitre : Trois"
-        }
-      },
-      {
-        "time": 90,
-        "title": {
-          "en": "Chapter Four",
-          "fr": "Chapitre Quatre",
-          "fr-ca": "Chapitre : Quatre"
-        }
-      },
-      {
-        "time": 110,
-        "title": {
-          "en": "Chapter Five",
-          "fr": "Chapitre Cinq",
-          "fr-ca": "Chapitre : Cinq"
         }
       }
     ]
