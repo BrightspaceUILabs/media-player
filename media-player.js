@@ -1097,15 +1097,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	_getMetadata() {
 		if (!this.metadata) return;
 
-		const data = this.metadata;
+		const data = (typeof this.metadata === 'string' || this.metadata instanceof String) ? JSON.parse(this.metadata) : this.metadata;
 		if (!(data && data.chapters && data.chapters.length > 0)) return;
-
 		let chapters = data.chapters.map(({ time, title }) => {
 			return {
 				time: parseInt(time),
 				title
 			};
 		}).sort((a, b) => a.time - b.time);
+
+		if (!data.cuts) {
+			data.cuts = [];
+		}
 
 		// updating the chapter times based on the cuts, loops over all chapters per cut because it can change multiple chapters
 		let cutDiff = 0;
@@ -1234,7 +1237,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		// format of the thumbnail is [url]/th<height>w<height>i<interval>-<hash>.[png|jpg]
 		const matches = this.thumbnails.match(/th(\d+)w(\d+)i(\d+)[^/]*$/i);
-		if (matches.length !== 4) return; // no matches
+		if (matches && matches.length !== 4) return; // no matches
 		const [ , thumbHeight, thumbWidth, interval] = matches;
 
 		const width = this._thumbnailsImage.width;

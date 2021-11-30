@@ -143,15 +143,15 @@ The media player supports switching to different qualities. If multiple `<source
 Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
 
 > e.g. sample video thumbnails sprite
-![Example thumbnails sprite](demo/tw160h90i5-samplevideo.png)
+![Example thumbnails sprite](demo/th90w160i1-samplevideo.png)
 
 The thumbnail file name must use the following format:
-`tw<width>h<height>i<interval>-<hash>.[png|jpg]`
+`th<height>w<width>i<interval>-<hash>.[png|jpg]`
 
 - `width` and `height` are the width/height px of each individual thumbnail
 - `interval` indicates how many seconds apart each thumbnail is
 
-For example, a sprite image named `tw160h90i5-<hash>png` has the thumbnails 5 seconds apart, with width 160px and height 90px.
+For example, a sprite image named `th90w160i5-<hash>png` has the thumbnails 5 seconds apart, with width 160px and height 90px.
 
 | Attribute | Required | Default | Description |
 |--|--|--|--|
