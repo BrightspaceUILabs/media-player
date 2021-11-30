@@ -24,12 +24,6 @@ A LitElement based media player component, designed for similarity across browse
 > Displaying audio
 ![Example of audio](demo/example-audio.gif)
 
-> Loading media
-![Example of loading](demo/example-loading.gif)
-
-> Media Error
-![Example of error](demo/example-error.png)
-
 ## Installation
 
 To install from NPM:
@@ -52,12 +46,13 @@ npm install @brightspace-ui-labs/media-player
 | Attribute | Type | Default | Description |
 |--|--|--|--|
 | allow-download| Boolean | false | If set, will allow the media to be downloaded.
-| allow-download-on-error | Boolean | false | If set, display the download button in the error view. |
 | autoplay | Boolean | false | If set, will play the media as soon as it has been loaded. |
 | crossorigin | String | null | If set, will set the `crossorigin` attribute on the underlying media element to the set value.
+| hide-seek-bar | Boolean | false | If set, the seek bar will not be shown. |
 | locale | String | en | If set, will display chapter titles in the given locale when possible. |
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
-| metadata | String | false | URL of the metadata JSON of the video, contains chapters data. |
+| media-type | ["video", "audio"] | null | Whether the video or audio player should be rendered. If not set, a loading indicator will be displayed until set.
+| metadata | JSON | false | Metadata JSON of the video, contains chapters and cuts data. |
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
 | thumbnails | String |  | If set, will show thumbnails on preview. See below for required format. |
@@ -139,23 +134,24 @@ The media player supports switching to different qualities. If multiple `<source
 
 | Attribute | Type | Default | Description |
 |--|--|--|--|
-| label | String, required | The label for the track, displayed to the user for selection.
-| src | String, required | The URL of the source file.
+| label | String, required | | The label for the track, displayed to the user for selection.
+| src | String, required | | The URL of the source file.
 | default | Boolean | false | The source to be selected by default. If no source has the `default` attribute, then the first `<source>` tag is selected by default. Only one default should be set.
+
 ## Showing thumbnails preview with `thumbnails` attribute
 
 Provide a url to the thumbnails sprite image. This sprite is a grid of images taken from the video, at a set interval.
 
 > e.g. sample video thumbnails sprite
-![Example thumbnails sprite](demo/tw160h90i5-samplevideo.png)
+![Example thumbnails sprite](demo/th90w160i1-samplevideo.png)
 
 The thumbnail file name must use the following format:
-`tw<width>h<height>i<interval>-<hash>.[png|jpg]`
+`th<height>w<width>i<interval>-<hash>.[png|jpg]`
 
 - `width` and `height` are the width/height px of each individual thumbnail
 - `interval` indicates how many seconds apart each thumbnail is
 
-For example, a sprite image named `tw160h90i5-<hash>png` has the thumbnails 5 seconds apart, with width 160px and height 90px.
+For example, a sprite image named `th90w160i5-<hash>png` has the thumbnails 5 seconds apart, with width 160px and height 90px.
 
 | Attribute | Required | Default | Description |
 |--|--|--|--|
@@ -164,14 +160,17 @@ For example, a sprite image named `tw160h90i5-<hash>png` has the thumbnails 5 se
 | interval | required | | Interval in seconds between each thumbnail.
 | width | optional | 160px | Width px of each individual thumbnail in the sprite.
 
-## Chapters  with `metadata` attribute
+## Chapters with `metadata` attribute
 
-Provide a url to the metadata JSON file e.g. [getMetadata endpoint](http://d2l-content-service-docs.s3-website-us-east-1.amazonaws.com/#operation/getMetadata)
+Provide metadata JSON e.g. [getMetadata endpoint](http://d2l-content-service-docs.s3-website-us-east-1.amazonaws.com/#operation/getMetadata)
 
 Example format:
 ```
 {
-    "cuts": [],
+    "cuts": [
+      "in": 20,
+      "out": 30
+    ],
     "chapters": [
       {
         "time": 0,
@@ -198,9 +197,6 @@ Example format:
 }
 ```
 
-
-
-
 ## Captions and Subtitles Using `<track>`
 
 The media player supports captions and subtitles, provided as `.srt` or `.vtt` files. If any valid tracks are present, a captions menu will be presented in the settings menu with an item for each track.
@@ -219,16 +215,16 @@ The media player supports captions and subtitles, provided as `.srt` or `.vtt` f
 
 | Attribute | Type | Default | Description |
 |--|--|--|--|
-| kind | ["captions", "subtitles"], required | The kind of track.
-| label | String, required | The label for the track, displayed to the user for selection.
-| src | String, required | The URL of the source file.
-| srclang | String, required | The language's code.
+| kind | ["captions", "subtitles"], required | | The kind of track.
+| label | String, required | | The label for the track, displayed to the user for selection.
+| src | String, required | | The URL of the source file.
+| srclang | String, required | | The language's code.
 | default | Boolean | false | The track to be selected by default. If D2L.MediaPlayer.Preferences.Track is defined in local storage, then it will take precedence over this attribute.
 | default-ignore-preferences | Boolean | false | Same as default, but if D2L.MediaPlayer.Preferences.Track is defined, it will be ignored and this track will be selected instead.
 
 ## Local Storage
 
-The media player uses local storage to persist the user's playback speed and track selections.
+The media player uses local storage to persist the user's playback speed, track selections, and volume.
 
 **Items**
 
@@ -236,6 +232,7 @@ The media player uses local storage to persist the user's playback speed and tra
 | -- | -- |
 | D2L.MediaPlayer.Preferences.Speed | Playback speed that was last selected.
 | D2L.MediaPlayer.Preferences.Track | Identifier for the kind and language of the track that was last selected.
+| D2L.MediaPlayer.Preferences.Volume | Volume that was last selected.
 
 ## Accessibility
 

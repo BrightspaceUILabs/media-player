@@ -44,6 +44,7 @@ module.exports = config => {
 			sauceLabs: {
 				testName: 'Unit Tests'
 			},
+			browserDisconnectTimeout: 50000,
 			customLaunchers: customLaunchers,
 			browsers: Object.keys(customLaunchers),
 			reporters: ['dots', 'saucelabs'],
