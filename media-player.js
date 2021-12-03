@@ -535,7 +535,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._muted = false;
 		this._playing = false;
 		this._recentlyShowedCustomControls = false;
-		this._recentlyToggledFullscreen = false;
 		this._searchInputFocused = false;
 		this._searchInstances = {};
 		this._searchResults = [];
@@ -632,14 +631,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
-
-				if (height === this._twoHeightsAgo && width === this._twoWidthsAgo && !this._recentlyToggledFullscreen) {
+				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
+				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
+				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
+				const flickerThreshold = 10;
+				if ((height === this._twoHeightsAgo && width === this._twoWidthsAgo)
+					&& Math.abs(this._lastHeight - height) < flickerThreshold
+				) {
 					this._heightPixels = Math.floor(Math.max(height, this._lastHeight));
 				} else {
 					this._heightPixels = null;
 				}
-
-				this._recentlyToggledFullscreen = false;
 
 				this._twoHeightsAgo = this._lastHeight;
 				this._lastHeight = height;
@@ -664,7 +666,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
 		const mediaContainerStyle = {
-			cursor: !this._hidingCustomControls() || 'none',
+			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
@@ -1113,7 +1115,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// updating the chapter times based on the cuts, loops over all chapters per cut because it can change multiple chapters
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
-			if (!cut.in || cut.in === cut.out) continue;
 			const cutIn = cut.in - cutDiff;
 
 			const newChapters = new Map(); // using map to preserve sort ordering
@@ -1885,8 +1886,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (!FULLSCREEN_ENABLED) return;
 
 		if (this.mediaType !== SOURCE_TYPES.video) return;
-
-		this._recentlyToggledFullscreen = true;
 
 		if (fullscreenApi.isFullscreen) {
 			fullscreenApi.exit();
