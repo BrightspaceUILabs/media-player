@@ -1115,7 +1115,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// updating the chapter times based on the cuts, loops over all chapters per cut because it can change multiple chapters
 		let cutDiff = 0;
 		for (const cut of data.cuts) {
-			if (!cut.in || cut.in === cut.out) continue;
 			const cutIn = cut.in - cutDiff;
 
 			const newChapters = new Map(); // using map to preserve sort ordering
