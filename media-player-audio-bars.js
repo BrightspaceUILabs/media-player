@@ -269,7 +269,6 @@ class MediaPlayerAudioBars extends LitElement {
 	static _weightedAverage(a, b, weightOfB) {
 		return a + (b - a) * weightOfB;
 	}
-
 }
 
 customElements.define('d2l-labs-media-player-audio-bars', MediaPlayerAudioBars);
