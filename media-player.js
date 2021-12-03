@@ -666,7 +666,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
 		const mediaContainerStyle = {
-			cursor: !this._hidingCustomControls() || 'none',
+			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
