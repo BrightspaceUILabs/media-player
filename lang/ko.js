@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "캡션",
+	"quality": "품질",
 	"closedCaptionsAcronym": "참조",
 	"default": "기본값",
 	"download": "다운로드",
@@ -15,6 +16,8 @@ export default {
 	"play": "재생",
 	"playbackSpeed": "재생 속도",
 	"retry": "재시도",
+	"showSearchInput": "검색 입력 표시",
+	"searchPlaceholder": "검색...",
 	"seekSlider": "검색 슬라이더",
 	"settings": "settings",
 	"speed": "속도",

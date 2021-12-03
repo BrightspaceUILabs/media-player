@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "キャプション",
+	"quality": "品質",
 	"closedCaptionsAcronym": "CC",
 	"default": "デフォルト",
 	"download": "ダウンロード",
@@ -15,6 +16,8 @@ export default {
 	"play": "再生",
 	"playbackSpeed": "再生速度",
 	"retry": "再試行",
+	"showSearchInput": "検索入力の表示",
+	"searchPlaceholder": "検索...",
 	"seekSlider": "シークバー",
 	"settings": "settings",
 	"speed": "速度",

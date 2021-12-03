@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "字幕",
+	"quality": "品質",
 	"closedCaptionsAcronym": "副本",
 	"default": "預設",
 	"download": "下載",
@@ -15,6 +16,8 @@ export default {
 	"play": "播放",
 	"playbackSpeed": "播放速度",
 	"retry": "重試",
+	"showSearchInput": "顯示搜尋輸入",
+	"searchPlaceholder": "搜尋...",
 	"seekSlider": "搜尋滑桿",
 	"settings": "settings",
 	"speed": "速度",

@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "التسميات التوضيحية",
+	"quality": "الجودة",
 	"closedCaptionsAcronym": "التسميات التوضيحية المغلقة",
 	"default": "افتراضية",
 	"download": "تنزيل",
@@ -15,6 +16,8 @@ export default {
 	"play": "تشغيل",
 	"playbackSpeed": "سرعة التشغيل",
 	"retry": "إعادة المحاولة",
+	"showSearchInput": "إظهار إدخال البحث",
+	"searchPlaceholder": "البحث...",
 	"seekSlider": "شريط تمرير التقديم/الترجيع",
 	"settings": "settings",
 	"speed": "السرعة",

@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Altyazı",
+	"quality": "Kalite",
 	"closedCaptionsAcronym": "Bilgi",
 	"default": "Varsayılan",
 	"download": "İndir",
@@ -15,6 +16,8 @@ export default {
 	"play": "Oynat",
 	"playbackSpeed": "Oynatma hızı",
 	"retry": "Tekrar Dene",
+	"showSearchInput": "Arama girdisini göster",
+	"searchPlaceholder": "Ara...",
 	"seekSlider": "arama kaydırıcısı",
 	"settings": "settings",
 	"speed": "hız",
