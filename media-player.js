@@ -97,7 +97,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_selectedSpeed: { type: String, attribute: false },
 			_selectedTrackIdentifier: { type: String, attribute: false },
 			_sources: { type: Object, attribute: false },
-			_thumbnailsImage: { type: Image, attribute: false },
+			_thumbnailsImage: { type: Object, attribute: false },
 			_timelinePreviewOffset: { type: Number, attribute: false },
 			_trackFontSizeRem: { type: Number, attribute: false },
 			_trackText: { type: String, attribute: false },

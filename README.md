@@ -248,7 +248,7 @@ After cloning the repo, run `npm install` to install dependencies.
 
 ### Running the demos
 
-To start an [es-dev-server](https://open-wc.org/developing/es-dev-server.html) that hosts the demo page and tests:
+To start a [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/) that hosts the demo page and tests:
 
 ```shell
 npm start
@@ -270,17 +270,13 @@ npm run lint:lit
 ### Testing
 
 ```shell
-# lint, unit test and visual-diff test
+# lint & run headless unit tests
 npm test
-
-# lint only
-npm run lint
 
 # unit tests only
 npm run test:headless
 
 # debug or run a subset of local unit tests
-# then navigate to `http://localhost:9876/debug.html`
 npm run test:headless:watch
 ```
 
@@ -288,27 +284,32 @@ npm run test:headless:watch
 
 This repo uses the [@brightspace-ui/visual-diff utility](https://github.com/BrightspaceUI/visual-diff/) to compare current snapshots against a set of golden snapshots stored in source control.
 
-The golden snapshots in source control must be updated by Github Actions.  If your PR's code changes result in visual differences, a PR with the new goldens will be automatically opened for you against your branch.
+The golden snapshots in source control must be updated by the [visual-diff GitHub Action](https://github.com/BrightspaceUI/actions/tree/main/visual-diff).  If a pull request results in visual differences, a draft pull request with the new goldens will automatically be opened against its branch.
 
-If you'd like to run the tests locally to help troubleshoot or develop new tests, you can use these commands:
+To run the tests locally to help troubleshoot or develop new tests, first install these dependencies:
 
 ```shell
-# Install dependencies locally
-npm i mocha -g
-npm i @brightspace-ui/visual-diff puppeteer --no-save
+npm install @brightspace-ui/visual-diff@X mocha@Y puppeteer@Z  --no-save
+```
+
+Replace `X`, `Y` and `Z` with [the current versions](https://github.com/BrightspaceUI/actions/tree/main/visual-diff#current-dependency-versions) the action is using.
+
+Then run the tests:
+
+```shell
 # run visual-diff tests
-mocha './test/**/*.visual-diff.js' -t 10000
+npx mocha './test/**/*.visual-diff.js' -t 10000
 # subset of visual-diff tests:
-mocha './test/**/*.visual-diff.js' -t 10000 -g some-pattern
+npx mocha './test/**/*.visual-diff.js' -t 10000 -g some-pattern
 # update visual-diff goldens
-mocha './test/**/*.visual-diff.js' -t 10000 --golden
+npx mocha './test/**/*.visual-diff.js' -t 10000 --golden
 ```
 
 ## Versioning & Releasing
 
-> TL;DR: Commits prefixed with `fix:` and `feat:` will trigger patch and minor releases when merged to `master`. Read on for more details...
+> TL;DR: Commits prefixed with `fix:` and `feat:` will trigger patch and minor releases when merged to `main`. Read on for more details...
 
-The [sematic-release GitHub Action](https://github.com/BrightspaceUI/actions/tree/master/semantic-release) is called from the `release.yml` GitHub Action workflow to handle version changes and releasing.
+The [semantic-release GitHub Action](https://github.com/BrightspaceUI/actions/tree/main/semantic-release) is called from the `release.yml` GitHub Action workflow to handle version changes and releasing.
 
 ### Version Changes
 
