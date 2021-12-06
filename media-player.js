@@ -95,7 +95,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_searchResults: { type: Array, attribute: false },
 			_selectedQuality: { type: String, attribute: false },
 			_selectedSpeed: { type: String, attribute: false },
-			_selectedTrackIdentifier: { type: String, attribute: false },
+			_selectedTrackIdentifier: { type: Object, attribute: false },
 			_sources: { type: Object, attribute: false },
 			_thumbnailsImage: { type: Object, attribute: false },
 			_timelinePreviewOffset: { type: Number, attribute: false },
@@ -1017,7 +1017,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getKindFromTrackIdentifier(trackIdentifier) {
-		return !trackIdentifier ? null : JSON.parse(trackIdentifier).kind;
+		return !trackIdentifier ? null : trackIdentifier.kind;
 	}
 
 	_getLoadingSpinnerView() {
@@ -1156,8 +1156,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
 	}
 
-	_getPreference(preferenceKey, defaultValue) {
-		return localStorage.getItem(preferenceKey) ? localStorage.getItem(preferenceKey) : defaultValue;
+	_getPreference(preferenceKey) {
+		return localStorage.getItem(preferenceKey);
 	}
 
 	_getQualityFromNode(node) {
@@ -1206,7 +1206,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
-		return !trackIdentifier ? null : JSON.parse(trackIdentifier).srclang;
+		return !trackIdentifier ? null : trackIdentifier.srclang;
 	}
 
 	_getTheme() {
@@ -1277,6 +1277,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getTracksMenuView() {
+		const isTrackSelected = (track) => (
+			track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) &&
+			track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
+		);
+
 		return this._tracks.length > 0 ? html`
 			<d2l-menu-item text="${this.localize('captions')}">
 				<div slot="supporting">${this._selectedTrackLabel}</div>
@@ -1284,7 +1289,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>
 					${this._tracks.map(track => html`
 						<d2l-menu-item-radio
-							?selected="${this._getTrackIdentifier(track.srclang, track.kind) === this._selectedTrackIdentifier}"
+							?selected="${isTrackSelected(track)}"
 							text="${`${track.label}${track.kind === TRACK_KINDS.captions ? ` (${this.localize('closedCaptionsAcronym')})` : ''}`}"
 							value="${this._getTrackIdentifier(track.srclang, track.kind)}"
 						></d2l-menu-item-radio>
@@ -1429,14 +1434,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._maintainHeight = null;
 		this._loading = false;
 
-		const speed = this._getPreference(PREFERENCES_SPEED_KEY, DEFAULT_SPEED);
+		const speed = this._getPreference(PREFERENCES_SPEED_KEY) || DEFAULT_SPEED;
 		this._onPlaybackSpeedsMenuItemChange({
 			target: {
 				value: speed
 			}
 		});
 
-		const volume = this._getPreference(PREFERENCES_VOLUME_KEY, DEFAULT_VOLUME);
+		const volume = this._getPreference(PREFERENCES_VOLUME_KEY) || DEFAULT_VOLUME;
 		this.volume = volume;
 
 		this.dispatchEvent(new CustomEvent('loadedmetadata'));
@@ -1616,11 +1621,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			const defaultIgnorePreferences = node.attributes['default-ignore-preferences'];
 			if (node.default || defaultIgnorePreferences) {
 				// Stringified to be parsed in initializeTracks
-				defaultTrack = JSON.stringify({
+				defaultTrack = {
 					srclang: node.srclang,
 					kind: node.kind,
 					ignorePreferences: !!defaultIgnorePreferences,
-				});
+				};
 			}
 		}
 
@@ -1685,7 +1690,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			if (defaultTrack && defaultTrack.ignorePreferences) {
 				this._selectedTrackIdentifier = defaultTrack;
 			} else {
-				this._selectedTrackIdentifier = this._getPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, defaultTrack);
+				const trackPreference = this._getPreference(PREFERENCES_TRACK_IDENTIFIER_KEY);
+				this._selectedTrackIdentifier = trackPreference ? JSON.parse(trackPreference) : defaultTrack;
 			}
 
 			for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1727,6 +1733,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 		if (this._selectedTrackIdentifier) {
 			this._setPreference(PREFERENCES_TRACK_IDENTIFIER_KEY, this._selectedTrackIdentifier);
+			this._selectedTrackIdentifier = JSON.parse(this._selectedTrackIdentifier);
 		} else {
 			this._clearPreference(PREFERENCES_TRACK_IDENTIFIER_KEY);
 		}
