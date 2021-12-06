@@ -548,6 +548,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._videoClicked = false;
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
+		this._playRequested = false;
 	}
 
 	get currentTime() {
@@ -1377,6 +1378,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onEnded() {
+		this._playRequested = false;
 		this.dispatchEvent(new CustomEvent('ended'));
 	}
 
@@ -1807,7 +1809,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			this._maintainHeight = this._media.clientHeight;
 
 			this._stateBeforeLoad = {
-				paused: !this._pausedForSeekDrag && this.paused,
+				paused: !this._pausedForSeekDrag && this.paused && !this._playRequested,
 				autoplay: this._media.autoplay,
 				currentTime: this.currentTime
 			};
@@ -1907,8 +1909,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_togglePlay() {
 		if (this._media.paused) {
+			this._playRequested = true;
 			this._media.play();
 		} else {
+			this._playRequested = false;
 			this._media.pause();
 		}
 	}
