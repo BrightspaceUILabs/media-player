@@ -1529,7 +1529,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		const srclang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 		const searcher = this._searchInstances[srclang];
 		this._searchResults = searcher.search(this._searchInput.value)
-			.map(result => result.item.startTime || result.item.start);
+			.map(result => (isNaN(result.item.startTime) ? result.item.start : result.item.startTime));
 	}
 
 	_onSearchInputFocus() {
