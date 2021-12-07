@@ -912,6 +912,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		localStorage.removeItem(preferenceKey);
 	}
 
+	_disableNativeCaptions() {
+		for (let i = 0; i < this._media.textTracks.length; i++) {
+			const textTrack = this._media.textTracks[i];
+
+			if (this._selectedTrackIdentifier && textTrack.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && textTrack.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) {
+				textTrack.mode = 'hidden';
+			} else {
+				textTrack.mode = 'disabled';
+			}
+		}
+	}
+
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -1420,6 +1432,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_onLoadedData() {
+		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
 
@@ -1698,18 +1711,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				this._selectedTrackIdentifier = trackPreference ? JSON.parse(trackPreference) : defaultTrack;
 			}
 
-			for (let i = 0; i < this._media.textTracks.length; i++) {
-				const textTrack = this._media.textTracks[i];
-
-				if (this._selectedTrackIdentifier &&
-					textTrack.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) &&
-					textTrack.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
-				) {
-					textTrack.mode = 'hidden';
-				} else {
-					textTrack.mode = 'disabled';
-				}
-			}
+			this._disableNativeCaptions();
 		}).bind(this);
 
 		initializeTracks();
