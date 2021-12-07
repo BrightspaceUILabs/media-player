@@ -898,7 +898,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		for (let i = 0; i < this._tracks.length; i++) {
 			const track = this._tracks[i];
 
-			if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) return track.label;
+			if (track.srclang === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) &&
+				track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
+			) {
+				return track.label;
+			}
 		}
 
 		return this.localize('off');
@@ -1697,7 +1701,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			for (let i = 0; i < this._media.textTracks.length; i++) {
 				const textTrack = this._media.textTracks[i];
 
-				if (this._selectedTrackIdentifier && textTrack.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && textTrack.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) {
+				if (this._selectedTrackIdentifier &&
+					textTrack.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) &&
+					textTrack.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
+				) {
 					textTrack.mode = 'hidden';
 				} else {
 					textTrack.mode = 'disabled';
@@ -1741,7 +1748,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			const track = this._media.textTracks[i];
 
-			if (track.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) && track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)) {
+			if (track.language === this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier) &&
+				track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
+			) {
 				this._media.textTracks[i].mode = 'hidden';
 			} else {
 				this._media.textTracks[i].mode = 'disabled';
