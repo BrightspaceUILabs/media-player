@@ -72,6 +72,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			allowDownload: { type: Boolean, attribute: 'allow-download', reflect: true },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
+			hideCaptionsSelection: { type: Boolean, attribute: 'hide-captions-selection' },
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
 			locale: { type: String },
 			loop: { type: Boolean },
@@ -1298,7 +1299,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			track.kind === this._getKindFromTrackIdentifier(this._selectedTrackIdentifier)
 		);
 
-		return this._tracks.length > 0 ? html`
+		return this._tracks.length > 0 && !this.hideCaptionsSelection ? html`
 			<d2l-menu-item text="${this.localize('captions')}">
 				<div slot="supporting">${this._selectedTrackLabel}</div>
 				<d2l-menu @d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
