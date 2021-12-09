@@ -836,7 +836,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
-			this._reloadSource(!changedProperties['src']);
+			this._reloadSource();
 		}
 
 		if (changedProperties.has('locale')) {
@@ -1815,25 +1815,26 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sources[quality] = node.src;
 	}
 
-	_reloadSource(initialLoad = false) {
-		if (!initialLoad) {
-			this._loading = true;
-		}
-
+	_reloadSource() {
 		if (this._media) {
-			this._media.getElementsByTagName('source')[0].setAttribute('src', this._getCurrentSource());
 
-			// Maintain the height while loading the new source to prevent
-			// the video object from resizing temporarily
-			this._maintainHeight = this._media.clientHeight;
+			const oldSourceNode = this._media.getElementsByTagName('source')[0];
+			const updatedSource = this._getCurrentSource();
+			if (oldSourceNode.getAttribute('src') !== updatedSource) {
+				this._loading = true;
 
-			this._stateBeforeLoad = {
-				paused: !this._pausedForSeekDrag && this.paused && !this._playRequested,
-				autoplay: this._media.autoplay,
-				currentTime: this.currentTime
-			};
+				oldSourceNode.setAttribute('src', updatedSource);
 
-			if (!initialLoad) {
+				// Maintain the height while loading the new source to prevent
+				// the video object from resizing temporarily
+				this._maintainHeight = this._media.clientHeight;
+
+				this._stateBeforeLoad = {
+					paused: !this._pausedForSeekDrag && this.paused && !this._playRequested,
+					autoplay: this._media.autoplay,
+					currentTime: this.currentTime
+				};
+
 				this.pause();
 				this.load();
 			}
