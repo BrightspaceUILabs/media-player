@@ -1890,7 +1890,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._trackText = null;
 		const selectedTextTrack = this._getSelectedTextTrack();
 
-		if (!selectedTextTrack) return;
+		if (!selectedTextTrack || !selectedTextTrack.cues) return;
 
 		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
 			const cue = selectedTextTrack.cues[i];
