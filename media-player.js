@@ -1849,7 +1849,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._recentlyShowedCustomControls = true;
 		clearTimeout(this._showControlsTimeout);
 
-		if (temporarily && !this._searchInput.value) {
+		if (temporarily && !(this._searchInput && this._searchInput.value)) {
 			this._showControlsTimeout = setTimeout(() => {
 				this._recentlyShowedCustomControls = false;
 			}, HIDE_DELAY_MS);
