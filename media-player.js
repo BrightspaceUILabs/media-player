@@ -836,7 +836,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
-			this._reloadSource();
+			this._reloadSource({ forceReload: changedProperties.src !== undefined });
 		}
 
 		if (changedProperties.has('locale')) {
@@ -1815,12 +1815,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sources[quality] = node.src;
 	}
 
-	_reloadSource() {
+	_reloadSource({ forceReload = false } = {}) {
 		if (this._media) {
-
 			const oldSourceNode = this._media.getElementsByTagName('source')[0];
 			const updatedSource = this._getCurrentSource();
-			if (oldSourceNode.getAttribute('src') !== updatedSource) {
+			if (forceReload || oldSourceNode.getAttribute('src') !== updatedSource) {
 				this._loading = true;
 
 				oldSourceNode.setAttribute('src', updatedSource);
