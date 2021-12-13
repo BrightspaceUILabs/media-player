@@ -836,7 +836,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
-			this._reloadSource({ forceReload: changedProperties.src !== undefined });
+			this._reloadSource({ forceReload: changedProperties.get('src') !== undefined });
 		}
 
 		if (changedProperties.has('locale')) {
