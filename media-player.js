@@ -1800,10 +1800,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_onVolumeChange() {
 		this._volume = this.volume;
-
-		if (this._volume > 0) {
-			this._muted = false;
-		}
+		this._muted = this._volume === 0;
 	}
 
 	_parseSourceNode(node, index) {
@@ -1941,7 +1938,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_toggleMute() {
 		if (this._muted) {
-			this.volume = this.preMuteVolume;
+			this.volume = this.preMuteVolume || 1;
 		} else {
 			this.preMuteVolume = this.volume;
 			this.volume = 0;
