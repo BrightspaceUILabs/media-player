@@ -558,7 +558,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
-		this._timeBeforeSourceSwap = null;
 	}
 
 	get currentTime() {
