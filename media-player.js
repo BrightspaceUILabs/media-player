@@ -1849,11 +1849,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				// the video object from resizing temporarily
 				this._maintainHeight = this._media.clientHeight;
 
-				this._stateBeforeLoad = {
-					paused: !this._pausedForSeekDrag && this.paused && !this._playRequested,
-					autoplay: this._media.autoplay,
-					currentTime: this.currentTime
-				};
+				if (!this._stateBeforeLoad) {
+					this._stateBeforeLoad = {
+						paused: !this._pausedForSeekDrag && this.paused && !this._playRequested,
+						autoplay: this._media.autoplay,
+						currentTime: this.currentTime
+					};
+				}
 
 				this.pause();
 				this.load();
