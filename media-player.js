@@ -65,6 +65,14 @@ const DEFAULT_PREVIEW_WIDTH = 160;
 const DEFAULT_PREVIEW_HEIGHT = 90;
 const DEFAULT_LOCALE = 'en';
 
+const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
+const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
+const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
+const parseUrlExpiry = url => {
+	const urlObj = new URL(url);
+	return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
+};
+
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
 
 	static get properties() {
@@ -836,7 +844,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		super.updated(changedProperties);
 
 		if (changedProperties.has('src') || changedProperties.has('mediaType')) {
-			this._reloadSource({ forceReload: changedProperties.get('src') !== undefined });
+			this._reloadSource();
 		}
 
 		if (changedProperties.has('locale')) {
@@ -1059,7 +1067,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						?loop="${this.loop}"
 						crossorigin="${ifDefined(this.crossorigin)}"
 						poster="${ifDefined(this.poster)}"
-						preload="${this.poster ? 'none' : 'auto'}"
+						preload="${this.poster ? 'metadata' : 'auto'}"
 						@click=${this._onVideoClick}
 						@contextmenu=${this._onContextMenu}
 						@durationchange=${this._onDurationChange}
@@ -1073,7 +1081,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
-						<source src="${this._getCurrentSource()}" @error=${this._onError}>
+						<source @error=${this._onError}>
 					</video>
 				`;
 			case SOURCE_TYPES.audio:
@@ -1096,7 +1104,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						@timeupdate=${this._onTimeUpdate}
 						@volumechange=${this._onVolumeChange}
 					>
-						<source src="${this.src || this._sources[this._selectedQuality]}" @error=${this._onError}></source>
+						<source @error=${this._onError}></source>
 					</audio>
 
 					<div id="d2l-labs-media-player-audio-bars-container">
@@ -1582,6 +1590,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				observer.observe(node, { attributes: true });
 			});
 			this._updateSources(sourceNodes);
+			this._reloadSource();
 		}
 
 		for (let i = 0; i < nodes.length; i++) {
@@ -1812,14 +1821,29 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._sources[quality] = node.src;
 	}
 
-	_reloadSource({ forceReload = false } = {}) {
+	_reloadSource() {
 		if (this._media) {
 			const oldSourceNode = this._media.getElementsByTagName('source')[0];
 			const updatedSource = this._getCurrentSource();
-			if (forceReload || oldSourceNode.getAttribute('src') !== updatedSource) {
+			if (oldSourceNode.getAttribute('src') !== updatedSource) {
 				this._loading = true;
 
 				oldSourceNode.setAttribute('src', updatedSource);
+
+				// Note: Safari doesn't emit an error if a URL expires during playback. To work
+				// around this, we manually fire an error slightly before the URL is expected
+				// to expire. Note that this only currently works with URLs that include the
+				// "Expires" query parameter (e.g. CloudFront signed URLs). It's also not a
+				// good long-term solution since it depends on a somewhat accurate client
+				// system time.
+				if (isSafari()) {
+					const expires = parseUrlExpiry(updatedSource);
+					if (expires) {
+						const timeToExpiry = (expires * 1000) - Date.now() - SAFARI_EXPIRY_EARLY_SWAP_SECONDS;
+						const timeoutPeriod = Math.max(timeToExpiry, SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS);
+						setTimeout(() => this._onError(), timeoutPeriod);
+					}
+				}
 
 				// Maintain the height while loading the new source to prevent
 				// the video object from resizing temporarily
