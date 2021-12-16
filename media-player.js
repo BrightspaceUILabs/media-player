@@ -1067,7 +1067,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 						?loop="${this.loop}"
 						crossorigin="${ifDefined(this.crossorigin)}"
 						poster="${ifDefined(this.poster)}"
-						preload="${this.poster ? 'none' : 'auto'}"
+						preload="${this.poster ? 'metadata' : 'auto'}"
 						@click=${this._onVideoClick}
 						@contextmenu=${this._onContextMenu}
 						@durationchange=${this._onDurationChange}
