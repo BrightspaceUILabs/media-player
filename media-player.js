@@ -1803,7 +1803,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._muted = this._volume === 0;
 	}
 
-	_parseSourceNode(node, index) {
+	_parseSourceNode(node) {
 		const quality = this._getQualityFromNode(node);
 		if (!quality) {
 			console.warn("d2l-labs-media-player component requires 'label' text on source");
@@ -1814,11 +1814,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			return;
 		}
 
-		if ((index !== undefined && index === 0) || node.hasAttribute('default')) {
-			this._selectedQuality = quality;
-		}
-
 		this._sources[quality] = node.src;
+		return quality;
 	}
 
 	_reloadSource() {
@@ -1971,7 +1968,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		this._selectedQuality = null;
 		nodes.forEach((node, index) => {
 			if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'SOURCE') {
-				this._parseSourceNode(node, index);
+				const quality = this._parseSourceNode(node);
+				if (quality && ((index === 0) || node.hasAttribute('default'))) {
+					this._selectedQuality = quality;
+				}
 			}
 		});
 	}
