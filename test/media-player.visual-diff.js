@@ -29,6 +29,7 @@ describe('d2l-labs-media-player', () => {
 
 	[
 		'video',
+		'video-with-poster',
 		'audio',
 	].forEach((id) => {
 		it(id, async function() {

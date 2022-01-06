@@ -16,7 +16,7 @@
 
 			<h5>Single quality source</h5>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player src="sample-video-360p.mp4" thumbnails="th90w160i1-samplevideo.png" id="single-quality" media-type="video">
+				<d2l-labs-media-player src="sample-video-360p.mp4" thumbnails="th90w160i1-samplevideo.png" id="single-quality" media-type="video" poster="sample-poster.png">
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
@@ -40,7 +40,7 @@
 
 			<h5>Multiple qualities</h5>
 			<d2l-demo-snippet>
-				<d2l-labs-media-player thumbnails="th90w160i1-samplevideo.png" id="multiple-quality" media-type="video" metadata='{"chapters":[{"time":0,"title":{"en":"Chapter One","fr":"Chapitre Un","fr-ca":"Chapitre : Un"}},{"time":3,"title":{"en":"Chapter Two","fr":"Chapitre Deux","fr-ca":"Chapitre : Deux"}}]}'>
+				<d2l-labs-media-player thumbnails="th90w160i1-samplevideo.png" id="multiple-quality" media-type="video" metadata='{"chapters":[{"time":0,"title":{"en":"Chapter One","fr":"Chapitre Un","fr-ca":"Chapitre : Un"}},{"time":3,"title":{"en":"Chapter Two","fr":"Chapitre Deux","fr-ca":"Chapitre : Deux"}}]}' poster="sample-poster.png">
 					<source src="sample-video-144p.mp4" label="SD">
 					<source src="sample-video-360p.mp4" label="HD" default>
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
