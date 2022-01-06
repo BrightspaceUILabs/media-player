@@ -100,6 +100,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
+			_posterVisible: { type: Boolean, attribute: false },
 			_recentlyShowedCustomControls: { type: Boolean, attribute: false },
 			_searchResults: { type: Array, attribute: false },
 			_selectedQuality: { type: String, attribute: false },
@@ -155,11 +156,34 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				width: 100%;
 			}
 
+			#d2l-labs-media-player-video-poster {
+				cursor: pointer;
+				height: auto;
+				position: absolute;
+				width: 100%;
+				z-index: 1;
+			}
+
+			#d2l-labs-media-player-video-poster-play-button {
+				background-color: rgba(0, 0, 0, 0.69);
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+				padding: 2em;
+				position: absolute;
+				z-index: 3;
+			}
+
+			#d2l-labs-media-player-video-poster-play-button > d2l-icon {
+				color: #ffffff;
+			}
+
 			#d2l-labs-media-player-media-controls {
 				bottom: 0;
 				position: absolute;
 				transition: bottom 500ms ease;
 				width: 100%;
+				z-index: 2;
 			}
 
 			.d2l-labs-media-player-type-is-audio #d2l-labs-media-player-media-controls {
@@ -543,6 +567,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		};
 		this._muted = false;
 		this._playing = false;
+		this._posterVisible = true;
 		this._recentlyShowedCustomControls = false;
 		this._searchInputFocused = false;
 		this._searchInstances = {};
@@ -1060,13 +1085,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		switch (this.mediaType) {
 			case SOURCE_TYPES.video: // eslint-disable-line no-fallthrough
 				return html`
+					${this._getPosterView()}
 					<video
 						id="d2l-labs-media-player-video"
 						?controls="${IS_IOS}"
 						?autoplay="${this.autoplay}"
 						?loop="${this.loop}"
 						crossorigin="${ifDefined(this.crossorigin)}"
-						poster="${ifDefined(this.poster)}"
 						preload="${this.poster ? 'metadata' : 'auto'}"
 						@click=${this._onVideoClick}
 						@contextmenu=${this._onContextMenu}
@@ -1179,6 +1204,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_getPercentageTime(time) {
 		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+	}
+
+	_getPosterView() {
+		if (!this.poster || this.autoplay || !this._posterVisible) return;
+
+		const playIcon = !this._loading ? html`
+			<button id="d2l-labs-media-player-video-poster-play-button" @click=${this._onVideoClick}>
+				<d2l-icon icon="tier1:play" theme="${ifDefined(this._getTheme())}"></d2l-icon>
+			</button>
+		` : null;
+
+		return html`
+			${playIcon}
+			<img
+				id="d2l-labs-media-player-video-poster"
+				src="${ifDefined(this.poster)}"
+				@click=${this._onVideoClick}
+			/>
+		`;
 	}
 
 	_getPreference(preferenceKey) {
@@ -1775,6 +1819,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 		// Given that we are currently not rendering custom controls on the iOS video player,
 		//  we let the native controls/player handle the play/pause toggling
 		if (IS_IOS) {
+			if (this._posterVisible) this._togglePlay();
 			return;
 		}
 
@@ -1947,6 +1992,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_togglePlay() {
+		this._posterVisible = false;
 		if (this._media.paused) {
 			this._playRequested = true;
 			this._media.play();
