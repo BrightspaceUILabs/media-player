@@ -171,7 +171,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				cursor: pointer;
 				padding: 2em;
 				position: absolute;
-				z-index: 3;
+				z-index: 2;
 			}
 
 			#d2l-labs-media-player-video-poster-play-button > d2l-icon {
