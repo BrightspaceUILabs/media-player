@@ -1,9 +1,10 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Légendes",
+	"quality": "Quality",
 	"closedCaptionsAcronym": "CC",
 	"default": "Par défaut",
-	"download": "Télécharger",
+	"download": "Download",
 	"exitFullscreen": "Quitter le mode plein écran",
 	"fullscreen": "Plein écran",
 	"loadErrorMessage": "Oups, il y a eu un problème lors du chargement de ce fichier multimédia",
@@ -15,6 +16,8 @@ export default {
 	"play": "Lire",
 	"playbackSpeed": "Vitesse de lecture",
 	"retry": "Réessayer",
+	"showSearchInput": "Show search input",
+	"searchPlaceholder": "Search...",
 	"seekSlider": "Curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
