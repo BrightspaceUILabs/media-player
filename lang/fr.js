@@ -11,7 +11,7 @@ export default {
 	"loadSuccessMessage": "Chargement du contenu multimédia réussi",
 	"menu": "menu",
 	"mute": "Silence",
-	"off": "Désactivé",
+	"off": "Hors fonction",
 	"pause": "Pause",
 	"play": "Lire",
 	"playbackSpeed": "Vitesse de lecture",
@@ -21,7 +21,7 @@ export default {
 	"seekSlider": "Curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
-	"unableToDownload": "Impossible de télécharger. Veuillez rafraichir la page et réessayer.",
+	"unableToDownload": "Impossible de télécharger. Veuillez rafraîchir la page et réessayer.",
 	"unmute": "Annuler silence",
 	"volumeSlider": "Curseur du volume"
 };
