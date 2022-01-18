@@ -1,6 +1,6 @@
-import { css, html, LitElement } from 'lit-element/lit-element.js';
+import { css, html, LitElement } from 'lit-element';
 import ResizeObserver from 'resize-observer-polyfill';
-import { styleMap } from 'lit-html/directives/style-map';
+import { styleMap } from 'lit-html/directives/style-map.js';
 
 const AUDIO_BARS_GRADIENTS = [
 	{
