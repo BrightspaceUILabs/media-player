@@ -13,19 +13,19 @@ import '@brightspace-ui/core/components/offscreen/offscreen.js';
 import '@d2l/seek-bar/d2l-seek-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
-import { css, html, LitElement } from 'lit-element/lit-element.js';
-import { classMap } from 'lit-html/directives/class-map';
+import { css, html, LitElement } from 'lit-element';
+import { classMap } from 'lit-html/directives/class-map.js';
 import { debounce } from 'lodash-es';
 import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-visible-polyfill-mixin.js';
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
-import { ifDefined } from 'lit-html/directives/if-defined';
+import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
-import { styleMap } from 'lit-html/directives/style-map';
+import { styleMap } from 'lit-html/directives/style-map.js';
 
 const DEFAULT_SPEED = '1.0';
 const DEFAULT_VOLUME = '1.0';
@@ -591,20 +591,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	set currentTime(time) {
 		this._currentTime = time;
-		this._media.currentTime = time;
+		if (this._media) {
+			this._media.currentTime = time;
+		}
 		this._syncDisplayedTrackTextToSelectedTrack();
 	}
 
 	get volume() {
-		return this._media.volume;
+		return this._media ? this._media.volume : 0;
 	}
 
 	set volume(volume) {
-		this._media.volume = volume;
+		if (this._media) {
+			this._media.volume = volume;
+		}
 		this._setPreference(PREFERENCES_VOLUME_KEY, volume);
 	}
 
 	get activeCue() {
+		if (!this._media) return null;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
 				if (this._media &&
@@ -626,7 +631,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get ended() {
-		return this._media.ended;
+		return (this._media && this._media.ended);
 	}
 
 	get isIOSVideo() {
@@ -634,11 +639,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get paused() {
-		return this._media && this._media.paused;
+		return (this._media && this._media.paused);
 	}
 
 	get textTracks() {
-		return this._media.textTracks;
+		return this._media ? this._media.textTracks : null;
 	}
 
 	firstUpdated(changedProperties) {
@@ -892,19 +897,19 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	load() {
-		if (this._media.paused) {
+		if (this._media && this._media.paused) {
 			this._media.load();
 		}
 	}
 
 	pause() {
-		if (!this._media.paused) {
+		if (this._media && !this._media.paused) {
 			this._togglePlay();
 		}
 	}
 
 	play() {
-		if (this._media.paused) {
+		if (this._media && this._media.paused) {
 			this._togglePlay();
 		}
 	}
@@ -918,6 +923,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	get _media() {
+		if (!this.shadowRoot) return null;
 		switch (this.mediaType) {
 			case SOURCE_TYPES.audio:
 				return this.shadowRoot.getElementById('d2l-labs-media-player-audio');
@@ -947,6 +953,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_disableNativeCaptions() {
+		if (!this._media) return;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			const textTrack = this._media.textTracks[i];
 
@@ -1265,6 +1272,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_getSelectedTextTrack() {
+		if (!this._media) return null;
 		const selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].language === selectedTrackSrcLang) {
