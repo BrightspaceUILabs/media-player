@@ -89,6 +89,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
+			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences'},
 			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -1914,7 +1915,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 	}
 
 	_setPreference(preferenceKey, value) {
-		localStorage.setItem(preferenceKey, value);
+		if (!this.disableSetPreferences) {
+			localStorage.setItem(preferenceKey, value);
+		}
 	}
 
 	_showControls(temporarily) {
