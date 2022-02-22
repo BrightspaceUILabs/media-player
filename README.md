@@ -255,6 +255,12 @@ To start a [@web/dev-server](https://modern-web.dev/docs/dev-server/overview/) t
 npm start
 ```
 
+### Troubleshooting Common Issues
+
+- **Captions fail to load due to a "Protocols, domains, and ports must match" error**
+    - **Solution:** Set the Media Player's `crossorigin` property to the appropriate value (either "anonymous" or "use-credentials").
+    - **Explanation:** If your captions sources are on a different origin, CORS needs to be enabled on the `<video>`/`<audio>` element. Otherwise, the browser will block requests to that origin due to the security measures outlined in [the same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy). The Media Player passes its `crossorigin` property directly to the `<video>`/`<audio>` element's `crossorigin` attribute, which sets the CORS policy. (If the `crossorigin` attribute _isn't_ defined, CORS will not be used at all.)
+
 ### Linting
 
 ```shell
