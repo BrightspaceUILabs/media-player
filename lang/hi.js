@@ -1,0 +1,27 @@
+/* eslint quotes: 0 */
+export default {
+	"captions": "कैप्शन",
+	"quality": "गुणवत्ता",
+	"closedCaptionsAcronym": "प्रतिलिपि",
+	"default": "डिफ़ॉल्ट",
+	"download": "डाउनलोड करें",
+	"exitFullscreen": "फ़ुलस्क्रीन से बाहर निकलें",
+	"fullscreen": "पूर्ण स्क्रीन",
+	"loadErrorMessage": "ओह, इस मीडिया फ़ाइल को लोड करने में कोई समस्या हुई",
+	"loadSuccessMessage": "मीडिया सफलतापूर्वक लोड हो गया है",
+	"menu": "menu",
+	"mute": "म्यूट करें",
+	"off": "बंद",
+	"pause": "विराम दें",
+	"play": "चलाएँ",
+	"playbackSpeed": "प्लेबैक गति",
+	"retry": "फिर से प्रयास करें",
+	"showSearchInput": "खोज इनपुट दिखाएँ",
+	"searchPlaceholder": "खोजें...",
+	"seekSlider": "स्लाइडर खोजें",
+	"settings": "settings",
+	"speed": "गति",
+	"unableToDownload": "डाउनलोड नहीं हो सका। कृपया पेज को रीफ़्रेश करें और पुनः प्रयास करें।",
+	"unmute": "अनम्यूट करें",
+	"volumeSlider": "वॉल्यूम स्लाइडर"
+};
