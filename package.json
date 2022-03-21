@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@brightspace-ui/core": "^2",
-    "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^1",
+    "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^2",
     "fuse.js": "^6.4.6",
     "lit-element": "^3",
     "lit-html": "^2",
