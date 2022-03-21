@@ -30,7 +30,7 @@
     "@babel/core": "^7",
     "@babel/eslint-parser": "^7",
     "@brightspace-ui/stylelint-config": "^0.3",
-    "@open-wc/testing": "^2",
+    "@open-wc/testing": "^3",
     "@web/dev-server": "^0.1",
     "@web/test-runner": "^0.13",
     "@web/test-runner-saucelabs": "^0.6",
@@ -44,10 +44,11 @@
     "stylelint": "^14"
   },
   "dependencies": {
-    "@brightspace-ui/core": "^1",
-    "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^1",
+    "@brightspace-ui/core": "^2",
+    "@d2l/seek-bar": "github:Brightspace/d2l-seek-bar#semver:^2",
     "fuse.js": "^6.4.6",
-    "lit-element": "^2",
+    "lit-element": "^3",
+    "lit-html": "^2",
     "lodash-es": "^4.17.21",
     "parse-srt": "^1.0.0-alpha",
     "resize-observer-polyfill": "^1",
