@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Légendes",
+	"quality": "Qualité",
 	"closedCaptionsAcronym": "CC",
 	"default": "Par défaut",
 	"download": "Télécharger",
@@ -10,15 +11,17 @@ export default {
 	"loadSuccessMessage": "Chargement du contenu multimédia réussi",
 	"menu": "menu",
 	"mute": "Silence",
-	"off": "Désactivé",
+	"off": "Hors fonction",
 	"pause": "Pause",
 	"play": "Lire",
 	"playbackSpeed": "Vitesse de lecture",
 	"retry": "Réessayer",
+	"showSearchInput": "Afficher les critères de recherche",
+	"searchPlaceholder": "Recherche en cours…",
 	"seekSlider": "Curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
-	"unableToDownload": "Impossible de télécharger. Veuillez rafraichir la page et réessayer.",
+	"unableToDownload": "Impossible de télécharger. Veuillez rafraîchir la page et réessayer.",
 	"unmute": "Annuler silence",
 	"volumeSlider": "Curseur du volume"
 };
