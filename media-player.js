@@ -1458,6 +1458,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 
 	_onDurationChange(e) {
 		this._duration = e.target.duration;
+		this.dispatchEvent(new CustomEvent('durationchange'));
 	}
 
 	_onEnded() {

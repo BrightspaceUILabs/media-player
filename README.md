@@ -102,6 +102,7 @@ this.document.querySelector('d2l-labs-media-player').pause();
 | Event | Description |
 |--|--|
 | cuechange | Dispatched when the currently-displayed captions cue changes. |
+| durationchange | Dispatched when the video or media displayed has changed its duration |
 | ended | Dispatched when the media has reached the end of its duration. |
 | error | Dispatched when the media failed to load. |
 | loadeddata | Dispatched when the media at the current playback position has finished loading. Often the first frame. |
