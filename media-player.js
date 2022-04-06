@@ -20,7 +20,7 @@ import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-vis
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
-import { InternalLocalizeMixin } from './src/mixins/internal-localize-mixin.js';
+import { LocalizeDynamicMixin } from '@brightspace-ui/core/mixins/localize-dynamic-mixin.js'
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -73,7 +73,7 @@ const parseUrlExpiry = url => {
 	return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
 };
 
-class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMixin(LitElement))) {
+class MediaPlayer extends FocusVisiblePolyfillMixin(LocalizeDynamicMixin(RtlMixin(LitElement))) {
 
 	static get properties() {
 		return {
@@ -544,6 +544,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalLocalizeMixin(RtlMix
 				line-height: 2.1rem;
 			}
 		` ];
+	}
+
+	static get localizeConfig() {
+		return {
+			importFunc: async lang => {
+				const path = `./lang/${lang}.js`;
+				return (await import(path)).default;
+			}
+		};
 	}
 
 	constructor() {
