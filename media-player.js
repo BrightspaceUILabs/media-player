@@ -20,9 +20,8 @@ import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-vis
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
-import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
-import { LocalizeDynamicMixin } from '@brightspace-ui/core/mixins/localize-dynamic-mixin.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
+import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
