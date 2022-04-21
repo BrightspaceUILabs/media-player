@@ -675,7 +675,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
 				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
 				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
-				const flickerThreshold = 10;
+				const flickerThreshold = 20;
 				if ((height === this._twoHeightsAgo && width === this._twoWidthsAgo)
 					&& Math.abs(this._lastHeight - height) < flickerThreshold
 				) {
