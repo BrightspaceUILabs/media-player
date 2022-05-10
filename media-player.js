@@ -1408,7 +1408,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
 				if (this._media.textTracks[i].activeCues.length > 0) {
-					this._trackText = this._media.textTracks[i].activeCues[0].text.replace('<br />', '\n');
+					this._trackText = this._media.textTracks[i].activeCues[0].text.replace(/<br \/>/g, '\n');
 				} else this._trackText = null;
 
 				this.dispatchEvent(new CustomEvent('cuechange'));
