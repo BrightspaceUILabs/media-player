@@ -1408,7 +1408,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
 				if (this._media.textTracks[i].activeCues.length > 0) {
-					this._trackText = this._media.textTracks[i].activeCues[0].text.replace(/<br \/>/g, '\n');
+					this._trackText = this._sanitizeText(this._media.textTracks[i].activeCues[0].text);
 				} else this._trackText = null;
 
 				this.dispatchEvent(new CustomEvent('cuechange'));
@@ -1915,6 +1915,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 	}
 
+	_sanitizeText(text) {
+		return text.replace(/<br \/>/g, '\n');
+	}
+
 	_setPreference(preferenceKey, value) {
 		if (!this.disableSetPreferences) {
 			localStorage.setItem(preferenceKey, value);
@@ -1974,7 +1978,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				(cue.startTime <= this.currentTime) &&
 				(cue.endTime >= this.currentTime)
 			) {
-				this._trackText = cue.text;
+				this._trackText = this._sanitizeText(cue.text);
 				this.dispatchEvent(new CustomEvent('cuechange'));
 			}
 		}
