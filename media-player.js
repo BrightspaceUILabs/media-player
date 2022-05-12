@@ -1873,10 +1873,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return quality;
 	}
 
-	_sanitizeText(text) {
-		return text.replace(/<br \/>/g, '\n');
-	}
-
 	_reloadSource() {
 		if (this._media) {
 			const oldSourceNode = this._media.getElementsByTagName('source')[0];
@@ -1917,6 +1913,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this.load();
 			}
 		}
+	}
+
+	_sanitizeText(text) {
+		return text.replace(/<br \/>/g, '\n');
 	}
 
 	_setPreference(preferenceKey, value) {
