@@ -1888,7 +1888,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				// "Expires" query parameter (e.g. CloudFront signed URLs). It's also not a
 				// good long-term solution since it depends on a somewhat accurate client
 				// system time.
-				if (isSafari()) {
+				if (isSafari() && updatedSource !== undefined) {
 					const expires = parseUrlExpiry(updatedSource);
 					if (expires) {
 						const timeToExpiry = (expires * 1000) - Date.now() - SAFARI_EXPIRY_EARLY_SWAP_SECONDS;
