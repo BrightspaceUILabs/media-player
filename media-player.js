@@ -10,7 +10,7 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
-import '@d2l/seek-bar/d2l-seek-bar.js';
+import '@brightspace-ui-labs/seek-bar/d2l-seek-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
 import { css, html, LitElement } from 'lit-element';
