@@ -9,6 +9,16 @@
 		<title>media-player</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta charset="UTF-8">
+		<style>
+			.fixed-height {
+				height: 675px;
+			}
+
+			.full-span {
+				height: 100%;
+				width: 100%;
+			}
+		</style>
 	</head>
 	<body>
 		<d2l-demo-page page-title="d2l-media-player">
@@ -46,6 +56,37 @@
 					<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
 					<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
 				</d2l-labs-media-player>
+			</d2l-demo-snippet>
+
+			<h5>Mixed Video Layout</h5>
+			<d2l-demo-snippet>
+				<div>
+					<d2l-labs-media-player src="sample-mixed-video.mp4" id="mixed-video" media-type="video">
+						<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
+						<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
+					</d2l-labs-media-player>
+				</div>
+				<script>
+					const mixedVideoDemo = document.getElementById('mixed-video');
+					mixedVideoDemo.metadata = {
+						"cuts": [],
+						"chapters": [],
+						"layout": "VIDEO_AND_SCREEN",
+						"layoutPresets": { 
+							"frames":  [{
+								"bottom": 239,
+								"left": 0,
+								"right": 255,
+								"top": 48
+							}, {
+								"bottom": 287,
+								"left": 256,
+								"right": 767,
+								"top": 0
+							}]
+						}
+					}
+				</script>
 			</d2l-demo-snippet>
 
 			<h2>Audio Player</h2>

@@ -114,7 +114,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_trackText: { type: String, attribute: false },
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
-			_volume: { type: Number, attribute: false }
+			_volume: { type: Number, attribute: false },
+			_videoContainerStyle: { type: Object, attribute: false },
+			_videoStyle: { type: Object, attribute: false }
 		};
 	}
 
@@ -132,6 +134,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 			#d2l-labs-media-player-media-container {
 				align-items: center;
+				flex-direction: column;
 				justify-content: center;
 				overflow: hidden;
 				position: relative;
@@ -163,6 +166,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				position: absolute;
 				width: 100%;
 				z-index: 1;
+				bottom: 0px;
 			}
 
 			#d2l-labs-media-player-video-poster-play-button {
@@ -543,6 +547,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				font-size: 1rem;
 				line-height: 2.1rem;
 			}
+
+			.slider-container {
+				padding: 20px;
+			}
 		` ];
 	}
 
@@ -584,6 +592,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
+		this._videoStyle = {
+			width: '100%',
+			height: '100%',
+			top: '0%'
+		};
+		this._videoContainerStyle = {};
 	}
 
 	get currentTime() {
@@ -735,6 +749,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
+			<div class="slider-container">
+				<input type="range" min="-2" max="2" value="0" class="slider" @input=${this._sliderChange}>
+			</div>
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -869,6 +886,39 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			</div>`}
 		</div>
 		`;
+	}
+
+	calculateDefaultVideoHeight(videoWidth, videoHeight, playerWidth, playerHeight) {
+		var videoAr = videoWidth / videoHeight;
+		var newHeight = playerWidth / videoAr;
+
+		if (newHeight <= playerHeight) {
+			return newHeight;
+		}
+
+		return playerHeight;
+	}
+
+	_sliderChange(e) {
+		const zoomLevel = Number(e.target.value);
+		const zoom = Math.abs(zoomLevel) / 2;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+
+		this._videoStyle = {
+			width: scalePercentage + '%',
+			height: scalePercentage + '%',
+			top: -(zoomPercentage / 2) + '%',
+			left: zoomLevel > 0 ? `${pushRight}%` : '0px'
+		};
+
+		this._videoContainerStyle = {
+			
+		};
+		
+		console.log(this._videoStyle);
 	}
 
 	updated(changedProperties) {
@@ -1093,29 +1143,32 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		switch (this.mediaType) {
 			case SOURCE_TYPES.video: // eslint-disable-line no-fallthrough
 				return html`
-					${this._getPosterView()}
-					<video
-						id="d2l-labs-media-player-video"
-						?controls="${IS_IOS}"
-						?autoplay="${this.autoplay}"
-						?loop="${this.loop}"
-						crossorigin="${ifDefined(this.crossorigin)}"
-						preload="${this.poster ? 'metadata' : 'auto'}"
-						@click=${this._onVideoClick}
-						@contextmenu=${this._onContextMenu}
-						@durationchange=${this._onDurationChange}
-						@ended=${this._onEnded}
-						@error=${this._onError}
-						@loadeddata=${this._onLoadedData}
-						@play=${this._onPlay}
-						@playing=${this._onPlaying}
-						@pause=${this._onPause}
-						@loadedmetadata=${this._onLoadedMetadata}
-						@timeupdate=${this._onTimeUpdate}
-						@volumechange=${this._onVolumeChange}
-					>
-						<source @error=${this._onError}>
-					</video>
+					<div style=${styleMap(this._videoContainerStyle)}>
+						${this._getPosterView()}
+						<video
+							id="d2l-labs-media-player-video"
+							style=${styleMap(this._videoStyle)}
+							?controls="${IS_IOS}"
+							?autoplay="${this.autoplay}"
+							?loop="${this.loop}"
+							crossorigin="${ifDefined(this.crossorigin)}"
+							preload="${this.poster ? 'metadata' : 'auto'}"
+							@click=${this._onVideoClick}
+							@contextmenu=${this._onContextMenu}
+							@durationchange=${this._onDurationChange}
+							@ended=${this._onEnded}
+							@error=${this._onError}
+							@loadeddata=${this._onLoadedData}
+							@play=${this._onPlay}
+							@playing=${this._onPlaying}
+							@pause=${this._onPause}
+							@loadedmetadata=${this._onLoadedMetadata}
+							@timeupdate=${this._onTimeUpdate}
+							@volumechange=${this._onVolumeChange}
+						>
+							<source @error=${this._onError}>
+						</video>
+					</div>
 				`;
 			case SOURCE_TYPES.audio:
 				return html`
