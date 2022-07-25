@@ -98,6 +98,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
+			_mediaContainerAr: { type: Object, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -136,7 +137,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#d2l-labs-media-player-media-container {
 				align-items: flex-start;
 				flex-direction: column;
-				justify-content: center;
+				justify-content: flex-start;
 				overflow: hidden;
 				position: relative;
 				width: 100%;
@@ -157,7 +158,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				height: 100%;
 				max-height: 100vh;
 				min-height: 100%;
-				position: relative;
+				position: absolute;
 				width: 100%;
 			}
 
@@ -596,12 +597,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
+		this._mediaContainerAr = {
+			'aspect-ratio': 16:9,
+		}
 		this._videoStyle = {
 			width: '100%',
 			height: '100%',
 			top: '0%'
 		};
-		this._videoContainerStyle = {};
 		this._zoomLevel = 0;
 	}
 
@@ -730,6 +733,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
+			...this._mediaContainerAr,
 		};
 
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
@@ -752,9 +756,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		<slot @slotchange=${this._onSlotChange}></slot>
 
 		${this._getLoadingSpinnerView()}
+		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
 		<div class="slider-container">
 			<input type="range" min="-2" max="2" value="0" class="slider" @input=${this._sliderChange}>
-		</div>
+		</div>` : ``}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
 			${this._getMediaAreaView()}
@@ -904,8 +909,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return playerHeight;
 	}
 
-	_sliderChange(e) {
-		this.zoomLevel = Number(e.target.value);
+	_basicZoom(zoomLevel) {
+		this.zoomLevel = zoomLevel;
 		const zoom = Math.abs(this.zoomLevel) / 2;
 		const zoomPercentage = zoom * 100;
 
@@ -919,6 +924,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			top: -(zoomPercentage / 2) + '%',
 			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
 		};
+	}
+
+	_sliderChange(e) {
+		const zoomLevel = Number(e.target.value);
+		if(!this.metadata?.layoutPresets) {
+			this._basicZoom(zoomLevel);
+		} else {
+			this._basicZoom(zoomLevel);
+		}
 	}
 
 	updated(changedProperties) {
@@ -1546,6 +1560,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_onLoadedData() {
+		const media = this._media;
+		const width = media.videoWidth;
+		const height = media.videoHeight;
+		const ar = width / height;
+		if (Number.isNaN(ar)) {
+			this._mediaContainerAr = { 'aspect-ratio': 'auto' };
+		} else {
+			this._mediaContainerAr = { 'aspect-ratio': ar };
+		}
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
