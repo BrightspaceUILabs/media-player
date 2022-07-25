@@ -598,7 +598,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
 		this._mediaContainerAr = {
-			'aspect-ratio': 16:9,
+			'aspect-ratio': 16/9,
 		}
 		this._videoStyle = {
 			width: '100%',
