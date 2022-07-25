@@ -85,7 +85,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			locale: { type: String },
 			loop: { type: Boolean },
 			mediaType: { type: String, attribute: 'media-type' },
-			metadata: { type: String },
+			metadata: { type: Object },
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
@@ -1001,6 +1001,35 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			height: `${scalePercentage  }%`,
 			top: `${-(zoomPercentage / 2)  }%`,
 			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+		};
+	}
+
+	_advancedZoom(zoomLevel) {
+		let zoomedFrame, otherFrame;
+		if(zoomLevel > 0) {
+			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
+
+		} else {
+			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
+		}
+
+		const zoomedWidth = zoomedFrame.right - zoomedFrame.left + 1;
+		const otherWidth = otherFrame.right - otherFrame.left + 1;
+
+		this.zoomLevel = zoomLevel;
+
+		const zoom = otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / 2;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+		const pushLeft = 0;
+
+		this._videoStyle = {
+			width: `${scalePercentage  }%`,
+			height: `${scalePercentage  }%`,
+			top: `${-(zoomPercentage / 2)  }%`,
+			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}px`
 		};
 	}
 
@@ -2006,7 +2035,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!this.metadata?.layoutPresets) {
 			this._basicZoom(zoomLevel);
 		} else {
-			this._basicZoom(zoomLevel);
+			this._advancedZoom(zoomLevel);
 		}
 	}
 
