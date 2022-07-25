@@ -598,8 +598,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
 		this._mediaContainerAr = {
-			'aspect-ratio': 16/9,
-		}
+			'aspect-ratio': 16 / 9,
+		};
 		this._videoStyle = {
 			width: '100%',
 			height: '100%',
@@ -759,7 +759,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
 		<div class="slider-container">
 			<input type="range" min="-2" max="2" value="0" class="slider" @input=${this._sliderChange}>
-		</div>` : ``}
+		</div>` : ''}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
 			${this._getMediaAreaView()}
@@ -898,43 +898,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		`;
 	}
 
-	calculateDefaultVideoHeight(videoWidth, videoHeight, playerWidth, playerHeight) {
-		var videoAr = videoWidth / videoHeight;
-		var newHeight = playerWidth / videoAr;
-
-		if (newHeight <= playerHeight) {
-			return newHeight;
-		}
-
-		return playerHeight;
-	}
-
-	_basicZoom(zoomLevel) {
-		this.zoomLevel = zoomLevel;
-		const zoom = Math.abs(this.zoomLevel) / 2;
-		const zoomPercentage = zoom * 100;
-
-		const scalePercentage = 100 + zoomPercentage;
-		const pushRight = -zoomPercentage;
-		const pushLeft = 0;
-
-		this._videoStyle = {
-			width: scalePercentage + '%',
-			height: scalePercentage + '%',
-			top: -(zoomPercentage / 2) + '%',
-			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
-		};
-	}
-
-	_sliderChange(e) {
-		const zoomLevel = Number(e.target.value);
-		if(!this.metadata?.layoutPresets) {
-			this._basicZoom(zoomLevel);
-		} else {
-			this._basicZoom(zoomLevel);
-		}
-	}
-
 	updated(changedProperties) {
 		super.updated(changedProperties);
 
@@ -953,6 +916,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (changedProperties.has('thumbnails')) {
 			this._getThumbnails();
 		}
+	}
+
+	calculateDefaultVideoHeight(videoWidth, videoHeight, playerWidth, playerHeight) {
+		const videoAr = videoWidth / videoHeight;
+		const newHeight = playerWidth / videoAr;
+
+		if (newHeight <= playerHeight) {
+			return newHeight;
+		}
+
+		return playerHeight;
 	}
 
 	exitFullscreen() {
@@ -1011,6 +985,23 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 
 		return this.localize('off');
+	}
+
+	_basicZoom(zoomLevel) {
+		this.zoomLevel = zoomLevel;
+		const zoom = Math.abs(this.zoomLevel) / 2;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+		const pushLeft = 0;
+
+		this._videoStyle = {
+			width: `${scalePercentage  }%`,
+			height: `${scalePercentage  }%`,
+			top: `${-(zoomPercentage / 2)  }%`,
+			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+		};
 	}
 
 	_clearPreference(preferenceKey) {
@@ -2007,6 +1998,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._showControlsTimeout = setTimeout(() => {
 				this._recentlyShowedCustomControls = false;
 			}, HIDE_DELAY_MS);
+		}
+	}
+
+	_sliderChange(e) {
+		const zoomLevel = Number(e.target.value);
+		if (!this.metadata?.layoutPresets) {
+			this._basicZoom(zoomLevel);
+		} else {
+			this._basicZoom(zoomLevel);
 		}
 	}
 
