@@ -75,6 +75,12 @@ const parseUrlExpiry = url => {
 	return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
 };
 
+const LAYOUT_PRESETS = {
+	video: 'VIDEO',
+	screen: 'SCREEN',
+	videoAndScreen: 'VIDEO_AND_SCREEN' 
+};
+
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin(RtlMixin(LitElement))) {
 
 	static get properties() {
@@ -774,7 +780,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
-		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
+		${this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
 		<div id="d2l-labs-media-player-zoom-bar-container">
 			<d2l-seek-bar
 				id="d2l-labs-media-player-zoom-bar"
