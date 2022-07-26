@@ -781,6 +781,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			value="50"
 			aria-orientation="horizontal"
 			@position-change=${this._sliderChange}
+			@drag-start=${this._sliderChange}
+			@drag-end=${this._sliderChange}
 		></d2l-seek-bar></div>` : ''}
 			${this._getMediaAreaView()}
 
@@ -2040,7 +2042,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_sliderChange() {
+		if (!this._zoomBar) return;
 		const zoomLevel = this._zoomBar.immediateValue - 50;
+
 		if (!this.metadata?.layoutPresets) {
 			this._basicZoom(zoomLevel);
 		} else {
