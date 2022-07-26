@@ -78,7 +78,7 @@ const parseUrlExpiry = url => {
 const LAYOUT_PRESETS = {
 	video: 'VIDEO',
 	screen: 'SCREEN',
-	videoAndScreen: 'VIDEO_AND_SCREEN' 
+	videoAndScreen: 'VIDEO_AND_SCREEN'
 };
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin(RtlMixin(LitElement))) {
