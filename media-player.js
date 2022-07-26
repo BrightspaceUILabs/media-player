@@ -67,7 +67,7 @@ const DEFAULT_LOCALE = 'en';
 
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
-const SLIDER_STEPS = 1000;
+const SLIDER_STEPS = 50;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const parseUrlExpiry = url => {
 	const urlObj = new URL(url);
@@ -99,7 +99,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
-			_mediaContainerAr: { type: Object, attribute: false },
+			_mediaContainerAspectRatio: { type: Object, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -555,6 +555,21 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			.slider-container {
 				padding: 20px;
 			}
+			#d2l-labs-media-player-zoom-bar-container {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				position: absolute;
+				right: 20px;
+				top: 20px;
+				width: 200px;
+				height: 50px;
+				z-index: 1;
+			}
+
+			#d2l-labs-media-player-zoom-bar {
+				flex: 1;
+			}
 		` ];
 	}
 
@@ -596,7 +611,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
-		this._mediaContainerAr = {
+		this._mediaContainerAspectRatio = {
 			'aspect-ratio': 16 / 9,
 		};
 		this._videoStyle = {
@@ -684,6 +699,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+		this._zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
 
 		this._updateLocale();
 		this._getMetadata();
@@ -732,7 +748,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
-			...this._mediaContainerAr,
+			...this._mediaContainerAspectRatio,
 		};
 
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
@@ -755,12 +771,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		<slot @slotchange=${this._onSlotChange}></slot>
 
 		${this._getLoadingSpinnerView()}
-		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
-		<div class="slider-container">
-			<input type="range" min="${-SLIDER_STEPS}" max="${SLIDER_STEPS}" value="0" class="slider" @input=${this._sliderChange}>
-		</div>` : ''}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
+		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
+		<div id="d2l-labs-media-player-zoom-bar-container">
+		<d2l-seek-bar
+			id="d2l-labs-media-player-zoom-bar"
+			fullWidth
+			value="50"
+			aria-orientation="horizontal"
+			@position-change=${this._sliderChange}
+		></d2l-seek-bar></div>` : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -1573,9 +1594,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const height = media.videoHeight;
 		const ar = width / height;
 		if (Number.isNaN(ar)) {
-			this._mediaContainerAr = { 'aspect-ratio': 'auto' };
+			this._mediaContainerAspectRatio = { 'aspect-ratio': 'auto' };
 		} else {
-			this._mediaContainerAr = { 'aspect-ratio': ar };
+			this._mediaContainerAspectRatio = { 'aspect-ratio': ar };
 		}
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
@@ -2018,8 +2039,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 	}
 
-	_sliderChange(e) {
-		const zoomLevel = Number(e.target.value);
+	_sliderChange() {
+		const zoomLevel = this._zoomBar.immediateValue - 50;
 		if (!this.metadata?.layoutPresets) {
 			this._basicZoom(zoomLevel);
 		} else {
