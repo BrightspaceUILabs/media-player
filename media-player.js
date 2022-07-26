@@ -156,7 +156,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#d2l-labs-media-player-video {
 				display: block;
 				height: 100%;
-				max-height: 100vh;
 				min-height: 100%;
 				position: absolute;
 				width: 100%;
@@ -987,6 +986,35 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return this.localize('off');
 	}
 
+	_advancedZoom(zoomLevel) {
+		let zoomedFrame, otherFrame;
+		if (zoomLevel > 0) {
+			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
+
+		} else {
+			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
+		}
+
+		const zoomedWidth = zoomedFrame.right - zoomedFrame.left + 1;
+		const otherWidth = otherFrame.right - otherFrame.left + 1;
+
+		this.zoomLevel = zoomLevel;
+
+		const zoom =otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / 2;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+		const pushLeft = 0;
+
+		this._videoStyle = {
+			width: `${ scalePercentage }%`,
+			height: `${ scalePercentage }%`,
+			top: `${ -(zoomPercentage / 2) }%`,
+			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+		};
+	}
+
 	_basicZoom(zoomLevel) {
 		this.zoomLevel = zoomLevel;
 		const zoom = Math.abs(this.zoomLevel) / 2;
@@ -1001,35 +1029,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			height: `${scalePercentage  }%`,
 			top: `${-(zoomPercentage / 2)  }%`,
 			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
-		};
-	}
-
-	_advancedZoom(zoomLevel) {
-		let zoomedFrame, otherFrame;
-		if(zoomLevel > 0) {
-			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
-
-		} else {
-			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
-		}
-
-		const zoomedWidth = zoomedFrame.right - zoomedFrame.left + 1;
-		const otherWidth = otherFrame.right - otherFrame.left + 1;
-
-		this.zoomLevel = zoomLevel;
-
-		const zoom = otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / 2;
-		const zoomPercentage = zoom * 100;
-
-		const scalePercentage = 100 + zoomPercentage;
-		const pushRight = -zoomPercentage;
-		const pushLeft = 0;
-
-		this._videoStyle = {
-			width: `${scalePercentage  }%`,
-			height: `${scalePercentage  }%`,
-			top: `${-(zoomPercentage / 2)  }%`,
-			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}px`
 		};
 	}
 
