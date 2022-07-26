@@ -68,6 +68,7 @@ const DEFAULT_LOCALE = 'en';
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
 const SLIDER_STEPS = 50;
+const BASIC_ZOOM_MULTIPLIER = 2;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const parseUrlExpiry = url => {
 	const urlObj = new URL(url);
@@ -775,15 +776,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
 		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
 		<div id="d2l-labs-media-player-zoom-bar-container">
-		<d2l-seek-bar
-			id="d2l-labs-media-player-zoom-bar"
-			fullWidth
-			value="50"
-			aria-orientation="horizontal"
-			@position-change=${this._sliderChange}
-			@drag-start=${this._sliderChange}
-			@drag-end=${this._sliderChange}
-		></d2l-seek-bar></div>` : ''}
+			<d2l-seek-bar
+				id="d2l-labs-media-player-zoom-bar"
+				fullWidth
+				value="50"
+				aria-orientation="horizontal"
+				@position-change=${this._sliderChange}
+				@drag-start=${this._sliderChange}
+				@drag-end=${this._sliderChange}
+			></d2l-seek-bar>
+		</div>` : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -1029,7 +1031,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_basicZoom(zoomLevel) {
 		this.zoomLevel = zoomLevel;
-		const zoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const zoom = BASIC_ZOOM_MULTIPLIER * Math.abs(this.zoomLevel) / SLIDER_STEPS;
 		const zoomPercentage = zoom * 100;
 
 		const scalePercentage = 100 + zoomPercentage;
@@ -2043,7 +2045,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_sliderChange() {
 		if (!this._zoomBar) return;
-		const zoomLevel = this._zoomBar.immediateValue - 50;
+		const zoomBarValue = this._zoomBar.immediateValue - 50;
+		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
 		if (!this.metadata?.layoutPresets) {
 			this._basicZoom(zoomLevel);
