@@ -575,7 +575,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 
 			#d2l-labs-media-player-zoom-bar {
+				--d2l-knob-focus-color: #ffffff;
+				--d2l-knob-focus-size: 4px;
+				--d2l-knob-size: 15px;
+				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
+				--d2l-progress-border-radius: 0;
 				flex: 1;
+			}
+
+			.zoom-bar-icon {
+				margin: 10px;
 			}
 		` ];
 	}
@@ -782,6 +791,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
 		${this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
 		<div id="d2l-labs-media-player-zoom-bar-container">
+			<d2l-icon
+				class="zoom-bar-icon"
+				icon="tier3:file-video"
+			></d2l-icon>
 			<d2l-seek-bar
 				id="d2l-labs-media-player-zoom-bar"
 				fullWidth
@@ -791,6 +804,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				@drag-start=${this._sliderChange}
 				@drag-end=${this._sliderChange}
 			></d2l-seek-bar>
+			<d2l-icon
+				class="zoom-bar-icon"
+				icon="tier3:image"
+			></d2l-icon>
 		</div>` : ''}
 			${this._getMediaAreaView()}
 
