@@ -67,6 +67,7 @@ const DEFAULT_LOCALE = 'en';
 
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
+const SLIDER_STEPS = 1000;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const parseUrlExpiry = url => {
 	const urlObj = new URL(url);
@@ -116,7 +117,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
-			_videoContainerStyle: { type: Object, attribute: false },
 			_videoStyle: { type: Object, attribute: false },
 			_zoomLevel: { type: Number, attribute: false },
 		};
@@ -757,7 +757,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 		${this.metadata?.layout === 'VIDEO_AND_SCREEN' ? html`
 		<div class="slider-container">
-			<input type="range" min="-2" max="2" value="0" class="slider" @input=${this._sliderChange}>
+			<input type="range" min="${-SLIDER_STEPS}" max="${SLIDER_STEPS}" value="0" class="slider" @input=${this._sliderChange}>
 		</div>` : ''}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
@@ -917,17 +917,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 	}
 
-	calculateDefaultVideoHeight(videoWidth, videoHeight, playerWidth, playerHeight) {
-		const videoAr = videoWidth / videoHeight;
-		const newHeight = playerWidth / videoAr;
-
-		if (newHeight <= playerHeight) {
-			return newHeight;
-		}
-
-		return playerHeight;
-	}
-
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
@@ -1000,7 +989,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 		this.zoomLevel = zoomLevel;
 
-		const zoom =otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / 2;
+		const zoom = otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
 		const zoomPercentage = zoom * 100;
 
 		const scalePercentage = 100 + zoomPercentage;
@@ -1017,7 +1006,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_basicZoom(zoomLevel) {
 		this.zoomLevel = zoomLevel;
-		const zoom = Math.abs(this.zoomLevel) / 2;
+		const zoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
 		const zoomPercentage = zoom * 100;
 
 		const scalePercentage = 100 + zoomPercentage;
