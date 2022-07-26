@@ -169,12 +169,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 
 			#d2l-labs-media-player-video-poster {
+				bottom: 0;
 				cursor: pointer;
 				height: auto;
 				position: absolute;
 				width: 100%;
 				z-index: 1;
-				bottom: 0px;
 			}
 
 			#d2l-labs-media-player-video-poster-play-button {
@@ -182,12 +182,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				border: none;
 				border-radius: 50%;
 				cursor: pointer;
+				left: 50%;
 				padding: 2em;
 				position: absolute;
-				z-index: 2;
 				top: 50%;
-				left: 50%;
 				transform: translate(-50%, -50%);
+				z-index: 2;
 			}
 
 			#d2l-labs-media-player-video-poster-play-button > d2l-icon {
@@ -563,14 +563,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				padding: 20px;
 			}
 			#d2l-labs-media-player-zoom-bar-container {
+				align-items: center;
 				display: flex;
 				flex-direction: row;
-				align-items: center;
+				height: 50px;
 				position: absolute;
 				right: 20px;
 				top: 20px;
 				width: 200px;
-				height: 50px;
 				z-index: 1;
 			}
 
