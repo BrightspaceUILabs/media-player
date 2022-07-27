@@ -142,9 +142,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 
 			#d2l-labs-media-player-media-container {
-				align-items: flex-start;
+				align-items: center;
 				flex-direction: column;
-				justify-content: flex-start;
+				justify-content: center;
 				overflow: hidden;
 				position: relative;
 				width: 100%;
