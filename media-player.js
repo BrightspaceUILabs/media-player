@@ -169,7 +169,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 
 			#d2l-labs-media-player-video-poster {
-				bottom: 0;
 				cursor: pointer;
 				height: auto;
 				position: absolute;
@@ -789,26 +788,26 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
-		${this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
-		<div id="d2l-labs-media-player-zoom-bar-container">
-			<d2l-icon
-				class="zoom-bar-icon"
-				icon="tier3:file-video"
-			></d2l-icon>
-			<d2l-seek-bar
-				id="d2l-labs-media-player-zoom-bar"
-				fullWidth
-				value="50"
-				aria-orientation="horizontal"
-				@position-change=${this._sliderChange}
-				@drag-start=${this._sliderChange}
-				@drag-end=${this._sliderChange}
-			></d2l-seek-bar>
-			<d2l-icon
-				class="zoom-bar-icon"
-				icon="tier3:image"
-			></d2l-icon>
-		</div>` : ''}
+			${this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
+			<div id="d2l-labs-media-player-zoom-bar-container">
+				<d2l-icon
+					class="zoom-bar-icon"
+					icon="tier3:file-video"
+				></d2l-icon>
+				<d2l-seek-bar
+					id="d2l-labs-media-player-zoom-bar"
+					fullWidth
+					value="50"
+					aria-orientation="horizontal"
+					@position-change=${this._sliderChange}
+					@drag-start=${this._sliderChange}
+					@drag-end=${this._sliderChange}
+				></d2l-seek-bar>
+				<d2l-icon
+					class="zoom-bar-icon"
+					icon="tier3:image"
+				></d2l-icon>
+			</div>` : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
