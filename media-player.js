@@ -627,7 +627,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
 		this._mediaContainerAspectRatio = {
-			'aspect-ratio': 16 / 9,
 		};
 		this._videoStyle = {
 			width: '100%',
@@ -1618,11 +1617,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const media = this._media;
 		const width = media.videoWidth;
 		const height = media.videoHeight;
-		const ar = width / height;
-		if (Number.isNaN(ar)) {
+		const aspectRatio = width / height;
+		if (Number.isNaN(aspectRatio)) {
 			this._mediaContainerAspectRatio = { 'aspect-ratio': 'auto' };
 		} else {
-			this._mediaContainerAspectRatio = { 'aspect-ratio': ar };
+			this._mediaContainerAspectRatio = { 'aspect-ratio': aspectRatio };
 		}
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
