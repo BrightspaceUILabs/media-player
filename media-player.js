@@ -71,7 +71,7 @@ const SLIDER_STEPS = 50;
 const BASIC_ZOOM_MULTIPLIER = 2;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const tryParseUrlExpiry = url => {
-	try { 
+	try {
 		const urlObj = new URL(url);
 		return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
 	} catch (error) {
