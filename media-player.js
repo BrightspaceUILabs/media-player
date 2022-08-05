@@ -70,9 +70,13 @@ const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
 const SLIDER_STEPS = 50;
 const BASIC_ZOOM_MULTIPLIER = 2;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
-const parseUrlExpiry = url => {
-	const urlObj = new URL(url);
-	return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
+const tryParseUrlExpiry = url => {
+	try {
+		const urlObj = new URL(url);
+		return urlObj.searchParams ? urlObj.searchParams.get('Expires') : null;
+	} catch (error) {
+		return null;
+	}
 };
 
 const LAYOUT_PRESETS = {
@@ -2017,7 +2021,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				// good long-term solution since it depends on a somewhat accurate client
 				// system time.
 				if (isSafari() && updatedSource !== undefined) {
-					const expires = parseUrlExpiry(updatedSource);
+					const expires = tryParseUrlExpiry(updatedSource);
 					if (expires) {
 						const timeToExpiry = (expires * 1000) - Date.now() - SAFARI_EXPIRY_EARLY_SWAP_SECONDS;
 						const timeoutPeriod = Math.max(timeToExpiry, SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS);
