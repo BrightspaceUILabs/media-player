@@ -701,10 +701,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return this._media ? this._media.textTracks : null;
 	}
 
-	get zoomBar() {
-		return this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
-	}
-
 	firstUpdated(changedProperties) {
 		super.firstUpdated(changedProperties);
 
@@ -2072,8 +2068,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_sliderChange() {
-		if (!this.zoomBar) return;
-		const zoomBarValue = this.zoomBar.immediateValue - 50;
+		const zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
+		if (!zoomBar) return;
+		const zoomBarValue = zoomBar.immediateValue - 50;
 		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
 		if (!this.metadata?.layoutPresets) {
