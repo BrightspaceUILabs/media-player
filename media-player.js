@@ -717,6 +717,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+		this._zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
 
 		this._updateLocale();
 		this._getMetadata();
@@ -2068,9 +2069,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_sliderChange() {
-		const zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
-		if (!zoomBar) return;
-		const zoomBarValue = zoomBar.immediateValue - 50;
+		if (!this._zoomBar) return;
+		const zoomBarValue = this._zoomBar.immediateValue - 50;
 		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
 		if (!this.metadata?.layoutPresets) {
