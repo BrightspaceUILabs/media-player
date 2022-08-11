@@ -3,7 +3,7 @@
   "description": "A reusable media player component.",
   "type": "module",
   "repository": "https://github.com/BrightspaceUILabs/media-player.git",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "publishConfig": {
     "access": "public"
   },
