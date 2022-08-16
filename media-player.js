@@ -24,7 +24,7 @@ import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-loca
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
-import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin';
+import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 import { styleMap } from 'lit-html/directives/style-map.js';
 
 const DEFAULT_SPEED = '1.0';
@@ -155,7 +155,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#d2l-labs-media-player-video {
 				display: block;
 				height: 100%;
-				max-height: 100vh;
+				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
 				position: relative;
 				width: 100%;
