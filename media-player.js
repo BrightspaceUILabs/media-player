@@ -67,6 +67,8 @@ const DEFAULT_LOCALE = 'en';
 
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
+const SLIDER_STEPS = 50;
+const BASIC_ZOOM_MULTIPLIER = 2;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const tryParseUrlExpiry = url => {
 	try {
@@ -75,6 +77,12 @@ const tryParseUrlExpiry = url => {
 	} catch (error) {
 		return null;
 	}
+};
+
+const LAYOUT_PRESETS = {
+	video: 'VIDEO',
+	screen: 'SCREEN',
+	videoAndScreen: 'VIDEO_AND_SCREEN'
 };
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin(RtlMixin(LitElement))) {
@@ -89,7 +97,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			locale: { type: String },
 			loop: { type: Boolean },
 			mediaType: { type: String, attribute: 'media-type' },
-			metadata: { type: String },
+			metadata: { type: Object },
 			poster: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
@@ -102,6 +110,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
+			_mediaContainerAspectRatio: { type: Object, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -118,7 +127,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_trackText: { type: String, attribute: false },
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
-			_volume: { type: Number, attribute: false }
+			_volume: { type: Number, attribute: false },
+			_videoStyle: { type: Object, attribute: false },
+			_zoomLevel: { type: Number, attribute: false },
 		};
 	}
 
@@ -136,6 +147,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 			#d2l-labs-media-player-media-container {
 				align-items: center;
+				flex-direction: column;
 				justify-content: center;
 				overflow: hidden;
 				position: relative;
@@ -157,7 +169,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				height: 100%;
 				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
-				position: relative;
+				position: absolute;
 				width: 100%;
 			}
 
@@ -174,8 +186,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				border: none;
 				border-radius: 50%;
 				cursor: pointer;
+				left: 50%;
 				padding: 2em;
 				position: absolute;
+				top: 50%;
+				transform: translate(-50%, -50%);
 				z-index: 2;
 			}
 
@@ -547,6 +562,34 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				font-size: 1rem;
 				line-height: 2.1rem;
 			}
+
+			.slider-container {
+				padding: 20px;
+			}
+			#d2l-labs-media-player-zoom-bar-container {
+				align-items: center;
+				display: flex;
+				flex-direction: row;
+				height: 50px;
+				position: absolute;
+				right: 20px;
+				top: 20px;
+				width: 200px;
+				z-index: 1;
+			}
+
+			#d2l-labs-media-player-zoom-bar {
+				--d2l-knob-focus-color: #ffffff;
+				--d2l-knob-focus-size: 4px;
+				--d2l-knob-size: 15px;
+				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
+				--d2l-progress-border-radius: 0;
+				flex: 1;
+			}
+
+			.zoom-bar-icon {
+				margin: 10px;
+			}
 		` ];
 	}
 
@@ -588,6 +631,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
+		this._mediaContainerAspectRatio = {
+		};
+		this._videoStyle = {
+			width: '100%',
+			height: '100%',
+			top: '0%'
+		};
+		this._zoomLevel = 0;
 	}
 
 	get currentTime() {
@@ -667,6 +718,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+		this._zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
 
 		this._updateLocale();
 		this._getMetadata();
@@ -715,6 +767,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
 			height,
+			...this._mediaContainerAspectRatio,
 		};
 
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
@@ -739,6 +792,26 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
+			${this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
+			<div id="d2l-labs-media-player-zoom-bar-container">
+				<d2l-icon
+					class="zoom-bar-icon"
+					icon="tier3:file-video"
+				></d2l-icon>
+				<d2l-seek-bar
+					id="d2l-labs-media-player-zoom-bar"
+					fullWidth
+					value="50"
+					aria-orientation="horizontal"
+					@position-change=${this._sliderChange}
+					@drag-start=${this._sliderChange}
+					@drag-end=${this._sliderChange}
+				></d2l-seek-bar>
+				<d2l-icon
+					class="zoom-bar-icon"
+					icon="tier3:image"
+				></d2l-icon>
+			</div>` : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -953,6 +1026,52 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return this.localize('off');
 	}
 
+	_advancedZoom(zoomLevel) {
+		let zoomedFrame, otherFrame;
+		if (zoomLevel > 0) {
+			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
+
+		} else {
+			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
+		}
+
+		const zoomedWidth = zoomedFrame.right - zoomedFrame.left + 1;
+		const otherWidth = otherFrame.right - otherFrame.left + 1;
+
+		this.zoomLevel = zoomLevel;
+
+		const zoom = otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+		const pushLeft = 0;
+
+		this._videoStyle = {
+			width: `${ scalePercentage }%`,
+			height: `${ scalePercentage }%`,
+			top: `${ -(zoomPercentage / 2) }%`,
+			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+		};
+	}
+
+	_basicZoom(zoomLevel) {
+		this.zoomLevel = zoomLevel;
+		const zoom = BASIC_ZOOM_MULTIPLIER * Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const zoomPercentage = zoom * 100;
+
+		const scalePercentage = 100 + zoomPercentage;
+		const pushRight = -zoomPercentage;
+		const pushLeft = 0;
+
+		this._videoStyle = {
+			width: `${scalePercentage  }%`,
+			height: `${scalePercentage  }%`,
+			top: `${-(zoomPercentage / 2)  }%`,
+			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+		};
+	}
+
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
@@ -1100,6 +1219,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					${this._getPosterView()}
 					<video
 						id="d2l-labs-media-player-video"
+						style=${styleMap(this._videoStyle)}
 						?controls="${IS_IOS}"
 						?autoplay="${this.autoplay}"
 						?loop="${this.loop}"
@@ -1499,6 +1619,15 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_onLoadedData() {
+		const media = this._media;
+		const width = media.videoWidth;
+		const height = media.videoHeight;
+		const aspectRatio = width / height;
+		if (Number.isNaN(aspectRatio)) {
+			this._mediaContainerAspectRatio = { 'aspect-ratio': 'auto' };
+		} else {
+			this._mediaContainerAspectRatio = { 'aspect-ratio': aspectRatio };
+		}
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
@@ -1937,6 +2066,18 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._showControlsTimeout = setTimeout(() => {
 				this._recentlyShowedCustomControls = false;
 			}, HIDE_DELAY_MS);
+		}
+	}
+
+	_sliderChange() {
+		if (!this._zoomBar) return;
+		const zoomBarValue = this._zoomBar.immediateValue - 50;
+		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
+
+		if (!this.metadata?.layoutPresets) {
+			this._basicZoom(zoomLevel);
+		} else {
+			this._advancedZoom(zoomLevel);
 		}
 	}
 

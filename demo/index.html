@@ -48,6 +48,55 @@
 				</d2l-labs-media-player>
 			</d2l-demo-snippet>
 
+			<h5>Mixed Video Layout</h5>
+			<d2l-demo-snippet>
+				<div>
+					<d2l-labs-media-player src="sample-mixed-video.mp4" id="mixed-video" media-type="video">
+						<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
+						<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
+					</d2l-labs-media-player>
+				</div>
+				<script>
+					const mixedVideoDemo = document.getElementById('mixed-video');
+					mixedVideoDemo.metadata = {
+						'cuts': [],
+						'chapters': [],
+						'layout': 'VIDEO_AND_SCREEN',
+						'layoutPresets': {
+							'frames':  [{
+								'bottom': 431,
+								'left': 0,
+								'right': 511,
+								'top': 144
+							}, {
+								'bottom': 575,
+								'left': 512,
+								'right': 1535,
+								'top': 0
+							}]
+						}
+					};
+				</script>
+			</d2l-demo-snippet>
+
+			<h5>Mixed Video Layout (no layout preset)</h5>
+			<d2l-demo-snippet>
+				<div>
+					<d2l-labs-media-player src="sample-mixed-video.mp4" id="no-layout-video" media-type="video">
+						<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
+						<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
+					</d2l-labs-media-player>
+				</div>
+				<script>
+					const mixedVideoDemoNoPreset = document.getElementById('no-layout-video');
+					mixedVideoDemoNoPreset.metadata = {
+						'cuts': [],
+						'chapters': [],
+						'layout': 'VIDEO_AND_SCREEN',
+					};
+				</script>
+			</d2l-demo-snippet>
+
 			<h2>Audio Player</h2>
 			<d2l-demo-snippet>
 				<d2l-labs-media-player src="sample-audio.mp3" media-type="audio">
