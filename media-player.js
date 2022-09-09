@@ -149,6 +149,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				align-items: center;
 				flex-direction: column;
 				justify-content: center;
+				max-height: 100vh;
 				overflow: hidden;
 				position: relative;
 				width: 100%;
