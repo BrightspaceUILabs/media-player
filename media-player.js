@@ -760,12 +760,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
 		const volumeTooltip = `${this._muted ? this.localize('unmute') : this.localize('mute')} (${KEY_BINDINGS.mute})`;
 
-		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
+		const height = this._maintainHeight ? { height: `${this._maintainHeight}px` } : {};
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
-			minHeight: this.isIOSVideo ? 'auto' : '17rem',
-			height,
+			...height,
 			...this._mediaContainerAspectRatio,
 		};
 
