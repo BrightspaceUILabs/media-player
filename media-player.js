@@ -69,6 +69,7 @@ const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
 const SLIDER_STEPS = 50;
 const BASIC_ZOOM_MULTIPLIER = 2;
+const BASIC_ZOOM_TRANSLATE_X_MAX_PERCENTAGE = 30;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const tryParseUrlExpiry = url => {
 	try {
@@ -1028,47 +1029,69 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_advancedZoom(zoomLevel) {
 		let zoomedFrame, otherFrame;
+
+		// zoomLevel < 0 means that the slider is shifted to the left, towards "Video".
+		// zoomLevel > 0 means that the slider is shifted to the right, towards "Presentation".
 		if (zoomLevel > 0) {
 			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
-
 		} else {
 			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
 		}
 
-		const zoomedWidth = zoomedFrame.right - zoomedFrame.left + 1;
-		const otherWidth = otherFrame.right - otherFrame.left + 1;
+		const zoomedFrameWidth = zoomedFrame.right - zoomedFrame.left + 1;
+		const zoomedFrameHeight = zoomedFrame.bottom - zoomedFrame.top + 1;
+		const otherFrameWidth = otherFrame.right - otherFrame.left + 1;
+		const otherFrameHeight = otherFrame.bottom - otherFrame.top + 1;
 
 		this.zoomLevel = zoomLevel;
-
-		const zoom = otherWidth / zoomedWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const zoom = otherFrameWidth / zoomedFrameWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
 		const zoomPercentage = zoom * 100;
 
+		// The video will be enlarged using the CSS transform(scale(...)) property.
+		// When scaling, the origin point will be the center point of the video.
+		// Because of that, when the video is fully zoomed to either frame, the video needs to be translated as follows in order to center the zoomed frame:
+		//     (center of the zoomed frame) - (center of the video)
+		// The above applies for to both the X and Y axis. For the X-axis, we also need to multiply by -1 to force the video to translate left.
+
 		const scalePercentage = 100 + zoomPercentage;
-		const pushRight = -zoomPercentage;
-		const pushLeft = 0;
+
+		const zoomedFrameCenterX = zoomedFrame.left + (zoomedFrameWidth / 2);
+		const zoomedFrameCenterY = zoomedFrame.top + (zoomedFrameHeight / 2);
+
+		const fullVideoWidth = zoomedFrameWidth + otherFrameWidth;
+		const fullVideoHeight = zoomedFrameHeight + otherFrameHeight;
+		const fullVideoCenterX = fullVideoWidth / 2;
+		const fullVideoCenterY = fullVideoHeight / 2;
+
+		const xDistanceBetweenFrameCenterAndVideoCenter = -1 * (zoomedFrameCenterX - fullVideoCenterX);
+		const yDistanceBetweenFrameCenterAndVideoCenter = zoomedFrameCenterY - fullVideoCenterY;
+
+		// The exact distance in pixels will change depending on the zoom level.
+		// By using percentages, we guarantee that the right distance is used at all zoom levels.
+		const xDistancePercentage = xDistanceBetweenFrameCenterAndVideoCenter / fullVideoWidth * 100;
+		const yDistancePercentage = yDistanceBetweenFrameCenterAndVideoCenter / fullVideoHeight * 100;
+
+		const currentPercentageOfFullZoom = (Math.abs(this.zoomLevel) / SLIDER_STEPS);
+		const translateXPercentage = xDistancePercentage * currentPercentageOfFullZoom;
+		const translateYPercentage = yDistancePercentage * currentPercentageOfFullZoom;
 
 		this._videoStyle = {
-			width: `${ scalePercentage }%`,
-			height: `${ scalePercentage }%`,
-			top: `${ -(zoomPercentage / 2) }%`,
-			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+			transform: `scale(${scalePercentage / 100}) translateX(${translateXPercentage}%) translateY(${translateYPercentage}%)`,
 		};
 	}
 
 	_basicZoom(zoomLevel) {
 		this.zoomLevel = zoomLevel;
-		const zoom = BASIC_ZOOM_MULTIPLIER * Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
+		const zoom = BASIC_ZOOM_MULTIPLIER * currentPercentageOfFullZoom;
 		const zoomPercentage = zoom * 100;
 
 		const scalePercentage = 100 + zoomPercentage;
-		const pushRight = -zoomPercentage;
-		const pushLeft = 0;
+		const direction = -1 * this.zoomLevel / SLIDER_STEPS;
+		const translateX = direction * BASIC_ZOOM_TRANSLATE_X_MAX_PERCENTAGE * currentPercentageOfFullZoom;
 
 		this._videoStyle = {
-			width: `${scalePercentage  }%`,
-			height: `${scalePercentage  }%`,
-			top: `${-(zoomPercentage / 2)  }%`,
-			left: this.zoomLevel > 0 ? `${pushRight}%` : `${pushLeft}%`
+			transform: `scale(${scalePercentage / 100}) translateX(${translateX}%)`,
 		};
 	}
 
