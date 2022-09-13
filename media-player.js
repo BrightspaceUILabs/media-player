@@ -106,7 +106,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
-			_heightPixels: { type: Number, attribute: false },
 			_hoverTime: { type: Number, attribute: false },
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
@@ -607,7 +606,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
-		this._heightPixels = null;
 		this._hoverTime = 0;
 		this._hovering = false;
 		this._hoveringMediaControls = false;
@@ -730,23 +728,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
-				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
-				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
-				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
-				const flickerThreshold = 20;
-				if ((height === this._twoHeightsAgo && width === this._twoWidthsAgo)
-					&& Math.abs(this._lastHeight - height) < flickerThreshold
-				) {
-					this._heightPixels = Math.floor(Math.max(height, this._lastHeight));
-				} else {
-					this._heightPixels = null;
-				}
-
-				this._twoHeightsAgo = this._lastHeight;
-				this._lastHeight = height;
-
-				this._twoWidthsAgo = this._lastWidth;
-				this._lastWidth = width;
 
 				const multiplier = Math.sqrt(Math.max(1, Math.min(height, width) / MIN_TRACK_WIDTH_PX));
 				this._trackFontSizeRem = multiplier;
