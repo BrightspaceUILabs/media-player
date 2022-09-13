@@ -150,6 +150,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				align-items: center;
 				flex-direction: column;
 				justify-content: center;
+				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
 				max-height: 100vh;
 				overflow: hidden;
 				position: relative;
