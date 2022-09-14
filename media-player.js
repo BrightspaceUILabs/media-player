@@ -2080,10 +2080,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const zoomBarValue = zoomBar.immediateValue - 50;
 		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
-		if (!this.metadata?.layoutPresets) {
-			this._basicZoom(zoomLevel);
-		} else {
+		if (this.metadata?.layoutPresets?.frames?.length > 0) {
 			this._advancedZoom(zoomLevel);
+		} else {
+			this._basicZoom(zoomLevel);
 		}
 	}
 
