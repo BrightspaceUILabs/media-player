@@ -97,6 +97,37 @@
 				</script>
 			</d2l-demo-snippet>
 
+			<h5>Mixed Video Layout (video from Capture App)</h5>
+			<d2l-demo-snippet>
+				<div>
+					<d2l-labs-media-player src="sample-mixed-video-2.mp4" id="mixed-video-2" media-type="video">
+						<track src="sample-vtt-en.vtt" kind="captions" srclang="en" label="English">
+						<track src="sample-srt-fr.srt" kind="captions" srclang="fr" label="French">
+					</d2l-labs-media-player>
+				</div>
+				<script>
+					const mixedVideoDemo2 = document.getElementById('mixed-video-2');
+					mixedVideoDemo2.metadata = {
+						'cuts': [],
+						'chapters': [],
+						'layout': 'VIDEO_AND_SCREEN',
+						'layoutPresets': {
+							'frames':  [{
+								'bottom': 503,
+								'left': 0,
+								'right': 575,
+								'top': 72
+							}, {
+								'bottom': 575,
+								'left': 576,
+								'right': 1599,
+								'top': 0
+							}]
+						}
+					};
+				</script>
+			</d2l-demo-snippet>
+
 			<h2>Audio Player</h2>
 			<d2l-demo-snippet>
 				<d2l-labs-media-player src="sample-audio.mp3" media-type="audio">
