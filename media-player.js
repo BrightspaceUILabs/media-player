@@ -634,11 +634,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._playRequested = false;
 		this._mediaContainerAspectRatio = {
 		};
-		this._videoStyle = {
-			width: '100%',
-			height: '100%',
-			top: '0%'
-		};
+		this._videoStyle = {};
 		this._zoomLevel = 0;
 	}
 
