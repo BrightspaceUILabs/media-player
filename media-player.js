@@ -112,6 +112,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
 			_mediaContainerAspectRatio: { type: Object, attribute: false },
+			_mediaHeightBeforeScaling: { type: Number, attribute: false },
+			_mediaWidthBeforeScaling: { type: Number, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -1025,24 +1027,43 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_advancedZoom(zoomLevel) {
-		let zoomedFrame, otherFrame;
+		let zoomedFrame;
 
 		// zoomLevel < 0 means that the slider is shifted to the left, towards "Video".
 		// zoomLevel > 0 means that the slider is shifted to the right, towards "Presentation".
 		if (zoomLevel > 0) {
-			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
+			[, zoomedFrame] = this.metadata.layoutPresets.frames;
 		} else {
-			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
+			[zoomedFrame] = this.metadata.layoutPresets.frames;
 		}
 
 		const zoomedFrameWidth = zoomedFrame.right - zoomedFrame.left + 1;
 		const zoomedFrameHeight = zoomedFrame.bottom - zoomedFrame.top + 1;
-		const otherFrameWidth = otherFrame.right - otherFrame.left + 1;
-		const otherFrameHeight = otherFrame.bottom - otherFrame.top + 1;
+
+		const fullVideoWidth = this._mediaWidthBeforeScaling;
+		const fullVideoHeight = this._mediaHeightBeforeScaling;
+		const fullVideoCenterX = fullVideoWidth / 2;
+		const fullVideoCenterY = fullVideoHeight / 2;
 
 		this.zoomLevel = zoomLevel;
-		const zoom = otherFrameWidth / zoomedFrameWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
-		const zoomPercentage = zoom * 100;
+		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
+
+		// At the maximum zoom level, none of the zoomed frame should be cut off.
+		// In other words:
+		//     scaledWidth <= fullVideoWidth AND scaledHeight <= fullVideoHeight
+		// To determine whether the width or height should serve as the limiter,
+		// we compare the aspect ratio of the zoomed frame to the aspect ratio of the full video.
+		const zoomedFrameAspectRatio = zoomedFrameHeight / zoomedFrameWidth;
+		const fullVideoAspectRatio = fullVideoHeight / fullVideoWidth;
+		let scaleCeil;
+		if (zoomedFrameAspectRatio <= fullVideoAspectRatio) {
+			scaleCeil = (fullVideoWidth / zoomedFrameWidth) - 1;
+		} else {
+			scaleCeil = (fullVideoHeight / zoomedFrameHeight) - 1;
+		}
+
+		const scale = scaleCeil * currentPercentageOfFullZoom;
+		const scalePercentage = 100 + (scale * 100);
 
 		// The video will be enlarged using the CSS transform(scale(...)) property.
 		// When scaling, the origin point will be the center point of the video.
@@ -1050,15 +1071,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		//     (center of the zoomed frame) - (center of the video)
 		// The above applies for to both the X and Y axis. For the X-axis, we also need to multiply by -1 to force the video to translate left.
 
-		const scalePercentage = 100 + zoomPercentage;
-
 		const zoomedFrameCenterX = zoomedFrame.left + (zoomedFrameWidth / 2);
 		const zoomedFrameCenterY = zoomedFrame.top + (zoomedFrameHeight / 2);
-
-		const fullVideoWidth = zoomedFrameWidth + otherFrameWidth;
-		const fullVideoHeight = zoomedFrameHeight + otherFrameHeight;
-		const fullVideoCenterX = fullVideoWidth / 2;
-		const fullVideoCenterY = fullVideoHeight / 2;
 
 		const xDistanceBetweenFrameCenterAndVideoCenter = -1 * (zoomedFrameCenterX - fullVideoCenterX);
 		const yDistanceBetweenFrameCenterAndVideoCenter = zoomedFrameCenterY - fullVideoCenterY;
@@ -1068,7 +1082,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const xDistancePercentage = xDistanceBetweenFrameCenterAndVideoCenter / fullVideoWidth * 100;
 		const yDistancePercentage = yDistanceBetweenFrameCenterAndVideoCenter / fullVideoHeight * 100;
 
-		const currentPercentageOfFullZoom = (Math.abs(this.zoomLevel) / SLIDER_STEPS);
 		const translateXPercentage = xDistancePercentage * currentPercentageOfFullZoom;
 		const translateYPercentage = yDistancePercentage * currentPercentageOfFullZoom;
 
@@ -1663,6 +1676,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 			this._stateBeforeLoad = null;
 		}
+
+		this._mediaWidthBeforeScaling = this._media.videoWidth;
+		this._mediaHeightBeforeScaling = this._media.videoHeight;
 
 		this._maintainHeight = null;
 		this._loading = false;
