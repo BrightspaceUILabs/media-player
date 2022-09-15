@@ -106,11 +106,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
+			_heightPixels: { type: Number, attribute: false },
 			_hoverTime: { type: Number, attribute: false },
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
 			_mediaContainerAspectRatio: { type: Object, attribute: false },
+			_mediaHeightBeforeScaling: { type: Number, attribute: false },
+			_mediaWidthBeforeScaling: { type: Number, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -606,6 +609,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = 1;
+		this._heightPixels = null;
 		this._hoverTime = 0;
 		this._hovering = false;
 		this._hoveringMediaControls = false;
@@ -634,11 +638,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._playRequested = false;
 		this._mediaContainerAspectRatio = {
 		};
-		this._videoStyle = {
-			width: '100%',
-			height: '100%',
-			top: '0%'
-		};
+		this._videoStyle = {};
 		this._zoomLevel = 0;
 	}
 
@@ -728,6 +728,23 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
+				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
+				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
+				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
+				const flickerThreshold = 20;
+				if ((height === this._twoHeightsAgo && width === this._twoWidthsAgo)
+					&& Math.abs(this._lastHeight - height) < flickerThreshold
+				) {
+					this._heightPixels = Math.floor(Math.max(height, this._lastHeight));
+				} else {
+					this._heightPixels = null;
+				}
+
+				this._twoHeightsAgo = this._lastHeight;
+				this._lastHeight = height;
+
+				this._twoWidthsAgo = this._lastWidth;
+				this._lastWidth = width;
 
 				const multiplier = Math.sqrt(Math.max(1, Math.min(height, width) / MIN_TRACK_WIDTH_PX));
 				this._trackFontSizeRem = multiplier;
@@ -744,12 +761,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const playTooltip = `${this._playing ? this.localize('pause') : this.localize('play')} (${KEY_BINDINGS.play})`;
 		const volumeTooltip = `${this._muted ? this.localize('unmute') : this.localize('mute')} (${KEY_BINDINGS.mute})`;
 
-		const height = this._maintainHeight ? { height: `${this._maintainHeight}px` } : {};
+		const height = this._maintainHeight ? `${this._maintainHeight}px` : (this._heightPixels ? `${this._heightPixels}px` : '100%');
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
 			minHeight: this.isIOSVideo ? 'auto' : '17rem',
-			...height,
+			height,
 			...this._mediaContainerAspectRatio,
 		};
 
@@ -1010,24 +1027,43 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_advancedZoom(zoomLevel) {
-		let zoomedFrame, otherFrame;
+		let zoomedFrame;
 
 		// zoomLevel < 0 means that the slider is shifted to the left, towards "Video".
 		// zoomLevel > 0 means that the slider is shifted to the right, towards "Presentation".
 		if (zoomLevel > 0) {
-			[otherFrame, zoomedFrame] = this.metadata.layoutPresets.frames;
+			[, zoomedFrame] = this.metadata.layoutPresets.frames;
 		} else {
-			[zoomedFrame, otherFrame] = this.metadata.layoutPresets.frames;
+			[zoomedFrame] = this.metadata.layoutPresets.frames;
 		}
 
 		const zoomedFrameWidth = zoomedFrame.right - zoomedFrame.left + 1;
 		const zoomedFrameHeight = zoomedFrame.bottom - zoomedFrame.top + 1;
-		const otherFrameWidth = otherFrame.right - otherFrame.left + 1;
-		const otherFrameHeight = otherFrame.bottom - otherFrame.top + 1;
+
+		const fullVideoWidth = this._mediaWidthBeforeScaling;
+		const fullVideoHeight = this._mediaHeightBeforeScaling;
+		const fullVideoCenterX = fullVideoWidth / 2;
+		const fullVideoCenterY = fullVideoHeight / 2;
 
 		this.zoomLevel = zoomLevel;
-		const zoom = otherFrameWidth / zoomedFrameWidth * Math.abs(this.zoomLevel) / SLIDER_STEPS;
-		const zoomPercentage = zoom * 100;
+		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
+
+		// At the maximum zoom level, none of the zoomed frame should be cut off.
+		// In other words:
+		//     scaledWidth <= fullVideoWidth AND scaledHeight <= fullVideoHeight
+		// To determine whether the width or height should serve as the limiter,
+		// we compare the aspect ratio of the zoomed frame to the aspect ratio of the full video.
+		const zoomedFrameAspectRatio = zoomedFrameHeight / zoomedFrameWidth;
+		const fullVideoAspectRatio = fullVideoHeight / fullVideoWidth;
+		let scaleCeil;
+		if (zoomedFrameAspectRatio <= fullVideoAspectRatio) {
+			scaleCeil = (fullVideoWidth / zoomedFrameWidth) - 1;
+		} else {
+			scaleCeil = (fullVideoHeight / zoomedFrameHeight) - 1;
+		}
+
+		const scale = scaleCeil * currentPercentageOfFullZoom;
+		const scalePercentage = 100 + (scale * 100);
 
 		// The video will be enlarged using the CSS transform(scale(...)) property.
 		// When scaling, the origin point will be the center point of the video.
@@ -1035,15 +1071,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		//     (center of the zoomed frame) - (center of the video)
 		// The above applies for to both the X and Y axis. For the X-axis, we also need to multiply by -1 to force the video to translate left.
 
-		const scalePercentage = 100 + zoomPercentage;
-
 		const zoomedFrameCenterX = zoomedFrame.left + (zoomedFrameWidth / 2);
 		const zoomedFrameCenterY = zoomedFrame.top + (zoomedFrameHeight / 2);
-
-		const fullVideoWidth = zoomedFrameWidth + otherFrameWidth;
-		const fullVideoHeight = zoomedFrameHeight + otherFrameHeight;
-		const fullVideoCenterX = fullVideoWidth / 2;
-		const fullVideoCenterY = fullVideoHeight / 2;
 
 		const xDistanceBetweenFrameCenterAndVideoCenter = -1 * (zoomedFrameCenterX - fullVideoCenterX);
 		const yDistanceBetweenFrameCenterAndVideoCenter = zoomedFrameCenterY - fullVideoCenterY;
@@ -1053,7 +1082,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const xDistancePercentage = xDistanceBetweenFrameCenterAndVideoCenter / fullVideoWidth * 100;
 		const yDistancePercentage = yDistanceBetweenFrameCenterAndVideoCenter / fullVideoHeight * 100;
 
-		const currentPercentageOfFullZoom = (Math.abs(this.zoomLevel) / SLIDER_STEPS);
 		const translateXPercentage = xDistancePercentage * currentPercentageOfFullZoom;
 		const translateYPercentage = yDistancePercentage * currentPercentageOfFullZoom;
 
@@ -1649,6 +1677,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._stateBeforeLoad = null;
 		}
 
+		this._mediaWidthBeforeScaling = this._media.videoWidth;
+		this._mediaHeightBeforeScaling = this._media.videoHeight;
+
 		this._maintainHeight = null;
 		this._loading = false;
 
@@ -2080,10 +2111,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const zoomBarValue = zoomBar.immediateValue - 50;
 		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
-		if (!this.metadata?.layoutPresets) {
-			this._basicZoom(zoomLevel);
-		} else {
+		if (this.metadata && this.metadata.layoutPresets && this.metadata.layoutPresets.frames && this.metadata.layoutPresets.frames.length > 0) {
 			this._advancedZoom(zoomLevel);
+		} else {
+			this._basicZoom(zoomLevel);
 		}
 	}
 
