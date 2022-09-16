@@ -104,6 +104,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
 			_chapters: { type: Array, attribute: false },
+			_containerHeight: { type: Number, attribute: false },
+			_containerWidth: { type: Number, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -728,6 +730,13 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
+				this._containerHeight = height;
+				this._containerWidth = width;
+				// Mixed layout zoom level is based on container dimensions,
+				// so the zoom values need to be recalculated.
+				if (this._zoomBarIsVisible()) {
+					this._sliderChange();
+				}
 				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
 				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
 				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
@@ -792,7 +801,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
-			${!this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen ? html`
+			${this._zoomBarIsVisible() ? html`
 			<div id="d2l-labs-media-player-zoom-bar-container">
 				<d2l-icon
 					class="zoom-bar-icon"
@@ -1045,21 +1054,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const fullVideoCenterX = fullVideoWidth / 2;
 		const fullVideoCenterY = fullVideoHeight / 2;
 
+		const containerAspectRatio = this._containerHeight / this._containerWidth;
+
 		this.zoomLevel = zoomLevel;
-		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
 
 		// At the maximum zoom level, none of the zoomed frame should be cut off.
 		// In other words:
-		//     scaledWidth <= fullVideoWidth AND scaledHeight <= fullVideoHeight
+		//     scaledWidth <= containerWidth AND scaledHeight <= containerHeight
 		// To determine whether the width or height should serve as the limiter,
-		// we compare the aspect ratio of the zoomed frame to the aspect ratio of the full video.
+		// we compare the aspect ratio of the zoomed frame to the aspect ratio of the container.
+		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
 		const zoomedFrameAspectRatio = zoomedFrameHeight / zoomedFrameWidth;
-		const fullVideoAspectRatio = fullVideoHeight / fullVideoWidth;
 		let scaleCeil;
-		if (zoomedFrameAspectRatio <= fullVideoAspectRatio) {
+		if (zoomedFrameAspectRatio <= containerAspectRatio) {
 			scaleCeil = (fullVideoWidth / zoomedFrameWidth) - 1;
 		} else {
-			scaleCeil = (fullVideoHeight / zoomedFrameHeight) - 1;
+			// Since mixed layout videos are always wide rather than tall, pillar boxes will only appear above and below the video.
+			// This means that we only need to account for pillar boxing when height is the limiting factor.
+			const fullVideoHeightWithPillarBoxes = fullVideoWidth * containerAspectRatio;
+			scaleCeil = (fullVideoHeightWithPillarBoxes / zoomedFrameHeight) - 1;
 		}
 
 		const scale = scaleCeil * currentPercentageOfFullZoom;
@@ -2218,6 +2231,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				}
 			}
 		});
+	}
+
+	_zoomBarIsVisible() {
+		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen;
 	}
 }
 
