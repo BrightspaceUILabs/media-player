@@ -609,11 +609,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 			.video-transcript-cue[active] {
 				background-color: gray;
-				box-shadow: -5px 0px 0px white;
+				box-shadow: -5px 0 0 white;
 			}
 			.audio-transcript-cue[active] {
 				background-color: lightgray;
-				box-shadow: -5px 0px 0px black;
+				box-shadow: -5px 0 0 black;
 			}
 			#video-transcript-viewer {
 				color: white;
@@ -2210,26 +2210,25 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const captionsToHtml = (item) => {
 			const updateTime = () => this.currentTime = item.startTime;
 			return html`
-			<div class=${isVideo ? "video-transcript-cue" : "audio-transcript-cue"}
+			<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'}
 				@click=${updateTime}>
 				${item.text}<br>
 			</div>`;
 		};
-		let textColour = 'white';
 
 		return html`
 			<span id="close-transcript"
 			@click=${this._closeTranscript}>
 			<d2l-icon class="d2l-button-icon" 
-				id=${isVideo ? "video-close-transcript-icon" : "audio-close-transcript-icon"}
+				id=${isVideo ? 'video-close-transcript-icon' : 'audio-close-transcript-icon'}
 				icon="tier1:close-small"></d2l-icon>
 			</span>
 			<div
-			id=${isVideo ? "video-transcript-viewer" : "audio-transcript-viewer"}
+			id=${isVideo ? 'video-transcript-viewer' : 'audio-transcript-viewer'}
 			>
 			<div class="transcript-cue-container">
 				${beforeCaptions.map(captionsToHtml)}
-				<div class=${isVideo ? "video-transcript-cue" : "audio-transcript-cue"} active
+				<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'} active
 				id="transcript-viewer-active-cue">
 					${this.transcriptCue?.text}
 				</div>
@@ -2237,7 +2236,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			</div>
 			</div>
 			<d2l-dropdown-button-subtle
-				id=${isVideo ? "video-transcript-download-button" : "audio-transcript-download-button"}
+				id=${isVideo ? 'video-transcript-download-button' : 'audio-transcript-download-button'}
 				text="${this.localize('download')}">
 				<d2l-dropdown-menu id="dropdown">
 					<d2l-menu>
