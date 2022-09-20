@@ -103,6 +103,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			src: { type: String },
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
+			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
 			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -595,6 +596,31 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			.zoom-bar-icon {
 				margin: 10px;
 			}
+			.transcript-cue-container {
+				padding-left: 10px;
+			}
+			.transcript-cue {
+				padding-left: 5px;
+			}
+			#transcript-viewer {
+				position: absolute;
+				top: 40px;
+				right: 0px;
+				z-index: 1;
+				height: 75%;
+				overflow-y: auto;
+			}
+			#close-transcript {
+				position: absolute;
+				top: 0px;
+				right: 7px;
+				z-index: 1;
+			}
+			#transcript-download-button {
+				position: absolute;
+				top: 0px;
+				z-index: 2;
+			}
 		` ];
 	}
 
@@ -812,6 +838,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					icon="tier3:image"
 				></d2l-icon>
 			</div>` : ''}
+			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -1240,6 +1267,104 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				<d2l-loading-spinner size="100"></d2l-loading-spinner>
 			</div>
 		` : null;
+	}
+
+	_renderTranscriptViewer() {
+		if (!this._media) {
+			return;
+		}
+		let cues = null;
+		let transcriptLocale;
+		for (let i = 0; i < this._media.textTracks.length; i += 1) {
+			cues = this._media.textTracks[i]?.cues;
+			if (cues) {
+				const activeCues = this._media.textTracks[i].activeCues;
+				if (!activeCues) break;
+				transcriptLocale = this._media.textTracks[i]?.language;
+				this.transcriptCue = activeCues[activeCues.length - 1];
+				break;
+			}
+		}
+		if (!cues) {
+			return;
+		}
+
+		this.locale = transcriptLocale?.toLowerCase();
+
+		const beforeCaptions = [];
+		const afterCaptions = [];
+		for (let i = 0; i < cues.length; i += 1) {
+			const currCue = cues[i];
+			const currTime = this._media?.currentTime;
+			const before = currCue !== this.transcriptCue && ( currCue.endTime < currTime || currCue.endTime <= this.transcriptCue?.endTime );
+			if (before) {
+				beforeCaptions.push(currCue);
+			} else if (currCue !== this.transcriptCue) {
+				afterCaptions.push(currCue);
+			}
+		}
+		const captionsToHtml = (item) => {
+			const updateTime = () => this.currentTime = item.startTime;
+			return html`
+			<div class="transcript-cue" @click=${updateTime}>
+				${item.text}<br>
+			</div>`;
+		};
+
+		let textColour;
+		switch (this.mediaType) {
+			case SOURCE_TYPES.video: {
+				textColour = 'white';
+				this._video = true;
+				break;
+			}
+			case SOURCE_TYPES.audio: {
+				textColour = 'black';
+				break;
+			}
+			default: textColour = 'white';
+		}
+		return html`
+			<span id="close-transcript"
+			@click=${this._closeTranscript}>
+			<d2l-icon class="d2l-button-icon" icon="tier1:close-small" style="color: ${textColour};"></d2l-icon>
+			</span>
+			<div
+			id="transcript-viewer"
+			style="width: ${this._video ? '65%' : '100%'}; color: ${textColour};"
+			>
+			<div class="transcript-cue-container">
+				${beforeCaptions.map(captionsToHtml)}
+				<div class="transcript-cue"
+				style="background-color: ${this._video ? 'gray' : 'lightgray'}; box-shadow: -5px 0px 0px ${textColour};"
+				id="transcript-viewer-active-cue">
+					${this.transcriptCue?.text}
+				</div>
+				${afterCaptions.map(captionsToHtml)}
+			</div>
+			</div>
+			<d2l-dropdown-button-subtle id="transcript-download-button" text="${this.localize('download')}"
+			style="left: ${this._video ? '35%' : '0px'};">
+				<d2l-dropdown-menu id="dropdown">
+					<d2l-menu>
+							<d2l-menu-item @click=${this._downloadTranscript} text="${this.localize('transcriptTxt')}"></d2l-menu-item>
+							<d2l-menu-item @click=${this._downloadCaptions} text="${this.localize('captionsVtt')}"></d2l-menu-item>
+					</d2l-menu>
+				</d2l-dropdown-menu>
+			</d2l-dropdown-button-subtle>
+		`;
+	}
+
+	_downloadCaptions() {
+		this.dispatchEvent(new CustomEvent("download-captions",  {bubbles: true, composed: true}));
+	}
+
+	_downloadTranscript() {
+		this.dispatchEvent(new CustomEvent("download-transcript",  {bubbles: true, composed: true}));
+	}
+
+	_closeTranscript() {
+		this.dispatchEvent(new CustomEvent("close-transcript",  {bubbles: true, composed: true}));
 	}
 
 	_getMediaAreaView() {
