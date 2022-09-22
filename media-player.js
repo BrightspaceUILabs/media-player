@@ -103,6 +103,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			src: { type: String },
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
+			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
 			_chapters: { type: Array, attribute: false },
 			_containerHeight: { type: Number, attribute: false },
 			_containerWidth: { type: Number, attribute: false },
@@ -597,6 +598,67 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			.zoom-bar-icon {
 				margin: 10px;
 			}
+			.transcript-cue-container {
+				padding-left: 10px;
+			}
+			.video-transcript-cue {
+				padding-left: 5px;
+			}
+			.audio-transcript-cue {
+				padding-left: 5px;
+			}
+			.video-transcript-cue[active] {
+				background-color: gray;
+				box-shadow: -5px 0 0 white;
+			}
+			.audio-transcript-cue[active] {
+				background-color: lightgray;
+				box-shadow: -5px 0 0 black;
+			}
+			#video-transcript-viewer {
+				color: white;
+				height: 75%;
+				overflow-y: auto;
+				position: absolute;
+				right: 0;
+				top: 40px;
+				width: 65%;
+				z-index: 1;
+			}
+			#audio-transcript-viewer {
+				color: black;
+				height: 75%;
+				overflow-y: auto;
+				position: absolute;
+				right: 0;
+				top: 40px;
+				width: 100%;
+				z-index: 1;
+			}
+			#close-transcript {
+				position: absolute;
+				right: 7px;
+				top: 0;
+				z-index: 1;
+			}
+			#video-transcript-download-button {
+				left: 35%;
+				position: absolute;
+				top: 0;
+				z-index: 2;
+			}
+			#audio-transcript-download-button {
+				left: 0;
+				position: absolute;
+				top: 0;
+				z-index: 2;
+			}
+			#video-close-transcript-icon {
+				color: white;
+			}
+			#audio-close-transcript-icon {
+				color: black;
+			}
 		` ];
 	}
 
@@ -821,6 +883,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					icon="tier3:image"
 				></d2l-icon>
 			</div>` : ''}
+			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
@@ -1122,6 +1185,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		localStorage.removeItem(preferenceKey);
 	}
 
+	_closeTranscript() {
+		this.dispatchEvent(new CustomEvent('close-transcript',  { bubbles: true, composed: true }));
+	}
+
 	_disableNativeCaptions() {
 		if (!this._media) return;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1133,6 +1200,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				textTrack.mode = 'disabled';
 			}
 		}
+	}
+
+	_downloadCaptions() {
+		this.dispatchEvent(new CustomEvent('download-captions',  { bubbles: true, composed: true }));
+	}
+
+	_downloadTranscript() {
+		this.dispatchEvent(new CustomEvent('download-transcript',  { bubbles: true, composed: true }));
 	}
 
 	static _formatTime(totalSeconds) {
@@ -2095,6 +2170,82 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this.load();
 			}
 		}
+	}
+
+	_renderTranscriptViewer() {
+		if (!this._media) {
+			return;
+		}
+		let cues = null;
+		let transcriptLocale;
+		for (let i = 0; i < this._media.textTracks.length; i += 1) {
+			cues = this._media.textTracks[i]?.cues;
+			if (cues) {
+				const activeCues = this._media.textTracks[i].activeCues;
+				if (!activeCues) break;
+				transcriptLocale = this._media.textTracks[i]?.language;
+				this.transcriptCue = activeCues[activeCues.length - 1];
+				break;
+			}
+		}
+		if (!cues) {
+			return;
+		}
+
+		this.locale = transcriptLocale?.toLowerCase();
+
+		const beforeCaptions = [];
+		const afterCaptions = [];
+		for (let i = 0; i < cues.length; i += 1) {
+			const currCue = cues[i];
+			const currTime = this._media?.currentTime;
+			const before = currCue !== this.transcriptCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptCue?.endTime);
+			if (before) {
+				beforeCaptions.push(currCue);
+			} else if (currCue !== this.transcriptCue) {
+				afterCaptions.push(currCue);
+			}
+		}
+		const isVideo = this.mediaType === SOURCE_TYPES.video;
+		const captionsToHtml = (item) => {
+			const updateTime = () => this.currentTime = item.startTime;
+			return html`
+			<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'}
+				@click=${updateTime}>
+				${item.text}<br>
+			</div>`;
+		};
+
+		return html`
+			<span id="close-transcript"
+			@click=${this._closeTranscript}>
+			<d2l-icon class="d2l-button-icon" 
+				id=${isVideo ? 'video-close-transcript-icon' : 'audio-close-transcript-icon'}
+				icon="tier1:close-small"></d2l-icon>
+			</span>
+			<div
+			id=${isVideo ? 'video-transcript-viewer' : 'audio-transcript-viewer'}
+			>
+			<div class="transcript-cue-container">
+				${beforeCaptions.map(captionsToHtml)}
+				<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'} active
+				id="transcript-viewer-active-cue">
+					${this.transcriptCue?.text}
+				</div>
+				${afterCaptions.map(captionsToHtml)}
+			</div>
+			</div>
+			<d2l-dropdown-button-subtle
+				id=${isVideo ? 'video-transcript-download-button' : 'audio-transcript-download-button'}
+				text="${this.localize('download')}">
+				<d2l-dropdown-menu id="dropdown">
+					<d2l-menu>
+							<d2l-menu-item @click=${this._downloadTranscript} text="${this.localize('transcriptTxt')}"></d2l-menu-item>
+							<d2l-menu-item @click=${this._downloadCaptions} text="${this.localize('captionsVtt')}"></d2l-menu-item>
+					</d2l-menu>
+				</d2l-dropdown-menu>
+			</d2l-dropdown-button-subtle>
+		`;
 	}
 
 	_sanitizeText(text) {

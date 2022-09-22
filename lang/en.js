@@ -1,6 +1,7 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Captions",
+	"captionsVtt": "Captions (.vtt)",
 	"quality": "Quality",
 	"closedCaptionsAcronym": "CC",
 	"default": "Default",
@@ -21,6 +22,7 @@ export default {
 	"seekSlider": "seek slider",
 	"settings": "settings",
 	"speed": "speed",
+	"transcriptTxt": "Transcript (.txt)",
 	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Unmute",
 	"volumeSlider": "volume slider"
