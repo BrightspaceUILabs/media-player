@@ -2191,7 +2191,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!cues) {
 			let defaultTrack;
 			for (let i = 0; i < this._media.textTracks.length; i++) {
-				console.log(this._media.textTracks[i]);
 				if (this._media.textTracks[i].default) {
 					defaultTrack = this._media.textTracks[i];
 					break;
