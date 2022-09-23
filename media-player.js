@@ -2242,8 +2242,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			<div
 			id=${isVideo ? 'video-transcript-viewer' : 'audio-transcript-viewer'}
 			>
-			<div class="transcript-cue-container"
-				id="transcript-viewer-active-cue-container">
+			<div class="transcript-cue-container">
 				${beforeCaptions.map(captionsToHtml)}
 				<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'} active
 				id="transcript-viewer-active-cue">
