@@ -2189,6 +2189,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 		}
 		if (!cues) {
+			let defaultTrack;
+			for (let i = 0; i < this._media.textTracks.length; i++) {
+				if (this._media.textTracks[i].default) {
+					defaultTrack = this._media.textTracks[i];
+					break;
+				}
+			}
+			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
+			defaultTrack.mode = 'hidden';
+			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
+			this.requestUpdate();
 			return;
 		}
 
