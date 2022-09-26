@@ -1621,10 +1621,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		);
 
 		return this._tracks.length > 0 && !this.hideCaptionsSelection ? html`
-			<d2l-menu-item text="${this.localize('captions')}">
+			<d2l-menu-item text="${this.transcriptViewerOn ? this.localize('language') : this.localize('captions')}">
 				<div slot="supporting">${this._selectedTrackLabel}</div>
-				<d2l-menu @d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
-					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>
+				<d2l-menu id="d2l-labs-media-player-captions-menu"
+					@d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
+					${this.transcriptViewerOn ? '' : html`
+					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>`}
 					${this._tracks.map(track => html`
 						<d2l-menu-item-radio
 							?selected="${isTrackSelected(track)}"
@@ -2194,6 +2196,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	_renderTranscriptViewer() {
 		if (!this._media) {
 			return;
+		}
+		const captionsMenu = this.shadowRoot.getElementById('d2l-labs-media-player-captions-menu');
+		if (captionsMenu) {
+			const returnItem = captionsMenu.shadowRoot.querySelector('d2l-menu-item-return');
+			returnItem.text = this.localize('language');
 		}
 		let cues = null;
 		let transcriptLocale;

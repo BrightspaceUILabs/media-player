@@ -8,6 +8,7 @@ export default {
 	"download": "Download",
 	"exitFullscreen": "Exit fullscreen",
 	"fullscreen": "Fullscreen",
+	"language": "Language",
 	"loadErrorMessage": "Oops, there was a problem loading this media file",
 	"loadSuccessMessage": "The media has loaded successfully",
 	"menu": "menu",
