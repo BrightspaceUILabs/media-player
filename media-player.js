@@ -202,6 +202,20 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				z-index: 2;
 			}
 
+			#d2l-labs-media-player-video-poster-play-button[transcript]{
+				background-color: rgba(0, 0, 0, 0.69);
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+				left: 10%;
+				padding: 2em;
+				position: absolute;
+				top: 10%;
+				transform: scale(0.5);
+				z-index: 2;
+			}
+
+
 			#d2l-labs-media-player-video-poster-play-button > d2l-icon {
 				color: #ffffff;
 			}
@@ -1463,7 +1477,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!this.poster || this.autoplay || !this._posterVisible) return;
 
 		const playIcon = !this._loading ? html`
-			<button id="d2l-labs-media-player-video-poster-play-button" @click=${this._onVideoClick}>
+			<button id="d2l-labs-media-player-video-poster-play-button" transcript="${ifDefined(this.transcriptViewerOn ? true : undefined)}"
+				@click=${this._onVideoClick}>
 				<d2l-icon icon="tier1:play" theme="${ifDefined(this._getTheme())}"></d2l-icon>
 			</button>
 		` : null;
