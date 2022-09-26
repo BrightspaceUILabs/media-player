@@ -1650,6 +1650,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_onCueChange() {
+		if (this.transcriptViewerOn) {
+			const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
+			cue?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+		}
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
 				if (this._media.textTracks[i].activeCues.length > 0) {
@@ -2178,6 +2182,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 		let cues = null;
 		let transcriptLocale;
+		this._setZoomLevel(0);
 		for (let i = 0; i < this._media.textTracks.length; i += 1) {
 			cues = this._media.textTracks[i]?.cues;
 			if (cues) {
@@ -2269,6 +2274,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 	}
 
+	_setZoomLevel(zoomLevel) {
+		if (this.metadata && this.metadata.layoutPresets && this.metadata.layoutPresets.frames && this.metadata.layoutPresets.frames.length > 0) {
+			this._advancedZoom(zoomLevel);
+		} else {
+			this._basicZoom(zoomLevel);
+		}
+	}
+
 	_showControls(temporarily) {
 		this._recentlyShowedCustomControls = true;
 		clearTimeout(this._showControlsTimeout);
@@ -2286,11 +2299,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const zoomBarValue = zoomBar.immediateValue - 50;
 		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
 
-		if (this.metadata && this.metadata.layoutPresets && this.metadata.layoutPresets.frames && this.metadata.layoutPresets.frames.length > 0) {
-			this._advancedZoom(zoomLevel);
-		} else {
-			this._basicZoom(zoomLevel);
-		}
+		this._setZoomLevel(zoomLevel);
 	}
 
 	_startHoveringControls() {
@@ -2396,7 +2405,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_zoomBarIsVisible() {
-		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen;
+		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen && !this.transcriptViewerOn;
 	}
 }
 
