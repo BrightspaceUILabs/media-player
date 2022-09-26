@@ -202,7 +202,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				z-index: 2;
 			}
 
-			#d2l-labs-media-player-video-poster-play-button[transcript]{
+			#d2l-labs-media-player-video-poster-play-button[transcript] {
 				background-color: rgba(0, 0, 0, 0.69);
 				border: none;
 				border-radius: 50%;
@@ -673,7 +673,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#audio-close-transcript-icon {
 				color: black;
 			}
-		` ];
+` ];
 	}
 
 	constructor() {
