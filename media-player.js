@@ -202,6 +202,20 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				z-index: 2;
 			}
 
+			#d2l-labs-media-player-video-poster-play-button[transcript] {
+				background-color: rgba(0, 0, 0, 0.69);
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+				left: 10%;
+				padding: 2em;
+				position: absolute;
+				top: 10%;
+				transform: scale(0.5);
+				z-index: 2;
+			}
+
+
 			#d2l-labs-media-player-video-poster-play-button > d2l-icon {
 				color: #ffffff;
 			}
@@ -659,7 +673,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#audio-close-transcript-icon {
 				color: black;
 			}
-		` ];
+` ];
 	}
 
 	constructor() {
@@ -1463,7 +1477,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!this.poster || this.autoplay || !this._posterVisible) return;
 
 		const playIcon = !this._loading ? html`
-			<button id="d2l-labs-media-player-video-poster-play-button" @click=${this._onVideoClick}>
+			<button id="d2l-labs-media-player-video-poster-play-button" transcript="${ifDefined(this.transcriptViewerOn ? true : undefined)}"
+				@click=${this._onVideoClick}>
 				<d2l-icon icon="tier1:play" theme="${ifDefined(this._getTheme())}"></d2l-icon>
 			</button>
 		` : null;
@@ -1606,10 +1621,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		);
 
 		return this._tracks.length > 0 && !this.hideCaptionsSelection ? html`
-			<d2l-menu-item text="${this.localize('captions')}">
+			<d2l-menu-item text="${this.transcriptViewerOn ? this.localize('language') : this.localize('captions')}">
 				<div slot="supporting">${this._selectedTrackLabel}</div>
-				<d2l-menu @d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
-					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>
+				<d2l-menu id="d2l-labs-media-player-captions-menu"
+					@d2l-menu-item-change=${this._onTracksMenuItemChange} theme="${ifDefined(this._getTheme())}">
+					${this.transcriptViewerOn ? '' : html`
+					<d2l-menu-item-radio text="${this.localize('off')}" ?selected="${!this._selectedTrackIdentifier}"></d2l-menu-item-radio>`}
 					${this._tracks.map(track => html`
 						<d2l-menu-item-radio
 							?selected="${isTrackSelected(track)}"
@@ -2179,6 +2196,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	_renderTranscriptViewer() {
 		if (!this._media) {
 			return;
+		}
+		const captionsMenu = this.shadowRoot.getElementById('d2l-labs-media-player-captions-menu');
+		if (captionsMenu) {
+			const returnItem = captionsMenu.shadowRoot.querySelector('d2l-menu-item-return');
+			returnItem.text = this.localize('language');
 		}
 		let cues = null;
 		let transcriptLocale;

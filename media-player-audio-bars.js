@@ -95,7 +95,7 @@ class MediaPlayerAudioBars extends LitElement {
 				margin: 0 ${AUDIO_BAR_HORIZONTAL_MARGIN_REM}rem;
 				width: ${AUDIO_BAR_WIDTH_REM}rem;
 			}
-		`;
+`;
 	}
 
 	constructor() {
