@@ -635,7 +635,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
-				top: 40px;
+				top: 50px;
 				width: 65%;
 				z-index: 1;
 			}
@@ -645,7 +645,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
-				top: 40px;
+				top: 45px;
 				width: 100%;
 				z-index: 1;
 			}
