@@ -901,7 +901,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
-				${!this._trackText ? null : html`
+				${!this._trackText || this.transcriptViewerOn ? null : html`
 				<div id="d2l-labs-media-player-track-container" style=${styleMap(trackContainerStyle)} @click=${this._onTrackContainerClick}>
 					<div>
 						<span style=${styleMap(trackSpanStyle)} role="status">${this._trackText}</span>
