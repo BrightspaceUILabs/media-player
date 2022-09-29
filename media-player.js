@@ -630,8 +630,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				box-shadow: -5px 0 0 black;
 			}
 			#video-transcript-viewer {
+				bottom: 55px;
 				color: white;
-				height: 75%;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -640,8 +640,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				z-index: 1;
 			}
 			#audio-transcript-viewer {
+				bottom: 60px;
 				color: black;
-				height: 75%;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -904,7 +904,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			${this._getMediaAreaView()}
 
 			${this.isIOSVideo ? null : html`
-				${!this._trackText ? null : html`
+				${!this._trackText || this.transcriptViewerOn ? null : html`
 				<div id="d2l-labs-media-player-track-container" style=${styleMap(trackContainerStyle)} @click=${this._onTrackContainerClick}>
 					<div>
 						<span style=${styleMap(trackSpanStyle)} role="status">${this._trackText}</span>
@@ -1401,7 +1401,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					>
 						<source @error=${this._onError}></source>
 					</audio>
-
+					${this.transcriptViewerOn ? null : html`
 					<div id="d2l-labs-media-player-audio-bars-container">
 						<div id="d2l-labs-media-player-audio-play-button-container">
 							<button id="d2l-labs-media-player-audio-play-button" title="${playTooltip}" aria-label="${playTooltip}" @click=${this._togglePlay}>
@@ -1410,7 +1410,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 						</div>
 
 						<d2l-labs-media-player-audio-bars ?playing="${this._playing}"></d2l-labs-media-player-audio-bars>
-					</div>
+					</div>`}
 				`;
 			default:
 				return null;
