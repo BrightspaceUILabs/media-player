@@ -635,7 +635,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
-				top: 40px;
+				top: 50px;
 				width: 65%;
 				z-index: 1;
 			}
@@ -645,7 +645,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
-				top: 40px;
+				top: 45px;
 				width: 100%;
 				z-index: 1;
 			}
@@ -658,14 +658,17 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#video-transcript-download-button {
 				left: 35%;
 				position: absolute;
-				top: 0;
+				top: 5px;
 				z-index: 2;
 			}
 			#audio-transcript-download-button {
-				left: 0;
+				left: 10px;
 				position: absolute;
 				top: 0;
 				z-index: 2;
+			}
+			#audio-transcript-download-menu {
+				left: 35px;
 			}
 			#video-close-transcript-icon {
 				color: white;
@@ -2276,7 +2279,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			<d2l-dropdown-button-subtle
 				id=${isVideo ? 'video-transcript-download-button' : 'audio-transcript-download-button'}
 				text="${this.localize('download')}">
-				<d2l-dropdown-menu id="dropdown">
+				<d2l-dropdown-menu id=${isVideo ? 'video-transcript-download-menu' : 'audio-transcript-download-menu'}>
 					<d2l-menu>
 							<d2l-menu-item @click=${this._downloadTranscript} text="${this.localize('transcriptTxt')}"></d2l-menu-item>
 							<d2l-menu-item @click=${this._downloadCaptions} text="${this.localize('captionsVtt')}"></d2l-menu-item>
