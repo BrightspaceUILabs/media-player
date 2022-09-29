@@ -631,21 +631,21 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 			#video-transcript-viewer {
 				color: white;
-				height: 75%;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
 				top: 40px;
+				bottom: 55px;
 				width: 65%;
 				z-index: 1;
 			}
 			#audio-transcript-viewer {
 				color: black;
-				height: 75%;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
 				top: 40px;
+				bottom: 60px;
 				width: 100%;
 				z-index: 1;
 			}
@@ -1398,7 +1398,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					>
 						<source @error=${this._onError}></source>
 					</audio>
-
+					${this.transcriptViewerOn ? null : html`
 					<div id="d2l-labs-media-player-audio-bars-container">
 						<div id="d2l-labs-media-player-audio-play-button-container">
 							<button id="d2l-labs-media-player-audio-play-button" title="${playTooltip}" aria-label="${playTooltip}" @click=${this._togglePlay}>
@@ -1407,7 +1407,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 						</div>
 
 						<d2l-labs-media-player-audio-bars ?playing="${this._playing}"></d2l-labs-media-player-audio-bars>
-					</div>
+					</div>`}
 				`;
 			default:
 				return null;
