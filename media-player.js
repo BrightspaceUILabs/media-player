@@ -630,22 +630,22 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				box-shadow: -5px 0 0 black;
 			}
 			#video-transcript-viewer {
+				bottom: 55px;
 				color: white;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
 				top: 40px;
-				bottom: 55px;
 				width: 65%;
 				z-index: 1;
 			}
 			#audio-transcript-viewer {
+				bottom: 60px;
 				color: black;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
 				top: 40px;
-				bottom: 60px;
 				width: 100%;
 				z-index: 1;
 			}
