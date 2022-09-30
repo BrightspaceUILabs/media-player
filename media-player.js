@@ -866,6 +866,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const theme = this.mediaType === SOURCE_TYPES.video ? 'dark' : undefined;
 		const volumeLevelContainerClass = { 'd2l-labs-media-player-hidden': !this._usingVolumeContainer || this._hidingCustomControls() };
 		const searchContainerClass = { 'd2l-labs-media-player-search-container-hidden' : !this._searchInstances[this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)] };
+		this._captionsMenuReturnItem?.setAttribute('text', (this.transcriptViewerOn ? this.localize('language') : this.localize('captions')));
 
 		const fullscreenButton = this.mediaType === SOURCE_TYPES.video ? html`<d2l-button-icon
 			class="d2l-dropdown-opener"
@@ -2202,8 +2203,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 		const captionsMenu = this.shadowRoot.getElementById('d2l-labs-media-player-captions-menu');
 		if (captionsMenu) {
-			const returnItem = captionsMenu.shadowRoot.querySelector('d2l-menu-item-return');
-			returnItem.text = this.localize('language');
+			this._captionsMenuReturnItem = captionsMenu.shadowRoot.querySelector('d2l-menu-item-return');
+			this._captionsMenuReturnItem?.setAttribute('text', this.localize('language'));
 		}
 		let cues = null;
 		let transcriptLocale;
