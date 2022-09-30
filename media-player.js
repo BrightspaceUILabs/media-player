@@ -2430,7 +2430,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_zoomBarIsVisible() {
-		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen && !this.transcriptViewerOn;
+		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen
+			&& !this.transcriptViewerOn && !IS_IOS;
 	}
 }
 
