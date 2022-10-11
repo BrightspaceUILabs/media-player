@@ -633,6 +633,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#video-transcript-viewer {
 				bottom: 55px;
 				color: white;
+				overflow-anchor: none;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -806,7 +807,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._getMetadata();
 
 		this._startUpdatingCurrentTime();
-
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
@@ -1673,8 +1673,22 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_onCueChange() {
 		if (this.transcriptViewerOn) {
+			if (!this._transcriptViewer) {
+				this._transcriptViewer = this.shadowRoot.getElementById('video-transcript-viewer')
+					|| this.shadowRoot.getElementById('audio-transcript-viewer');
+			}
 			const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
-			cue?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+			const cueRect = cue.getBoundingClientRect();
+			const transcriptRect = this._transcriptViewer.getBoundingClientRect();
+			if (cue && this.activeCue && this._canScroll) {
+				if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
+					this._scrolling = true;
+					this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' })
+				} else if (cueRect.top < transcriptRect.top) {
+					this._scrolling = true;
+					this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' })
+				}
+			}
 		}
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
@@ -2199,6 +2213,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_renderTranscriptViewer() {
+		this._canScroll = true;
 		if (!this._media) {
 			return;
 		}
