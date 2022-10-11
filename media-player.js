@@ -633,7 +633,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#video-transcript-viewer {
 				bottom: 55px;
 				color: white;
-				overflow-anchor: none;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -1683,10 +1682,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			if (cue && this.activeCue && this._canScroll) {
 				if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
 					this._scrolling = true;
-					this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' })
+					this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' });
 				} else if (cueRect.top < transcriptRect.top) {
 					this._scrolling = true;
-					this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' })
+					this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
 				}
 			}
 		}
