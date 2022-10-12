@@ -2423,7 +2423,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_updateTranscriptViewerCues() {
 		let cues = null;
-		let lang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)
+		const lang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 		for (let i = 0; i < this._media.textTracks.length; i += 1) {
 			const currTracks = this._media.textTracks[i];
 			if (currTracks?.cues) {
