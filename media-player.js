@@ -1675,13 +1675,11 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	_onCueChange() {
 		if (this.transcriptViewerOn) {
 			let cues = null;
-			let transcriptLocale;
 			for (let i = 0; i < this._media.textTracks.length; i += 1) {
 				cues = this._media.textTracks[i]?.cues;
 				if (cues) {
 					const activeCues = this._media.textTracks[i].activeCues;
 					if (!activeCues) break;
-					transcriptLocale = this._media.textTracks[i]?.language;
 					this.transcriptCue = activeCues[activeCues.length - 1];
 					break;
 				}
@@ -2269,10 +2267,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 		const isVideo = this.mediaType === SOURCE_TYPES.video;
 		const captionsToHtml = (item) => {
-			const updateTime = async () => {
+			const updateTime = async() => {
 				this.currentTime = item.startTime;
 				this._media.currentTime = item.startTime;
-			}
+			};
 			return html`
 			<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'}
 				@click=${updateTime}>
