@@ -633,6 +633,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#video-transcript-viewer {
 				bottom: 55px;
 				color: white;
+				overflow-anchor: none;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -643,6 +644,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			#audio-transcript-viewer {
 				bottom: 60px;
 				color: black;
+				overflow-anchor: none;
 				overflow-y: auto;
 				position: absolute;
 				right: 0;
@@ -1672,60 +1674,68 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!this.allowDownload) e.preventDefault();
 	}
 
-	_onCueChange() {
-		if (this.transcriptViewerOn) {
-			let cues = null;
-			for (let i = 0; i < this._media.textTracks.length; i += 1) {
-				cues = this._media.textTracks[i]?.cues;
-				if (cues) {
-					const activeCues = this._media.textTracks[i].activeCues;
-					if (!activeCues) break;
-					this.transcriptCue = activeCues[activeCues.length - 1];
+	_updateTranscriptViewerCues() {
+		let cues = null;
+		for (let i = 0; i < this._media.textTracks.length; i += 1) {
+			cues = this._media.textTracks[i]?.cues;
+			if (cues) {
+				const activeCues = this._media.textTracks[i].activeCues;
+				if (!activeCues) break;
+				this.transcriptActiveCue = activeCues[activeCues.length - 1];
+				break;
+			}
+		}
+		if (!cues) {
+			let defaultTrack;
+			for (let i = 0; i < this._media.textTracks.length; i++) {
+				if (this._media.textTracks[i].default) {
+					defaultTrack = this._media.textTracks[i];
 					break;
 				}
 			}
-			if (!cues) {
-				let defaultTrack;
-				for (let i = 0; i < this._media.textTracks.length; i++) {
-					if (this._media.textTracks[i].default) {
-						defaultTrack = this._media.textTracks[i];
-						break;
-					}
-				}
-				if (!defaultTrack) defaultTrack = this._media.textTracks[0];
-				defaultTrack.mode = 'hidden';
-				this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
-				this.requestUpdate();
-				return;
-			}
+			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
+			defaultTrack.mode = 'hidden';
+			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
+			this.requestUpdate();
+			return;
+		}
 
-			this.beforeCaptions = [];
-			this.afterCaptions = [];
-			for (let i = 0; i < cues.length; i += 1) {
-				const currCue = cues[i];
-				const currTime = this._media?.currentTime;
-				const before = currCue !== this.transcriptCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptCue?.endTime);
-				if (before) {
-					this.beforeCaptions.push(currCue);
-				} else if (currCue !== this.transcriptCue) {
-					this.afterCaptions.push(currCue);
-				}
+		this.beforeCaptions = [];
+		this.afterCaptions = [];
+		for (let i = 0; i < cues.length; i += 1) {
+			const currCue = cues[i];
+			const currTime = this._media?.currentTime;
+			const before = currCue !== this.transcriptActiveCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptActiveCue?.endTime);
+			if (before) {
+				this.beforeCaptions.push(currCue);
+			} else if (currCue !== this.transcriptActiveCue) {
+				this.afterCaptions.push(currCue);
 			}
+		}
+	}
 
+	_scrollTranscriptViewer() {
+		const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
+		const cueRect = cue?.getBoundingClientRect();
+		const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
+		if (cue && cueRect && transcriptRect) {
+			if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
+				this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' });
+			} else if (cueRect.top < transcriptRect.top) {
+				this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
+			}
+		}
+	}
+
+	async _onCueChange() {
+		if (this.transcriptViewerOn) {
 			if (!this._transcriptViewer) {
 				this._transcriptViewer = this.shadowRoot.getElementById('video-transcript-viewer')
 					|| this.shadowRoot.getElementById('audio-transcript-viewer');
 			}
-			const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
-			const cueRect = cue?.getBoundingClientRect();
-			const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
-			if (cue && cueRect && transcriptRect && cue === this.transcriptCue) {
-				if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
-					this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' });
-				} else if (cueRect.top < transcriptRect.top) {
-					this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
-				}
-			}
+			this._updateTranscriptViewerCues();
+			await this.requestUpdate();
+			this._scrollTranscriptViewer();
 		}
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
@@ -2259,7 +2269,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._captionsMenuReturnItem?.setAttribute('text', this.localize('language'));
 		}
 
-		this._setZoomLevel(0);
+		this._setZoomLevel(0); // Reset zoom level since zoom bar is disabled in transcript view
 
 		if (!this._transcriptViewer) {
 			this._onCueChange();
@@ -2292,7 +2302,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				${this.beforeCaptions.map(captionsToHtml)}
 				<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'} active
 				id="transcript-viewer-active-cue">
-					${this.transcriptCue?.text}
+					${this.transcriptActiveCue?.text}
 				</div>
 				${this.afterCaptions.map(captionsToHtml)}
 			</div>
