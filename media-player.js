@@ -1719,8 +1719,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		const cueRect = cue?.getBoundingClientRect();
 		const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
 		if (cue && cueRect && transcriptRect) {
-			if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
-				this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' });
+			if (cueRect.bottom > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
+				this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height - cueRect.height, left: 0, behavior: 'smooth' });
 			} else if (cueRect.top < transcriptRect.top) {
 				this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
 			}
