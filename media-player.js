@@ -1674,59 +1674,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (!this.allowDownload) e.preventDefault();
 	}
 
-	_updateTranscriptViewerCues() {
-		let cues = null;
-		for (let i = 0; i < this._media.textTracks.length; i += 1) {
-			cues = this._media.textTracks[i]?.cues;
-			if (cues) {
-				const activeCues = this._media.textTracks[i].activeCues;
-				if (!activeCues) break;
-				this.transcriptActiveCue = activeCues[activeCues.length - 1];
-				break;
-			}
-		}
-		if (!cues) {
-			let defaultTrack;
-			for (let i = 0; i < this._media.textTracks.length; i++) {
-				if (this._media.textTracks[i].default) {
-					defaultTrack = this._media.textTracks[i];
-					break;
-				}
-			}
-			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
-			defaultTrack.mode = 'hidden';
-			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
-			this.requestUpdate();
-			return;
-		}
-
-		this.beforeCaptions = [];
-		this.afterCaptions = [];
-		for (let i = 0; i < cues.length; i += 1) {
-			const currCue = cues[i];
-			const currTime = this._media?.currentTime;
-			const before = currCue !== this.transcriptActiveCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptActiveCue?.endTime);
-			if (before) {
-				this.beforeCaptions.push(currCue);
-			} else if (currCue !== this.transcriptActiveCue) {
-				this.afterCaptions.push(currCue);
-			}
-		}
-	}
-
-	_scrollTranscriptViewer() {
-		const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
-		const cueRect = cue?.getBoundingClientRect();
-		const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
-		if (cue && cueRect && transcriptRect) {
-			if (cueRect.bottom > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
-				this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height - cueRect.height, left: 0, behavior: 'smooth' });
-			} else if (cueRect.top < transcriptRect.top) {
-				this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
-			}
-		}
-	}
-
 	async _onCueChange() {
 		if (this.transcriptViewerOn) {
 			if (!this._transcriptViewer) {
@@ -2324,6 +2271,19 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return text.replace(/<br \/>/g, '\n');
 	}
 
+	_scrollTranscriptViewer() {
+		const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
+		const cueRect = cue?.getBoundingClientRect();
+		const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
+		if (cue && cueRect && transcriptRect) {
+			if (cueRect.bottom > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
+				this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height - cueRect.height, left: 0, behavior: 'smooth' });
+			} else if (cueRect.top < transcriptRect.top) {
+				this._transcriptViewer.scrollBy({ top: cueRect.top - transcriptRect.top, left: 0, behavior: 'smooth' });
+			}
+		}
+	}
+
 	_setPreference(preferenceKey, value) {
 		if (!this.disableSetPreferences) {
 			localStorage.setItem(preferenceKey, value);
@@ -2458,6 +2418,46 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				}
 			}
 		});
+	}
+
+	_updateTranscriptViewerCues() {
+		let cues = null;
+		for (let i = 0; i < this._media.textTracks.length; i += 1) {
+			cues = this._media.textTracks[i]?.cues;
+			if (cues) {
+				const activeCues = this._media.textTracks[i].activeCues;
+				if (!activeCues) break;
+				this.transcriptActiveCue = activeCues[activeCues.length - 1];
+				break;
+			}
+		}
+		if (!cues) {
+			let defaultTrack;
+			for (let i = 0; i < this._media.textTracks.length; i++) {
+				if (this._media.textTracks[i].default) {
+					defaultTrack = this._media.textTracks[i];
+					break;
+				}
+			}
+			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
+			defaultTrack.mode = 'hidden';
+			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
+			this.requestUpdate();
+			return;
+		}
+
+		this.beforeCaptions = [];
+		this.afterCaptions = [];
+		for (let i = 0; i < cues.length; i += 1) {
+			const currCue = cues[i];
+			const currTime = this._media?.currentTime;
+			const before = currCue !== this.transcriptActiveCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptActiveCue?.endTime);
+			if (before) {
+				this.beforeCaptions.push(currCue);
+			} else if (currCue !== this.transcriptActiveCue) {
+				this.afterCaptions.push(currCue);
+			}
+		}
 	}
 
 	_zoomBarIsVisible() {
