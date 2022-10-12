@@ -1686,7 +1686,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 		for (let i = 0; i < this._media.textTracks.length; i++) {
 			if (this._media.textTracks[i].mode === 'hidden') {
-				if (this._media.textTracks[i].activeCues.length > 0) {
+				if (this._media.textTracks[i].activeCues?.length > 0) {
 					this._trackText = this._sanitizeText(this._media.textTracks[i].activeCues[0].text);
 				} else this._trackText = null;
 
@@ -2422,13 +2422,16 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_updateTranscriptViewerCues() {
 		let cues = null;
+		let lang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier)
 		for (let i = 0; i < this._media.textTracks.length; i += 1) {
-			cues = this._media.textTracks[i]?.cues;
-			if (cues) {
-				const activeCues = this._media.textTracks[i].activeCues;
-				if (!activeCues) break;
-				this.transcriptActiveCue = activeCues[activeCues.length - 1];
-				break;
+			const currTracks = this._media.textTracks[i];
+			if (currTracks?.cues) {
+				const activeCues = currTracks.activeCues;
+				if (lang === currTracks.language) {
+					this.transcriptActiveCue = activeCues?.[activeCues?.length - 1];
+					cues = currTracks.cues;
+					break;
+				}
 			}
 		}
 		if (!cues) {
