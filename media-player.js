@@ -722,6 +722,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		};
 		this._videoStyle = {};
 		this._zoomLevel = 0;
+		this.afterCaptions = [];
+		this.beforeCaptions = [];
 	}
 
 	get currentTime() {
@@ -1672,14 +1674,54 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_onCueChange() {
 		if (this.transcriptViewerOn) {
+			let cues = null;
+			let transcriptLocale;
+			for (let i = 0; i < this._media.textTracks.length; i += 1) {
+				cues = this._media.textTracks[i]?.cues;
+				if (cues) {
+					const activeCues = this._media.textTracks[i].activeCues;
+					if (!activeCues) break;
+					transcriptLocale = this._media.textTracks[i]?.language;
+					this.transcriptCue = activeCues[activeCues.length - 1];
+					break;
+				}
+			}
+			if (!cues) {
+				let defaultTrack;
+				for (let i = 0; i < this._media.textTracks.length; i++) {
+					if (this._media.textTracks[i].default) {
+						defaultTrack = this._media.textTracks[i];
+						break;
+					}
+				}
+				if (!defaultTrack) defaultTrack = this._media.textTracks[0];
+				defaultTrack.mode = 'hidden';
+				this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
+				this.requestUpdate();
+				return;
+			}
+
+			this.beforeCaptions = [];
+			this.afterCaptions = [];
+			for (let i = 0; i < cues.length; i += 1) {
+				const currCue = cues[i];
+				const currTime = this._media?.currentTime;
+				const before = currCue !== this.transcriptCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptCue?.endTime);
+				if (before) {
+					this.beforeCaptions.push(currCue);
+				} else if (currCue !== this.transcriptCue) {
+					this.afterCaptions.push(currCue);
+				}
+			}
+
 			if (!this._transcriptViewer) {
 				this._transcriptViewer = this.shadowRoot.getElementById('video-transcript-viewer')
 					|| this.shadowRoot.getElementById('audio-transcript-viewer');
 			}
 			const cue = this.shadowRoot.getElementById('transcript-viewer-active-cue');
-			const cueRect = cue.getBoundingClientRect();
-			const transcriptRect = this._transcriptViewer.getBoundingClientRect();
-			if (cue && this.activeCue && this._canScroll) {
+			const cueRect = cue?.getBoundingClientRect();
+			const transcriptRect = this._transcriptViewer?.getBoundingClientRect();
+			if (cue && cueRect && transcriptRect && cue === this.transcriptCue) {
 				if (cueRect.bottom + 50 > transcriptRect.bottom && cueRect.height <= transcriptRect.height) {
 					this._transcriptViewer.scrollBy({ top: cueRect.bottom - transcriptRect.bottom + transcriptRect.height, left: 0, behavior: 'smooth' });
 				} else if (cueRect.top < transcriptRect.top) {
@@ -2210,7 +2252,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_renderTranscriptViewer() {
-		this._canScroll = true;
 		if (!this._media) {
 			return;
 		}
@@ -2219,51 +2260,19 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._captionsMenuReturnItem = captionsMenu.shadowRoot.querySelector('d2l-menu-item-return');
 			this._captionsMenuReturnItem?.setAttribute('text', this.localize('language'));
 		}
-		let cues = null;
-		let transcriptLocale;
+
 		this._setZoomLevel(0);
-		for (let i = 0; i < this._media.textTracks.length; i += 1) {
-			cues = this._media.textTracks[i]?.cues;
-			if (cues) {
-				const activeCues = this._media.textTracks[i].activeCues;
-				if (!activeCues) break;
-				transcriptLocale = this._media.textTracks[i]?.language;
-				this.transcriptCue = activeCues[activeCues.length - 1];
-				break;
-			}
-		}
-		if (!cues) {
-			let defaultTrack;
-			for (let i = 0; i < this._media.textTracks.length; i++) {
-				if (this._media.textTracks[i].default) {
-					defaultTrack = this._media.textTracks[i];
-					break;
-				}
-			}
-			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
-			defaultTrack.mode = 'hidden';
-			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
-			this.requestUpdate();
-			return;
+
+		if (!this._transcriptViewer) {
+			this._onCueChange();
 		}
 
-		this.locale = transcriptLocale?.toLowerCase();
-
-		const beforeCaptions = [];
-		const afterCaptions = [];
-		for (let i = 0; i < cues.length; i += 1) {
-			const currCue = cues[i];
-			const currTime = this._media?.currentTime;
-			const before = currCue !== this.transcriptCue && (currCue.endTime < currTime || currCue.endTime <= this.transcriptCue?.endTime);
-			if (before) {
-				beforeCaptions.push(currCue);
-			} else if (currCue !== this.transcriptCue) {
-				afterCaptions.push(currCue);
-			}
-		}
 		const isVideo = this.mediaType === SOURCE_TYPES.video;
 		const captionsToHtml = (item) => {
-			const updateTime = () => this.currentTime = item.startTime;
+			const updateTime = async () => {
+				this.currentTime = item.startTime;
+				this._media.currentTime = item.startTime;
+			}
 			return html`
 			<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'}
 				@click=${updateTime}>
@@ -2282,12 +2291,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			id=${isVideo ? 'video-transcript-viewer' : 'audio-transcript-viewer'}
 			>
 			<div class="transcript-cue-container">
-				${beforeCaptions.map(captionsToHtml)}
+				${this.beforeCaptions.map(captionsToHtml)}
 				<div class=${isVideo ? 'video-transcript-cue' : 'audio-transcript-cue'} active
 				id="transcript-viewer-active-cue">
 					${this.transcriptCue?.text}
 				</div>
-				${afterCaptions.map(captionsToHtml)}
+				${this.afterCaptions.map(captionsToHtml)}
 			</div>
 			</div>
 			<d2l-dropdown-button-subtle
