@@ -101,6 +101,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: Object },
 			poster: { type: String },
+			selectedTrackSrcLang: { type: String },
 			src: { type: String },
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
@@ -1060,6 +1061,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		if (changedProperties.has('thumbnails')) {
 			this._getThumbnails();
 		}
+
+		if (changedProperties.has('_selectedTrackIdentifier')) {
+			this._getSelectedTrackSrclang();
+		}
 	}
 
 	exitFullscreen() {
@@ -1538,6 +1543,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				></d2l-icon>
 			`;
 		});
+	}
+
+	_getSelectedTrackSrclang() {
+		this.selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 	}
 
 	_getSelectedTextTrack() {
@@ -2425,12 +2434,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		let cues = null;
 		const lang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 		for (let i = 0; i < this._media.textTracks.length; i += 1) {
-			const currTracks = this._media.textTracks[i];
-			if (currTracks?.cues) {
-				const activeCues = currTracks.activeCues;
-				if (lang === currTracks.language) {
+			const currTrack = this._media.textTracks[i];
+			if (currTrack?.cues) {
+				const activeCues = currTrack.activeCues;
+				if (lang === currTrack.language) {
 					this.transcriptActiveCue = activeCues?.[activeCues?.length - 1];
-					cues = currTracks.cues;
+					cues = currTrack.cues;
 					break;
 				}
 			}
@@ -2443,9 +2452,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					break;
 				}
 			}
-			if (!defaultTrack) defaultTrack = this._media.textTracks[0];
-			defaultTrack.mode = 'hidden';
-			this._selectedTrackIdentifier = { kind: defaultTrack.kind, srclang: defaultTrack.language };
+			defaultTrack = defaultTrack || this._media.textTracks[0];
+			if (defaultTrack) defaultTrack.mode = 'hidden';
+			this._selectedTrackIdentifier = { kind: defaultTrack?.kind, srclang: defaultTrack?.language };
 			this.requestUpdate();
 			return;
 		}
