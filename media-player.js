@@ -101,7 +101,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: Object },
 			poster: { type: String },
-			selectedTrackSrcLang: { type: String },
+			_selectedTrackSrcLang: { type: String, attribute: false },
 			src: { type: String },
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
@@ -784,6 +784,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	get paused() {
 		return (this._media && this._media.paused);
+	}
+
+	get selectedTrackSrcLang() {
+		return this._selectedTrackSrcLang;
 	}
 
 	get textTracks() {
@@ -1557,7 +1561,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_getSelectedTrackSrclang() {
-		this.selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
+		this._selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 	}
 
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
