@@ -1545,10 +1545,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		});
 	}
 
-	_getSelectedTrackSrclang() {
-		this.selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
-	}
-
 	_getSelectedTextTrack() {
 		if (!this._media) return null;
 		const selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
@@ -1558,6 +1554,10 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			}
 		}
 		return null;
+	}
+
+	_getSelectedTrackSrclang() {
+		this.selectedTrackSrcLang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
 	}
 
 	_getSrclangFromTrackIdentifier(trackIdentifier) {
