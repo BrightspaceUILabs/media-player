@@ -101,7 +101,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: Object },
 			poster: { type: String },
-			_selectedTrackSrcLang: { type: String, attribute: false },
 			src: { type: String },
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
