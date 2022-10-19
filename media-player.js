@@ -2117,7 +2117,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this._media.textTracks[i].mode = 'disabled';
 			}
 		}
-		this._updateTranscriptViewerCues();
+		if (this.transcriptViewerOn) {
+			this._updateTranscriptViewerCues();
+		}
 		this._onSearchInputChanged();
 	}
 
