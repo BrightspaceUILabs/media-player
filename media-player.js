@@ -2427,7 +2427,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		});
 	}
 
-	
 	_updateTranscriptViewerCues() {
 		let cues = null;
 		const lang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
