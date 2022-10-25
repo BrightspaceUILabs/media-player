@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Altyazı",
+	"captionsVtt": "Alt yazılar (.vtt)",
 	"quality": "Kalite",
 	"closedCaptionsAcronym": "Bilgi",
 	"default": "Varsayılan",
 	"download": "İndir",
 	"exitFullscreen": "Tam ekrandan çık",
 	"fullscreen": "Tam Ekran",
+	"language": "Dil",
 	"loadErrorMessage": "Bu ortam dosyası yüklenirken bir sorun oluştu",
 	"loadSuccessMessage": "Ortam başarıyla yüklendi",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "arama kaydırıcısı",
 	"settings": "settings",
 	"speed": "hız",
+	"transcriptTxt": "Transkript (.txt)",
 	"unableToDownload": "İndirilemiyor. Lütfen sayfayı yenileyin veya tekrar deneyin.",
 	"unmute": "Sesi Aç",
 	"volumeSlider": "ses düzeyi kaydırıcısı"

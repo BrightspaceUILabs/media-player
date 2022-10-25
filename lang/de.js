@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Beschriftungen",
+	"captionsVtt": "Untertitel (vtt)",
 	"quality": "Qualität",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Herunterladen",
 	"exitFullscreen": "Vollbildmodus beenden",
 	"fullscreen": "Vollbildmodus",
+	"language": "Sprache",
 	"loadErrorMessage": "Hoppla, beim Laden dieser Mediendatei ist ein Problem aufgetreten",
 	"loadSuccessMessage": "Diese Medien wurden erfolgreich geladen",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "Suchregler",
 	"settings": "settings",
 	"speed": "Geschwindigkeit",
+	"transcriptTxt": "Transkript (txt)",
 	"unableToDownload": "Herunterladen nicht möglich. Aktualisieren Sie die Seite und versuchen Sie es erneut.",
 	"unmute": "Stummschaltung aufheben",
 	"volumeSlider": "Lautstärkeregler"

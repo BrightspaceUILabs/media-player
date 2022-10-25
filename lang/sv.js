@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Bildtexter",
+	"captionsVtt": "Bildtexter (.vtt)",
 	"quality": "Kvalitet",
 	"closedCaptionsAcronym": "Kopia",
 	"default": "Standard",
 	"download": "Ladda ned",
 	"exitFullscreen": "Avsluta helskärmsläget",
 	"fullscreen": "Helskärm",
+	"language": "Språk",
 	"loadErrorMessage": "Det uppstod ett problem när den här mediefilen skulle läsas in",
 	"loadSuccessMessage": "Mediefilen har lästs in",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "sökskjutreglage",
 	"settings": "settings",
 	"speed": "hastighet",
+	"transcriptTxt": "Transkript (.txt)",
 	"unableToDownload": "Kan inte ladda ner. Uppdatera sidan eller försök igen.",
 	"unmute": "Slå på ljudet",
 	"volumeSlider": "volymskjutreglage"

@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Billedtekster",
+	"captionsVtt": "Undertekster (.vtt)",
 	"quality": "Kvalitet",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standard",
 	"download": "Download",
 	"exitFullscreen": "Afslut fuld skærm",
 	"fullscreen": "Fuld skærm",
+	"language": "Sprog",
 	"loadErrorMessage": "Hovsa, der opstod et problem med at indlæse denne mediefil",
 	"loadSuccessMessage": "Mediet er indlæst",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "søgningsskyder",
 	"settings": "settings",
 	"speed": "hastighed",
+	"transcriptTxt": "Afskrift (.txt)",
 	"unableToDownload": "Kan ikke downloade. Opdater siden, og prøv igen.",
 	"unmute": "Slå lydløs fra",
 	"volumeSlider": "lydstyrkeskyder"
