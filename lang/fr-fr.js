@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Sous-titres",
+	"captionsVtt": "Sous-titres (.vtt)",
 	"quality": "Qualité",
 	"closedCaptionsAcronym": "Cc",
 	"default": "Par défaut",
 	"download": "Télécharger",
 	"exitFullscreen": "Quitter le mode plein écran",
 	"fullscreen": "Plein écran",
+	"language": "Langue",
 	"loadErrorMessage": "Un problème est survenu lors du chargement de ce fichier multimédia",
 	"loadSuccessMessage": "Le support a été chargé avec succès",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
+	"transcriptTxt": "Transcription (.txt)",
 	"unableToDownload": "Impossible de télécharger. Actualisez la page et réessayez.",
 	"unmute": "Annuler le mode muet",
 	"volumeSlider": "curseur du volume"

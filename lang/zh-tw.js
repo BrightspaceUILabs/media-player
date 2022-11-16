@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "字幕",
+	"captionsVtt": "字幕 (.vtt)",
 	"quality": "品質",
 	"closedCaptionsAcronym": "副本",
 	"default": "預設",
 	"download": "下載",
 	"exitFullscreen": "退出全螢幕",
 	"fullscreen": "全螢幕",
+	"language": "語言",
 	"loadErrorMessage": "糟糕，載入此影片檔時發生錯誤",
 	"loadSuccessMessage": "影片已成功載入",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "搜尋滑桿",
 	"settings": "settings",
 	"speed": "速度",
+	"transcriptTxt": "成績單 (.txt)",
 	"unableToDownload": "無法下載。請重新整理頁面並再試一次。",
 	"unmute": "取消靜音",
 	"volumeSlider": "音量滑桿"

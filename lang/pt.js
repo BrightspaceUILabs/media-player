@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Legendas",
+	"captionsVtt": "Legendas (.vtt)",
 	"quality": "Qualidade",
 	"closedCaptionsAcronym": "CC",
 	"default": "Padrão",
 	"download": "Baixar",
 	"exitFullscreen": "Sair do modo de tela inteira",
 	"fullscreen": "Tela inteira",
+	"language": "Idioma",
 	"loadErrorMessage": "Houve um problema ao carregar este arquivo de mídia",
 	"loadSuccessMessage": "Mídia carregada com êxito",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "controle deslizante de busca",
 	"settings": "settings",
 	"speed": "velocidade",
+	"transcriptTxt": "Transcrição (.txt)",
 	"unableToDownload": "Não foi possível fazer o download. Atualize a página e tente novamente.",
 	"unmute": "Desativar mudo",
 	"volumeSlider": "controle deslizante de volume"

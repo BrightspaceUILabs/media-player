@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Leyendas",
+	"captionsVtt": "Subtítulos (.vtt)",
 	"quality": "Calidad",
 	"closedCaptionsAcronym": "CC",
 	"default": "Predeterminado",
 	"download": "Descargar",
 	"exitFullscreen": "Salir de la pantalla completa",
 	"fullscreen": "Pantalla completa",
+	"language": "Idioma",
 	"loadErrorMessage": "Lo sentimos. Ha surgido un problema la cargar este archivo de medios",
 	"loadSuccessMessage": "Los medios se han cargado correctamente",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "barra deslizante de búsqueda",
 	"settings": "settings",
 	"speed": "velocidad",
+	"transcriptTxt": "Transcripción (.txt)",
 	"unableToDownload": "Se ha producido un error al descargar. Actualice la página e inténtelo de nuevo.",
 	"unmute": "Activar sonido",
 	"volumeSlider": "control deslizante del volumen"

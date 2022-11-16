@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Bijschriften",
+	"captionsVtt": "Ondertitels (.vtt)",
 	"quality": "Kwaliteit",
 	"closedCaptionsAcronym": "CC",
 	"default": "Standaard",
 	"download": "Downloaden",
 	"exitFullscreen": "Volledig scherm afsluiten",
 	"fullscreen": "Volledig scherm",
+	"language": "Taal",
 	"loadErrorMessage": "Er is een probleem opgetreden bij het laden van dit mediabestand",
 	"loadSuccessMessage": "De media is geladen",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "zoekschuifregelaar",
 	"settings": "settings",
 	"speed": "snelheid",
+	"transcriptTxt": "Transcript (.txt)",
 	"unableToDownload": "Downloaden is niet mogelijk. Vernieuw de pagina en probeer het opnieuw.",
 	"unmute": "Dempen opheffen",
 	"volumeSlider": "volumeschuifregelaar"

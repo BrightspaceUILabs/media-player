@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "Légendes",
+	"captionsVtt": "Sous-titres (.vtt)",
 	"quality": "Qualité",
 	"closedCaptionsAcronym": "CC",
 	"default": "Par défaut",
 	"download": "Télécharger",
 	"exitFullscreen": "Quitter le mode plein écran",
 	"fullscreen": "Plein écran",
+	"language": "Langue",
 	"loadErrorMessage": "Oups, il y a eu un problème lors du chargement de ce fichier multimédia",
 	"loadSuccessMessage": "Chargement du contenu multimédia réussi",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "Curseur de recherche",
 	"settings": "settings",
 	"speed": "vitesse",
+	"transcriptTxt": "Transcription (.txt)",
 	"unableToDownload": "Impossible de télécharger. Veuillez rafraîchir la page et réessayer.",
 	"unmute": "Annuler silence",
 	"volumeSlider": "Curseur du volume"
