@@ -2397,7 +2397,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_togglePlay() {
-		console.log("HELLO WORLD")
 		this._posterVisible = false;
 		if (this._media.paused) {
 			this._playRequested = true;
