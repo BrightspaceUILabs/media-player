@@ -2245,7 +2245,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return html`
 			<span id="close-transcript"
 			@click=${this._closeTranscript}>
-			<d2l-icon class="d2l-button-icon" 
+			<d2l-icon class="d2l-button-icon"
 				id=${isVideo ? 'video-close-transcript-icon' : 'audio-close-transcript-icon'}
 				icon="tier1:close-small"></d2l-icon>
 			</span>
@@ -2397,6 +2397,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_togglePlay() {
+		console.log("HELLO WORLD")
 		this._posterVisible = false;
 		if (this._media.paused) {
 			this._playRequested = true;
