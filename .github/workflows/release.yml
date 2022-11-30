@@ -1,10 +1,7 @@
 name: Release
 on:
-  pull_request:
   push:
-    branches:
-      - main
-      - release/*
+    branches: [main, 'release/**']
 jobs:
   release:
     name: Release
@@ -22,7 +19,6 @@ jobs:
       - name: Match LMS Release
         uses: Brightspace/lms-version-actions/match-lms-release@main
         with:
-          DRY_RUN: true
           RALLY_API_KEY: ${{ secrets.RALLY_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.D2L_GITHUB_TOKEN }}
           NPM: true
