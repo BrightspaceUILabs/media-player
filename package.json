@@ -1,5 +1,5 @@
 {
-  "name": "@brightspace-ui-labs/media-player",
+  "name": "@d2l/labs-media-player",
   "description": "A reusable media player component.",
   "type": "module",
   "repository": "https://github.com/BrightspaceUILabs/media-player.git",
