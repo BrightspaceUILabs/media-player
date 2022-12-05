@@ -1,11 +1,11 @@
 {
-  "name": "@d2l/media-player",
+  "name": "@brightspace-ui-labs/media-player",
   "description": "A reusable media player component.",
   "type": "module",
   "repository": "https://github.com/BrightspaceUILabs/media-player.git",
-  "version": "2023.1.2",
+  "version": "3.5.13",
   "publishConfig": {
-    "registry": "https://d2l-569998014834.d.codeartifact.us-east-1.amazonaws.com/npm/private/"
+    "access": "public"
   },
   "files": [
     "media-player-menu-item.js",
