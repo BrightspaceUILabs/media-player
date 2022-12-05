@@ -14,12 +14,10 @@ jobs:
           persist-credentials: false
       - name: Setup Node
         uses: Brightspace/third-party-actions@actions/setup-node
-        with:
-          node-version-file: .nvmrc
+        withcde-version-file: .nvmrc
       - name: Match LMS Release
         uses: Brightspace/lms-version-actions/match-lms-release@main
         with:
           RALLY_API_KEY: ${{ secrets.RALLY_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.D2L_GITHUB_TOKEN }}
           NPM: true
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
