@@ -5,7 +5,7 @@
   "repository": "https://github.com/BrightspaceUILabs/media-player.git",
   "version": "2023.1.2",
   "publishConfig": {
-    "access": "public"
+    "registry": "https://d2l-569998014834.d.codeartifact.us-east-1.amazonaws.com/npm/private/"
   },
   "files": [
     "media-player-menu-item.js",
