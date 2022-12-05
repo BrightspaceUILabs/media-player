@@ -14,7 +14,8 @@ jobs:
           persist-credentials: false
       - name: Setup Node
         uses: Brightspace/third-party-actions@actions/setup-node
-        withcde-version-file: .nvmrc
+        with:
+          node-version-file: .nvmrc
       - name: Match LMS Release
         uses: Brightspace/lms-version-actions/match-lms-release@main
         with:
