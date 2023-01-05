@@ -160,7 +160,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				height: 100%;
 				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
-				position: absolute;
+				position: relative;
 				width: 100%;
 			}
 
