@@ -68,9 +68,6 @@ const DEFAULT_LOCALE = 'en';
 
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
-const SLIDER_STEPS = 50;
-const BASIC_ZOOM_MULTIPLIER = 2;
-const BASIC_ZOOM_TRANSLATE_X_MAX_PERCENTAGE = 30;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
 const tryParseUrlExpiry = url => {
 	try {
@@ -79,12 +76,6 @@ const tryParseUrlExpiry = url => {
 	} catch (error) {
 		return null;
 	}
-};
-
-const LAYOUT_PRESETS = {
-	video: 'VIDEO',
-	screen: 'SCREEN',
-	videoAndScreen: 'VIDEO_AND_SCREEN'
 };
 
 class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin(RtlMixin(LitElement))) {
@@ -106,8 +97,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
 			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
 			_chapters: { type: Array, attribute: false },
-			_containerHeight: { type: Number, attribute: false },
-			_containerWidth: { type: Number, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -116,8 +105,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
 			_mediaContainerAspectRatio: { type: Object, attribute: false },
-			_mediaHeightBeforeScaling: { type: Number, attribute: false },
-			_mediaWidthBeforeScaling: { type: Number, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -135,8 +122,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
-			_videoStyle: { type: Object, attribute: false },
-			_zoomLevel: { type: Number, attribute: false },
 		};
 	}
 
@@ -154,10 +139,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 			#d2l-labs-media-player-media-container {
 				align-items: center;
-				flex-direction: column;
 				justify-content: center;
-				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
-				max-height: 100vh;
 				overflow: hidden;
 				position: relative;
 				width: 100%;
@@ -195,11 +177,8 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				border: none;
 				border-radius: 50%;
 				cursor: pointer;
-				left: 50%;
 				padding: 2em;
 				position: absolute;
-				top: 50%;
-				transform: translate(-50%, -50%);
 				z-index: 2;
 			}
 
@@ -586,33 +565,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				line-height: 2.1rem;
 			}
 
-			.slider-container {
-				padding: 20px;
-			}
-			#d2l-labs-media-player-zoom-bar-container {
-				align-items: center;
-				display: flex;
-				flex-direction: row;
-				height: 50px;
-				position: absolute;
-				right: 20px;
-				top: 20px;
-				width: 200px;
-				z-index: 1;
-			}
-
-			#d2l-labs-media-player-zoom-bar {
-				--d2l-knob-focus-color: #ffffff;
-				--d2l-knob-focus-size: 4px;
-				--d2l-knob-size: 15px;
-				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
-				--d2l-progress-border-radius: 0;
-				flex: 1;
-			}
-
-			.zoom-bar-icon {
-				margin: 10px;
-			}
 			.transcript-cue-container {
 				padding-left: 10px;
 			}
@@ -722,8 +674,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._playRequested = false;
 		this._mediaContainerAspectRatio = {
 		};
-		this._videoStyle = {};
-		this._zoomLevel = 0;
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
 	}
@@ -817,13 +767,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				const { height, width } = entry.contentRect;
-				this._containerHeight = height;
-				this._containerWidth = width;
-				// Mixed layout zoom level is based on container dimensions,
-				// so the zoom values need to be recalculated.
-				if (this._zoomBarIsVisible()) {
-					this._sliderChange();
-				}
 				// Handles potential flickering of video dimensions - given two heights (A, B), if we see that
 				// the heights alternate A -> B -> A (height === two heights ago), we set the height to the larger of A/B
 				// Furthermore, check that the height difference was within the threshold of a flicker (i.e., not a full screen toggle)
@@ -889,26 +832,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
-			${this._zoomBarIsVisible() ? html`
-			<div id="d2l-labs-media-player-zoom-bar-container">
-				<d2l-icon
-					class="zoom-bar-icon"
-					icon="tier3:file-video"
-				></d2l-icon>
-				<d2l-seek-bar
-					id="d2l-labs-media-player-zoom-bar"
-					fullWidth
-					value="50"
-					aria-orientation="horizontal"
-					@position-change=${this._sliderChange}
-					@drag-start=${this._sliderChange}
-					@drag-end=${this._sliderChange}
-				></d2l-seek-bar>
-				<d2l-icon
-					class="zoom-bar-icon"
-					icon="tier3:image"
-				></d2l-icon>
-			</div>` : ''}
 			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
 			${this._getMediaAreaView()}
 
@@ -1124,89 +1047,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		return this.localize('off');
 	}
 
-	_advancedZoom(zoomLevel) {
-		let zoomedFrame;
-
-		// zoomLevel < 0 means that the slider is shifted to the left, towards "Video".
-		// zoomLevel > 0 means that the slider is shifted to the right, towards "Presentation".
-		if (zoomLevel > 0) {
-			[, zoomedFrame] = this.metadata.layoutPresets.frames;
-		} else {
-			[zoomedFrame] = this.metadata.layoutPresets.frames;
-		}
-
-		const zoomedFrameWidth = zoomedFrame.right - zoomedFrame.left + 1;
-		const zoomedFrameHeight = zoomedFrame.bottom - zoomedFrame.top + 1;
-
-		const fullVideoWidth = this._mediaWidthBeforeScaling;
-		const fullVideoHeight = this._mediaHeightBeforeScaling;
-		const fullVideoCenterX = fullVideoWidth / 2;
-		const fullVideoCenterY = fullVideoHeight / 2;
-
-		const containerAspectRatio = this._containerHeight / this._containerWidth;
-
-		this.zoomLevel = zoomLevel;
-
-		// At the maximum zoom level, none of the zoomed frame should be cut off.
-		// In other words:
-		//     scaledWidth <= containerWidth AND scaledHeight <= containerHeight
-		// To determine whether the width or height should serve as the limiter,
-		// we compare the aspect ratio of the zoomed frame to the aspect ratio of the container.
-		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
-		const zoomedFrameAspectRatio = zoomedFrameHeight / zoomedFrameWidth;
-		let scaleCeil;
-		if (zoomedFrameAspectRatio <= containerAspectRatio) {
-			scaleCeil = (fullVideoWidth / zoomedFrameWidth) - 1;
-		} else {
-			// Since mixed layout videos are always wide rather than tall, pillar boxes will only appear above and below the video.
-			// This means that we only need to account for pillar boxing when height is the limiting factor.
-			const fullVideoHeightWithPillarBoxes = fullVideoWidth * containerAspectRatio;
-			scaleCeil = (fullVideoHeightWithPillarBoxes / zoomedFrameHeight) - 1;
-		}
-
-		const scale = scaleCeil * currentPercentageOfFullZoom;
-		const scalePercentage = 100 + (scale * 100);
-
-		// The video will be enlarged using the CSS transform(scale(...)) property.
-		// When scaling, the origin point will be the center point of the video.
-		// Because of that, when the video is fully zoomed to either frame, the video needs to be translated as follows in order to center the zoomed frame:
-		//     (center of the zoomed frame) - (center of the video)
-		// The above applies for to both the X and Y axis. For the X-axis, we also need to multiply by -1 to force the video to translate left.
-
-		const zoomedFrameCenterX = zoomedFrame.left + (zoomedFrameWidth / 2);
-		const zoomedFrameCenterY = zoomedFrame.top + (zoomedFrameHeight / 2);
-
-		const xDistanceBetweenFrameCenterAndVideoCenter = -1 * (zoomedFrameCenterX - fullVideoCenterX);
-		const yDistanceBetweenFrameCenterAndVideoCenter = zoomedFrameCenterY - fullVideoCenterY;
-
-		// The exact distance in pixels will change depending on the zoom level.
-		// By using percentages, we guarantee that the right distance is used at all zoom levels.
-		const xDistancePercentage = xDistanceBetweenFrameCenterAndVideoCenter / fullVideoWidth * 100;
-		const yDistancePercentage = yDistanceBetweenFrameCenterAndVideoCenter / fullVideoHeight * 100;
-
-		const translateXPercentage = xDistancePercentage * currentPercentageOfFullZoom;
-		const translateYPercentage = yDistancePercentage * currentPercentageOfFullZoom;
-
-		this._videoStyle = {
-			transform: `scale(${scalePercentage / 100}) translateX(${translateXPercentage}%) translateY(${translateYPercentage}%)`,
-		};
-	}
-
-	_basicZoom(zoomLevel) {
-		this.zoomLevel = zoomLevel;
-		const currentPercentageOfFullZoom = Math.abs(this.zoomLevel) / SLIDER_STEPS;
-		const zoom = BASIC_ZOOM_MULTIPLIER * currentPercentageOfFullZoom;
-		const zoomPercentage = zoom * 100;
-
-		const scalePercentage = 100 + zoomPercentage;
-		const direction = -1 * this.zoomLevel / SLIDER_STEPS;
-		const translateX = direction * BASIC_ZOOM_TRANSLATE_X_MAX_PERCENTAGE * currentPercentageOfFullZoom;
-
-		this._videoStyle = {
-			transform: `scale(${scalePercentage / 100}) translateX(${translateX}%)`,
-		};
-	}
-
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
@@ -1366,7 +1206,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 					${this._getPosterView()}
 					<video
 						id="d2l-labs-media-player-video"
-						style=${styleMap(this._videoStyle)}
 						?controls="${IS_IOS}"
 						?autoplay="${this.autoplay}"
 						?loop="${this.loop}"
@@ -1803,9 +1642,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._stateBeforeLoad = null;
 		}
 
-		this._mediaWidthBeforeScaling = this._media.videoWidth;
-		this._mediaHeightBeforeScaling = this._media.videoHeight;
-
 		this._maintainHeight = null;
 		this._loading = false;
 
@@ -2223,8 +2059,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			this._captionsMenuReturnItem?.setAttribute('text', this.localize('language'));
 		}
 
-		this._setZoomLevel(0); // Reset zoom level since zoom bar is disabled in transcript view
-
 		if (!this._transcriptViewer) {
 			this._onCueChange();
 		}
@@ -2297,14 +2131,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		}
 	}
 
-	_setZoomLevel(zoomLevel) {
-		if (this.metadata && this.metadata.layoutPresets && this.metadata.layoutPresets.frames && this.metadata.layoutPresets.frames.length > 0) {
-			this._advancedZoom(zoomLevel);
-		} else {
-			this._basicZoom(zoomLevel);
-		}
-	}
-
 	_showControls(temporarily) {
 		this._recentlyShowedCustomControls = true;
 		clearTimeout(this._showControlsTimeout);
@@ -2314,15 +2140,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this._recentlyShowedCustomControls = false;
 			}, HIDE_DELAY_MS);
 		}
-	}
-
-	_sliderChange() {
-		const zoomBar = this.shadowRoot.getElementById('d2l-labs-media-player-zoom-bar');
-		if (!zoomBar) return;
-		const zoomBarValue = zoomBar.immediateValue - 50;
-		const zoomLevel = -5 < zoomBarValue && zoomBarValue < 5 ? 0 : zoomBarValue;
-
-		this._setZoomLevel(zoomLevel);
 	}
 
 	_startHoveringControls() {
@@ -2468,11 +2285,6 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this.afterCaptions.push(currCue);
 			}
 		}
-	}
-
-	_zoomBarIsVisible() {
-		return !this._posterVisible && this.metadata?.layout === LAYOUT_PRESETS.videoAndScreen
-			&& !this.transcriptViewerOn && !IS_IOS;
 	}
 }
 
