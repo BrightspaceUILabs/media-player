@@ -27,6 +27,8 @@ import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 import { styleMap } from 'lit-html/directives/style-map.js';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 const DEFAULT_SPEED = '1.0';
 const DEFAULT_VOLUME = '1.0';
@@ -166,6 +168,14 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 			#d2l-labs-media-player-video-poster {
 				cursor: pointer;
+				height: auto;
+				position: absolute;
+				width: 100%;
+				z-index: 1;
+			}
+
+			#heatmap-chart {
+				bottom: 0;
 				height: auto;
 				position: absolute;
 				width: 100%;
@@ -789,6 +799,43 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				this._trackFontSizeRem = multiplier;
 			}
 		}).observe(this._mediaContainer);
+
+		const ctx = this.shadowRoot.getElementById('heatmap-chart');
+		new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: ['Start', '00:00:00 - 00:00:30', '00:00:30 - 00:01:00', '00:01:00 - 00:01:30', '00:01:30 - 00:02:00', '00:02:00 - 00:02:30'],
+				datasets: [{
+					label: 'Views',
+					data: [0, 45, 72, 63, 42, 59],
+					fill: {
+						target: 'origin',
+						above: 'rgba(0, 100, 255, 0.3)',
+					},
+					borderColor: 'rgb(0, 100, 150)',
+					pointBorderColor: 'rgb(255, 255, 255)',
+					pointBackgroundColor: 'rgb(0, 200, 0)',
+					pointRadius: 7,
+					pointBorderWidth: 3,
+					tension: 0.1,
+				}],
+			},
+			options: {
+				scales: {
+					x: {
+						display: false
+					},
+					y: {
+						display: false
+					}
+				},
+				plugins: {
+					legend: {
+						display: false
+					}
+				}
+			}
+		});
 	}
 
 	render() {
@@ -832,6 +879,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		${this._getLoadingSpinnerView()}
 
 		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
+			<canvas id="heatmap-chart"></canvas>
 			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
 			${this._getMediaAreaView()}
 

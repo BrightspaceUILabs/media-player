@@ -45,8 +45,9 @@
     "stylelint": "^14"
   },
   "dependencies": {
-    "@brightspace-ui/core": "^2",
     "@brightspace-ui-labs/seek-bar": "^2",
+    "@brightspace-ui/core": "^2",
+    "chart.js": "^4.1.2",
     "fuse.js": "^6.4.6",
     "lit-element": "^3",
     "lit-html": "^2",
