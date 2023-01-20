@@ -85,6 +85,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 			allowDownload: { type: Boolean, attribute: 'allow-download', reflect: true },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
+			durationHint: { type: Number, attribute: 'duration-hint' },
 			hideCaptionsSelection: { type: Boolean, attribute: 'hide-captions-selection' },
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
 			locale: { type: String },
@@ -644,7 +645,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 		this._chapters = [];
 		this._currentTime = 0;
 		this._determiningSourceType = true;
-		this._duration = 1;
+		this._duration = this.durationHint || 1;
 		this._heightPixels = null;
 		this._hoverTime = 0;
 		this._hovering = false;
@@ -1580,6 +1581,9 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 
 	_onDurationChange(e) {
 		this._duration = e.target.duration;
+		if ((!isFinite(this._duration) || isNaN(this._duration)) && this.durationHint) {
+			this._duration = this.durationHint;
+		}
 		this.dispatchEvent(new CustomEvent('durationchange'));
 	}
 
