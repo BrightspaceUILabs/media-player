@@ -1582,10 +1582,12 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 	}
 
 	_onDurationChange(e) {
-		this._duration = e.target.duration;
-		if ((!isFinite(this._duration) || isNaN(this._duration)) && this.durationHint) {
-			this._duration = this.durationHint;
-		}
+		const newDuration = e.target.duration;
+		const newDurationIsValid = isFinite(newDuration) && !isNaN(newDuration);
+		const hintIsValid = isFinite(this.durationHint) && !isNaN(this.durationHint);
+		this._duration = newDurationIsValid || !hintIsValid
+			? newDuration
+			: this.durationHint;
 		this.dispatchEvent(new CustomEvent('durationchange'));
 	}
 
