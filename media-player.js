@@ -14,7 +14,7 @@ import '@brightspace-ui/core/components/offscreen/offscreen.js';
 import '@brightspace-ui-labs/seek-bar/d2l-seek-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
-import { css, html, LitElement } from 'lit-element';
+import { css, html, LitElement, unsafeCSS } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { debounce } from 'lodash-es';
 import fullscreenApi from './src/fullscreen-api.js';
