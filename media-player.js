@@ -17,9 +17,9 @@ import './media-player-audio-bars.js';
 import { css, html, LitElement } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map.js';
 import { debounce } from 'lodash-es';
-import { FocusVisiblePolyfillMixin } from '@brightspace-ui/core/mixins/focus-visible-polyfill-mixin.js';
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
+import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
 import { ifDefined } from 'lit-html/directives/if-defined.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
@@ -78,7 +78,7 @@ const tryParseUrlExpiry = url => {
 	}
 };
 
-class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin(RtlMixin(LitElement))) {
+class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	static get properties() {
 		return {
@@ -398,7 +398,7 @@ class MediaPlayer extends FocusVisiblePolyfillMixin(InternalDynamicLocalizeMixin
 				cursor: pointer;
 			}
 
-			#d2l-labs-media-player-audio-play-button.focus-visible {
+			#d2l-labs-media-player-audio-play-button:${unsafeCSS(getFocusPseudoClass())} {
 				border: 2px solid var(--d2l-color-celestine);
 			}
 
