@@ -398,7 +398,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				cursor: pointer;
 			}
 
-			#d2l-labs-media-player-audio-play-button.focus-visible,
 			#d2l-labs-media-player-audio-play-button:${unsafeCSS(getFocusPseudoClass())} {
 				border: 2px solid var(--d2l-color-celestine);
 			}
