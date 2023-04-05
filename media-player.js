@@ -1629,11 +1629,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const width = media.videoWidth;
 		const height = media.videoHeight;
 		const aspectRatio = width / height;
-		if (Number.isNaN(aspectRatio)) {
-			this._mediaContainerAspectRatio = { 'aspect-ratio': 'auto' };
-		} else {
-			this._mediaContainerAspectRatio = { 'aspect-ratio': aspectRatio };
-		}
+		this._mediaContainerAspectRatio = { 'aspect-ratio': Number.isNaN(aspectRatio) ? 'auto' : aspectRatio.toString() };
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
