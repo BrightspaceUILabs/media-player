@@ -85,6 +85,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			allowDownload: { type: Boolean, attribute: 'allow-download', reflect: true },
 			autoplay: { type: Boolean },
 			crossorigin: { type: String },
+			downloadFilename: { type: String, attribute: 'download-filename' },
 			durationHint: { type: Number, attribute: 'duration-hint' },
 			hideCaptionsSelection: { type: Boolean, attribute: 'hide-captions-selection' },
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
@@ -1174,12 +1175,16 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		const linkHref = this._getDownloadLink();
 		return html`
-			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download></d2l-menu-item-link>
+			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download=${this.downloadFilename}></d2l-menu-item-link>
 		`;
 	}
 
 	_getDownloadLink() {
 		const srcUrl = this._getCurrentSource();
+		if (srcUrl.startsWith('blob:')) {
+			return srcUrl;
+		}
+
 		// Due to Ionic rewriter bug we need to use '_' as a first query string parameter
 		const attachmentUrl = `${srcUrl}${srcUrl && srcUrl.indexOf('?') === -1 ? '?_' : ''}`;
 		const url = new Url(this._getAbsoluteUrl(attachmentUrl));
