@@ -1159,9 +1159,13 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		if (this.locale in chapterTitle) {
 			return chapterTitle[this.locale];
-		} else if (this.locale.split('-')[0] in chapterTitle) {
-			return chapterTitle[this.locale.split('-')[0]];
-		} else if (DEFAULT_LOCALE in chapterTitle) {
+		}
+		for (const locale in chapterTitle) { 
+			if (this.locale.split('-')[0] === locale.split('-')[0]) {
+				return chapterTitle[locale];
+			}
+		}
+		if (DEFAULT_LOCALE in chapterTitle) {
 			return chapterTitle[DEFAULT_LOCALE];
 		}
 	}
