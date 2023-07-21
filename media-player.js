@@ -64,7 +64,6 @@ const FUSE_OPTIONS = options => ({
 const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hover';
 const DEFAULT_PREVIEW_WIDTH = 160;
 const DEFAULT_PREVIEW_HEIGHT = 90;
-const DEFAULT_LOCALE = 'en';
 
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
@@ -89,7 +88,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			durationHint: { type: Number, attribute: 'duration-hint' },
 			hideCaptionsSelection: { type: Boolean, attribute: 'hide-captions-selection' },
 			hideSeekBar: { type: Boolean, attribute: 'hide-seek-bar' },
-			locale: { type: String },
 			loop: { type: Boolean },
 			mediaType: { type: String, attribute: 'media-type' },
 			metadata: { type: Object },
@@ -764,7 +762,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
 
-		this._updateLocale();
 		this._getMetadata();
 
 		this._startUpdatingCurrentTime();
@@ -980,10 +977,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			this._reloadSource();
 		}
 
-		if (changedProperties.has('locale')) {
-			this._updateLocale();
-		}
-
 		if (changedProperties.has('metadata')) {
 			this._getMetadata();
 		}
@@ -1157,16 +1150,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		if (!chapterTitle) return;
 
-		if (this.locale in chapterTitle) {
-			return chapterTitle[this.locale];
+		if (typeof chapterTitle === 'string') {
+			return chapterTitle;
 		}
+
 		for (const locale in chapterTitle) {
-			if (this.locale.split('-')[0] === locale.split('-')[0]) {
+			if (locale.split('-')[0] === 'en') {
 				return chapterTitle[locale];
 			}
-		}
-		if (DEFAULT_LOCALE in chapterTitle) {
-			return chapterTitle[DEFAULT_LOCALE];
 		}
 	}
 
@@ -2239,10 +2230,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_updateCurrentTimeFromSeekbarProgress() {
 		this.currentTime = this._seekBar.immediateValue * this._duration / 100;
-	}
-
-	_updateLocale() {
-		this.locale = !this.locale ? DEFAULT_LOCALE : this.locale.toLowerCase();
 	}
 
 	_updateSources(nodes) {
