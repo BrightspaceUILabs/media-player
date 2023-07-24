@@ -51,7 +51,6 @@ npm install @brightspace-ui-labs/media-player
 | duration-hint | Number | 1 | Measured in seconds. If set and the duration cannot be determined automatically, this value will be used instead.
 | hide-captions-selection | Boolean | false | If set, the menu item to configure captions is hidden. |
 | hide-seek-bar | Boolean | false | If set, the seek bar will not be shown. |
-| locale | String | en | If set, will display chapter titles in the given locale when possible. |
 | loop | Boolean | false | If set, once the media has finished playing it will replay from the beginning. |
 | media-type | ["video", "audio"] | null | Whether the video or audio player should be rendered. If not set, a loading indicator will be displayed until set.
 | metadata | JSON | false | Metadata JSON of the video, contains chapters and cuts data. |
