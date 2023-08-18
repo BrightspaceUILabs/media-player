@@ -1561,6 +1561,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 			this._dragging = false;
 		}
+
+		this.dispatchEvent(new CustomEvent('seeked'));
 	}
 
 	_onDragStartSeek() {
@@ -1573,6 +1575,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		setTimeout(() => {
 			this._updateCurrentTimeFromSeekbarProgress();
 		}, 0);
+
+		this.dispatchEvent(new CustomEvent('seeking'));
 	}
 
 	_onDragStartVolume() {

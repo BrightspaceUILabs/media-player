@@ -109,6 +109,8 @@ this.document.querySelector('d2l-labs-media-player').pause();
 | loadedmetadata | Dispatched when the metadata for the media has finished loading. |
 | play | Dispatched when the media begins playing. |
 | pause | Dispatched when the media is paused. |
+| seeked | Dispatched when the user finishes navigating through the media's timeline using the seek bar. |
+| seeking | Dispatched when the user starts navigating through the media's timeline using the seek bar. |
 | timeupdate | Dispatched when the currentTime of the media player has been updated. |
 | trackloaded | Dispatched when a track element has loaded. |
 | trackloadfailed | Dispatched when a track element could not be loaded from the provided src attribute. |
