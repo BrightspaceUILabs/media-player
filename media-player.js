@@ -96,6 +96,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			thumbnails: { type: String },
 			disableSetPreferences: { type: Boolean, attribute: 'disable-set-preferences' },
 			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
+			playInView: { type: Boolean, attribute: 'play-in-view' },
 			_chapters: { type: Array, attribute: false },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
@@ -642,6 +643,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this.allowDownload = false;
 		this.autoplay = false;
 		this.loop = false;
+		this.playInView = false;
 
 		this._chapters = [];
 		this._currentTime = 0;
@@ -1516,6 +1518,23 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
+	_loadVisibilityObserver({ target }) {
+		if (this._observer) return;
+		this._observer = new IntersectionObserver(([ioEvent]) => {
+			if (!ioEvent.isIntersecting && this._playing) {
+				this.pause();
+				this._observer.unobserve(target);
+				this._observer.disconnect();
+				delete this._observer;
+			}
+		}, {
+			root: null, // entire viewport
+			rootMargin: '0px',
+			threshold: 0.05, // if 5% of the target is in the viewport
+		});
+		this._observer.observe(target);
+	}
+
 	_onContextMenu(e) {
 		if (!this.allowDownload) e.preventDefault();
 	}
@@ -2224,6 +2243,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	_togglePlay() {
 		this._posterVisible = false;
 		if (this._media.paused) {
+			if (this.playInView) {
+				this._loadVisibilityObserver({ target: this._mediaContainer });
+			}
 			this._playRequested = true;
 			this._media.play();
 		} else {
