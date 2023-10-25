@@ -57,6 +57,7 @@ npm install @brightspace-ui-labs/media-player
 | poster | String | null | URL of the image to display in place of the media before it has loaded. |
 | src | String |  | URL of the media to play. If multiple sources are desired, use `<source>` tags instead (see below). |
 | thumbnails | String |  | If set, will show thumbnails on preview. See below for required format. |
+| play-in-view | Boolean | false | If set, will stop the media playback if not in view
 
 ```
 <!-- Render a media player with a source file and loop the media when it reaches the end -->
