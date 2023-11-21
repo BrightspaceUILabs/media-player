@@ -17,6 +17,7 @@ export default {
 	"pause": "Pause",
 	"play": "Play",
 	"playbackSpeed": "Playback speed",
+	'playButton': "Play Button",
 	"retry": "Retry",
 	"showSearchInput": "Show search input",
 	"searchPlaceholder": "Search...",
