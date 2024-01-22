@@ -1,12 +1,14 @@
 /* eslint quotes: 0 */
 export default {
 	"captions": "कैप्शन",
+	"captionsVtt": "कैप्शन (.vtt)",
 	"quality": "गुणवत्ता",
 	"closedCaptionsAcronym": "प्रतिलिपि",
 	"default": "डिफ़ॉल्ट",
 	"download": "डाउनलोड करें",
 	"exitFullscreen": "फ़ुलस्क्रीन से बाहर निकलें",
 	"fullscreen": "पूर्ण स्क्रीन",
+	"language": "भाषा",
 	"loadErrorMessage": "ओह, इस मीडिया फ़ाइल को लोड करने में कोई समस्या हुई",
 	"loadSuccessMessage": "मीडिया सफलतापूर्वक लोड हो गया है",
 	"menu": "menu",
@@ -21,6 +23,7 @@ export default {
 	"seekSlider": "स्लाइडर खोजें",
 	"settings": "settings",
 	"speed": "गति",
+	"transcriptTxt": "ट्रांस्क्रिप्ट (.txt)",
 	"unableToDownload": "डाउनलोड नहीं हो सका। कृपया पेज को रीफ़्रेश करें और पुनः प्रयास करें।",
 	"unmute": "अनम्यूट करें",
 	"volumeSlider": "वॉल्यूम स्लाइडर"
