@@ -24,8 +24,8 @@
     "test": "npm run lint && npm run test:headless",
     "test:headless": "d2l-test-runner",
     "test:headless:watch": "npm run test:headless --watch",
-    "vdiff": "npx d2l-test-runner vdiff --chrome --firefox --webkit",
-    "vdiff:goldens": "d2l-test-runner vdiff golden --chrome --firefox --webkit",
+    "vdiff": "npx d2l-test-runner vdiff --chrome",
+    "vdiff:goldens": "d2l-test-runner vdiff golden --chrome",
     "vdiff:report": "d2l-test-runner vdiff report"
   },
   "author": "D2L Corporation",
