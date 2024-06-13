@@ -1,6 +1,5 @@
 import '../media-player.js';
-import { expect, fixture, html } from '@open-wc/testing';
-import { runConstructor } from '@brightspace-ui/core/tools/constructor-test-helper.js';
+import { expect, fixture, html, runConstructor } from '@brightspace-ui/testing';
 
 describe('d2l-labs-media-player', () => {
 
@@ -16,5 +15,4 @@ describe('d2l-labs-media-player', () => {
 			runConstructor('d2l-labs-media-player');
 		});
 	});
-
 });
