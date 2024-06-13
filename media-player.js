@@ -995,15 +995,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	async getLoadingComplete() {
-		const media = this.shadowRoot.getElementById(
-			this.mediaType === SOURCE_TYPES.video
-				? 'd2l-labs-media-player-video'
-				: 'd2l-labs-media-player-audio'
-		);
-
 		do {
 			await new Promise((resolve) => setTimeout(() => resolve(), 1000));
-		} while (this.loading || media.readyState < 3);
+		} while (this._loading);
 	}
 
 	load() {
