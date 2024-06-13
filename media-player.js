@@ -680,10 +680,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
-
-		this._loadingCompletePromise = new Promise((resolve) => {
-			this._loadingCompleteResolve = resolve;
-		});
 	}
 
 	get currentTime() {
@@ -749,17 +745,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	get textTracks() {
 		return this._media ? this._media.textTracks : null;
-	}
-
-	connectedCallback() {
-		super.connectedCallback();
-		// Simulating a delay for data loading
-		setTimeout(() => {
-			if (this._loadingCompleteResolve) {
-				this._loadingCompleteResolve();
-				this._loadingCompleteResolve = undefined;
-			}
-		}, 1000);
 	}
 
 	firstUpdated(changedProperties) {
@@ -1010,7 +995,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	async getLoadingComplete() {
-		return this._loadingCompletePromise;
+		const media = this.shadowRoot.getElementById(
+			this.mediaType === SOURCE_TYPES.video
+				? 'd2l-labs-media-player-video'
+				: 'd2l-labs-media-player-audio'
+		);
+
+		do {
+			await new Promise((resolve) => setTimeout(() => resolve(), 1000));
+		} while (this.loading || media.readyState < 3);
 	}
 
 	load() {
