@@ -788,7 +788,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				this._twoWidthsAgo = this._lastWidth;
 				this._lastWidth = width;
 
-				const multiplier = Math.sqrt(Math.max(1, Math.min(height, width) / MIN_TRACK_WIDTH_PX));
+				const multiplier = Math.sqrt(Math.min(height, width) / MIN_TRACK_WIDTH_PX);
 				this._trackFontSizeRem = multiplier;
 			}
 		}).observe(this._mediaContainer);
@@ -807,7 +807,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
-			minHeight: this.isIOSVideo ? 'auto' : '17rem',
+			minHeight: this.mediaType === SOURCE_TYPES.audio ? '5rem' : 'auto',
 			height,
 			...this._mediaContainerAspectRatio,
 		};
