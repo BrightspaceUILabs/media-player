@@ -1337,7 +1337,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (!this.poster || this.autoplay || !this._posterVisible) return;
 
 		const playIcon = !this._loading ? html`
-			<button id="d2l-labs-media-player-video-poster-play-button" aria-label=${this.localize('play')} transcript="${ifDefined(this.transcriptViewerOn ? true : undefined)}"
+			<button id="d2l-labs-media-player-video-poster-play-button" aria-label=${this.localize('play')} title=${this.localize('play')} transcript="${ifDefined(this.transcriptViewerOn ? true : undefined)}"
 				@click=${this._onVideoClick}>
 				<d2l-icon icon="tier1:play" theme="${ifDefined(this._getTheme())}"></d2l-icon>
 			</button>
