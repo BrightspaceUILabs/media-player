@@ -994,6 +994,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._toggleFullscreen();
 	}
 
+	async getLoadingComplete() {
+		do {
+			await new Promise((resolve) => setTimeout(() => resolve(), 1000));
+		} while (this._loading);
+	}
+
 	load() {
 		if (this._media && this._media.paused) {
 			this._media.load();
