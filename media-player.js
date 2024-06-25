@@ -410,11 +410,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.d2l-labs-media-player-chapter-marker, .d2l-labs-media-player-chapter-marker-highlight {
 				cursor: pointer;
 				height: 6px;
+				pointer-events: none;
 				position: absolute;
 				top: 4px;
 				width: 3px;
 				z-index: 2;
-				pointer-events: none;
 			}
 
 			.d2l-labs-media-player-chapter-marker {
@@ -517,11 +517,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				color: var(--d2l-color-ferrite);
 				cursor: pointer;
 				height: 6px;
-				width: 6px;
+				pointer-events: none;
 				position: absolute;
 				top: 4px;
+				width: 6px;
 				z-index: 2;
-				pointer-events: none;
 			}
 
 			.d2l-labs-media-player-search-marker[theme="dark"] {
