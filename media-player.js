@@ -225,7 +225,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			#d2l-labs-media-player-seek-bar {
 				--d2l-knob-focus-color: #ffffff;
 				--d2l-knob-focus-size: 4px;
-				--d2l-knob-size: 15px;
+				--d2l-knob-size: 16px;
 				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
 				--d2l-progress-border-radius: 0;
 				position: absolute;
@@ -407,28 +407,26 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 2.75rem;
 			}
 
-			.d2l-labs-media-player-chapter-marker {
-				color: var(--d2l-color-ferrite);
+			.d2l-labs-media-player-chapter-marker, .d2l-labs-media-player-chapter-marker-highlight {
 				cursor: pointer;
-				height: 7px;
+				height: 6px;
+				pointer-events: none;
 				position: absolute;
-				top: 3px;
-				width: 6px;
+				top: 4px;
+				width: 3px;
 				z-index: 2;
+			}
+
+			.d2l-labs-media-player-chapter-marker {
+				background-color: var(--d2l-color-ferrite);
 			}
 
 			.d2l-labs-media-player-chapter-marker-highlight {
-				color: var(--d2l-color-celestine-minus-1);
-				cursor: pointer;
-				height: 7px;
-				position: absolute;
-				top: 3px;
-				width: 6px;
-				z-index: 2;
+				background-color: var(--d2l-color-celestine-minus-1);
 			}
 
 			.d2l-labs-media-player-chapter-marker[theme="dark"] {
-				color: white;
+				background-color: white;
 			}
 
 			#d2l-labs-media-player-search-container {
@@ -484,7 +482,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				bottom: 60px;
 				position: absolute;
 				transform: translateX(-50%);
-				transition: all 0.2s;
 				z-index: 2;
 			}
 
@@ -519,10 +516,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.d2l-labs-media-player-search-marker {
 				color: var(--d2l-color-ferrite);
 				cursor: pointer;
-				height: 5px;
+				height: 6px;
+				pointer-events: none;
 				position: absolute;
 				top: 4px;
-				width: 5px;
+				width: 6px;
 				z-index: 2;
 			}
 
@@ -667,7 +665,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._searchResults = [];
 		this._settingsMenu = null;
 		this._sources = {};
-		this._timelinePreviewOffset = 10;
+		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
 		this._trackText = null;
 		this._tracks = [];
@@ -858,12 +856,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						id="d2l-labs-media-player-seek-bar"
 						fullWidth
 						solid
-						value="${Math.floor(this.currentTime / this._duration * 100)}"
+						min="0"
+						max="${Math.floor(this._getSeekbarValue(this.duration))}"
+						value="${this._getSeekbarValue(this._currentTime)}"
 						aria-label="${this.localize('seekSlider')}"
 						aria-orientation="horizontal"
 						aria-valuemin="0"
-						aria-valuemax="100"
-						aria-valuenow="${Math.floor(this.currentTime / this._duration * 100)}"
+						aria-valuemax="${Math.floor(this._getSeekbarValue(this.duration))}"
+						aria-valuenow="${this._getSeekbarValue(this._currentTime)}"
 						title="${this.localize('seekSlider')}"
 						@drag-start=${this._onDragStartSeek}
 						@drag-end=${this._onDragEndSeek}
@@ -1137,13 +1137,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		return this._chapters.map(chapter => {
 			const highlight = this._hovering && this._hoverTime >= this._chapters[0].time && (chapter.time === start || chapter.time === end);
 			return chapter.time > 0 ? html`
-				<d2l-icon
-					@click=${this._onTimelineMarkerClick(chapter.time)}
+				<div
 					class=${highlight ? 'd2l-labs-media-player-chapter-marker-highlight' : 'd2l-labs-media-player-chapter-marker'}
-					icon="tier1:bookmark-filled"
 					theme="${ifDefined(this._getTheme())}"
-					style=${styleMap({ left: this._getPercentageTime(chapter.time) })}
-				></d2l-icon>
+					style=${styleMap({ left: `${this._getPercentageTime(chapter.time)}%` })}
+				></div>
 			` : null;
 		});
 	}
@@ -1332,7 +1330,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_getPercentageTime(time) {
-		if (this._media) return `calc(${(time / this._media.duration) * 100}% - 2.5px)`;
+		if (this._media) return (time / this.duration) * 100;
 	}
 
 	_getPosterView() {
@@ -1388,10 +1386,18 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					class="d2l-labs-media-player-search-marker"
 					icon="tier1:subscribe-filled"
 					theme="${ifDefined(this._getTheme())}"
-					style=${styleMap({ left: this._getPercentageTime(result) })}
+					style=${styleMap({ left: `${this._getPercentageTime(result)}%` })}
 				></d2l-icon>
 			`;
 		});
+	}
+
+	_getSeekbarResolutionMultipler() {
+		return this._duration < 10 ? 1000 : this._duration < 100 ? 100 : 10;
+	}
+
+	_getSeekbarValue(time) {
+		return time * this._getSeekbarResolutionMultipler();
 	}
 
 	_getSelectedTextTrack() {
@@ -1426,7 +1432,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (!(this.thumbnails && this._thumbnailsImage))
 			return html`
 				<div id="d2l-labs-media-player-thumbnails-preview-container"
-					style="width: ${DEFAULT_PREVIEW_WIDTH}px; left: ${this._timelinePreviewOffset}%;">
+					style="width: ${DEFAULT_PREVIEW_WIDTH}px; left: clamp(${DEFAULT_PREVIEW_WIDTH / 2}px, ${this._timelinePreviewOffset}%, calc(100% - ${DEFAULT_PREVIEW_WIDTH / 2}px));">
 					<div
 						id="d2l-labs-media-player-thumbnails-preview-image"
 					>
@@ -1456,7 +1462,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return html`
 			<div id="d2l-labs-media-player-thumbnails-preview-container"
-				style="width: ${thumbWidth}px; left: ${this._timelinePreviewOffset}%;">
+				style="width: ${thumbWidth}px; left: clamp(${thumbWidth / 2}px, ${this._timelinePreviewOffset}%, calc(100% - ${thumbWidth / 2}px));">
 				<div
 					id="d2l-labs-media-player-thumbnails-preview-image"
 					style="height: ${thumbHeight}px; background: url(${this._thumbnailsImage.src}) ${-column * thumbWidth}px ${-row * thumbHeight}px / ${width}px ${height}px;"
@@ -1635,17 +1641,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_onHoverMove() {
 		if (this._hovering && this._seekBar) {
-
-			this._hoverTime = this._seekBar.hoverValue * this._duration / 100;
-
-			let offset = this._seekBar.hoverValue;
-			if (offset < 10) {
-				offset = 10;
-			} else if (offset > 90) {
-				offset = 90;
-			}
-
-			this._timelinePreviewOffset = offset;
+			this._hoverTime = this._seekBar.hoverValue / this._getSeekbarResolutionMultipler();
+			this._timelinePreviewOffset = (this._hoverTime / this._duration) * 100;
 		}
 	}
 
@@ -2261,7 +2258,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_updateCurrentTimeFromSeekbarProgress() {
-		this.currentTime = this._seekBar.immediateValue * this._duration / 100;
+		this.currentTime = this._seekBar.immediateValue / this._getSeekbarResolutionMultipler();
 	}
 
 	_updateSources(nodes) {
