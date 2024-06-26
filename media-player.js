@@ -805,7 +805,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
-			minHeight: this.mediaType === SOURCE_TYPES.audio ? '7rem' : 'auto',
+			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90vh)' : 'auto',
 			height,
 			...this._mediaContainerAspectRatio,
 		};
