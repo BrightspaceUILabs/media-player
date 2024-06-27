@@ -119,6 +119,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			_thumbnailsImage: { type: Object, attribute: false },
 			_timelinePreviewOffset: { type: Number, attribute: false },
 			_trackFontSizeRem: { type: Number, attribute: false },
+			_timeFontSizeRem: { type: Number, attribute: false },
 			_trackText: { type: String, attribute: false },
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
@@ -260,11 +261,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				--d2l-button-icon-min-height: 1.8rem;
 				--d2l-button-icon-min-width: 1.8rem;
 				margin: 6px 6px 6px 0;
-			}
-
-			#d2l-labs-media-player-time {
-				line-height: 1rem;
-				margin: 0 0.75rem;
 			}
 
 			#d2l-labs-media-player-time:hover {
@@ -667,6 +663,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._sources = {};
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
+		this._timeFontSizeRem = 0.8; // 0.8rem is the default font size for d2l-typography
 		this._trackText = null;
 		this._tracks = [];
 		this._usingVolumeContainer = false;
@@ -788,6 +785,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 				const multiplier = Math.sqrt(Math.min(height, width) / MIN_TRACK_WIDTH_PX);
 				this._trackFontSizeRem = multiplier;
+				this._timeFontSizeRem = Math.min(multiplier * 0.9 * 0.8, 0.8);
 			}
 		}).observe(this._mediaContainer);
 	}
@@ -808,6 +806,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90vh)' : 'auto',
 			height,
 			...this._mediaContainerAspectRatio,
+		};
+		const timeStyle = {
+			fontSize: `${this._timeFontSizeRem}rem`,
+			margin: `0 ${this._timeFontSizeRem * 0.7}rem`,
+			lineHeight: `${this._timeFontSizeRem * 1.2}rem`,
 		};
 
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
@@ -912,6 +915,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						aria-live="off"
 						aria-hidden="true"
 						tabindex="-1"
+						style=${styleMap(timeStyle)}
 						@focus=${this._onPlayerTimeFocus}
 						@blur=${this._onPlayerTimeBlur}>
 						${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
