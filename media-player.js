@@ -663,7 +663,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._sources = {};
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
-		this._timeFontSizeRem = 0.8; // 0.8rem is the default font size for d2l-typography
+		this._timeFontSizeRem = 0.95; // 0.95rem is the default font size for d2l-typography
 		this._trackText = null;
 		this._tracks = [];
 		this._usingVolumeContainer = false;
@@ -785,7 +785,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 				const multiplier = Math.sqrt(Math.min(height, width) / MIN_TRACK_WIDTH_PX);
 				this._trackFontSizeRem = multiplier;
-				this._timeFontSizeRem = Math.min(multiplier * 0.9 * 0.8, 0.8);
+				this._timeFontSizeRem = Math.min(multiplier * 0.9 * 0.95, 0.95);
 			}
 		}).observe(this._mediaContainer);
 	}
@@ -809,8 +809,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		const timeStyle = {
 			fontSize: `${this._timeFontSizeRem}rem`,
-			margin: `0 ${this._timeFontSizeRem * 0.7}rem`,
-			lineHeight: `${this._timeFontSizeRem * 1.2}rem`,
+			margin: `0 ${this._timeFontSizeRem * 0.79}rem`, // At max size, this is 15px.
+			lineHeight: `${this._timeFontSizeRem * 1.05263158}rem`, // At max size, this is 1rem.
 		};
 
 		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
