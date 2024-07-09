@@ -21,6 +21,7 @@ export default {
 	"showSearchInput": "Show search input",
 	"searchPlaceholder": "Search...",
 	"seekSlider": "seek slider",
+	"sliderBarProgress": "slider bar progress",
 	"settings": "settings",
 	"speed": "speed",
 	"transcriptTxt": "Transcript (.txt)",

@@ -1,6 +1,3 @@
 {
-  "extends": "brightspace/lit-config",
-  "rules": {
-    "lines-between-class-members": "error"
-  }
+  "extends": "brightspace/lit-config"
 }

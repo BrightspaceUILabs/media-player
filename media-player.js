@@ -11,7 +11,7 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
-import '@brightspace-ui-labs/seek-bar/d2l-seek-bar.js';
+import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
@@ -855,7 +855,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					${this._getChapterMarkersView()}
 				</div>
 				${this.hideSeekBar ? '' : html`
-					<d2l-seek-bar
+					<d2l-slider-bar
 						id="d2l-labs-media-player-seek-bar"
 						fullWidth
 						solid
@@ -874,7 +874,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						@hovering-move=${this._onHoverMove}
 						@hovering-start=${this._onHoverStart}
 						@hovering-end=${this._onHoverEnd}
-					></d2l-seek-bar>
+					></d2l-slider-bar>
 				`}
 				<div id="d2l-labs-media-player-buttons">
 					<d2l-button-icon icon="${playIcon}" text="${playTooltip}"  @click="${this._togglePlay}" theme="${ifDefined(theme)}"></d2l-button-icon>
@@ -892,7 +892,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						<div id="d2l-labs-media-player-volume-level-container" class=${classMap(volumeLevelContainerClass)}>
 							<div class="d2l-labs-media-player-rotated" id="d2l-labs-media-player-volume-level-background">
 								<div id="d2l-labs-media-player-volume-slider-container">
-									<d2l-seek-bar solid
+									<d2l-slider-bar solid
 										id="d2l-labs-media-player-volume-slider"
 										vertical
 										value="${Math.round(this._volume * 100)}"
@@ -905,7 +905,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 										@focus=${this._startUsingVolumeContainer}
 										@focusout=${this._stopUsingVolumeContainer}
 										@position-change=${this._onPositionChangeVolume}
-									></d2l-seek-bar>
+									></d2l-slider-bar>
 								</div>
 							</div>
 						</div>
@@ -1061,7 +1061,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_closeTranscript() {
-		this.dispatchEvent(new CustomEvent('close-transcript',  { bubbles: true, composed: true }));
+		this.dispatchEvent(new CustomEvent('close-transcript', { bubbles: true, composed: true }));
 	}
 
 	_disableNativeCaptions() {
@@ -1078,11 +1078,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_downloadCaptions() {
-		this.dispatchEvent(new CustomEvent('download-captions',  { bubbles: true, composed: true }));
+		this.dispatchEvent(new CustomEvent('download-captions', { bubbles: true, composed: true }));
 	}
 
 	_downloadTranscript() {
-		this.dispatchEvent(new CustomEvent('download-transcript',  { bubbles: true, composed: true }));
+		this.dispatchEvent(new CustomEvent('download-transcript', { bubbles: true, composed: true }));
 	}
 
 	static _formatTime(totalSeconds) {

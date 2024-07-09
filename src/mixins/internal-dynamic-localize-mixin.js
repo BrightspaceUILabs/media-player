@@ -1,4 +1,3 @@
-import { dedupingMixin } from '@polymer/polymer/lib/utils/mixin.js';
 import { LocalizeDynamicMixin } from '@brightspace-ui/core/mixins/localize-dynamic-mixin.js';
 
 const InternalDynamicLocalizeMixinClass = superClass => class extends LocalizeDynamicMixin(superClass) {
@@ -11,4 +10,4 @@ const InternalDynamicLocalizeMixinClass = superClass => class extends LocalizeDy
 	}
 };
 
-export const InternalDynamicLocalizeMixin = dedupingMixin(InternalDynamicLocalizeMixinClass);
+export const InternalDynamicLocalizeMixin = InternalDynamicLocalizeMixinClass;
