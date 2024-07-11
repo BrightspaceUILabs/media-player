@@ -24,14 +24,20 @@ class ProgressBar extends LitElement {
 			}
 
 			#progressContainer {
+				--d2l-calculated-progress-background-color: var(--d2l-progress-background-color, var(--d2l-color-corundum-65-opacity));
+				--d2l-calculated-progress-border-radius: var(--d2l-progress-border-radius, 6px);
+				--d2l-calculated-progress-shadow-color: var(--d2l-progress-shadow-color, var(--d2l-color-galena-88-opacity));
+				--d2l-progress-container-color: var(--d2l-calculated-progress-background-color);
 				background: var(--d2l-progress-container-color, var(--d2l-color-gypsum));
+				border-radius: var(--d2l-calculated-progress-border-radius);
+				box-shadow: inset 0 1px 0 0 var(--d2l-calculated-progress-shadow-color);
 				height: var(--d2l-progress-height, 6px);
 				position: relative;
 			}
 
 			#primaryProgress {
+				@apply --d2l-progress-primary;
 				background: var(--d2l-progress-active-color, var(--d2l-color-celestine));
-				height: 100%;
 			}
 		`;
 	}
