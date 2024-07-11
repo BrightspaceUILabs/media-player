@@ -24,7 +24,7 @@ class ProgressBar extends LitElement {
 			}
 
 			#progressContainer {
-				background: var(--d2l-progress-container-color, var(--d2l-color-gypsum));
+				background: var(--d2l-progress-container-color, var(--d2l-color-corundum-65-opacity));
 				height: var(--d2l-progress-height, 6px);
 				position: relative;
 			}
