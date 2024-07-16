@@ -26,5 +26,7 @@ export default {
 	"transcriptTxt": "Transcript (.txt)",
 	"unableToDownload": "Unable to download. Please refresh the page and try again.",
 	"unmute": "Unmute",
-	"volumeSlider": "volume slider"
+	"volumeSlider": "volume slider",
+	"seekSlider": "Seek Slider",
+	"seekBarProgress": "Seek Bar Progress"
 };
