@@ -170,7 +170,7 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		<div id="sliderContainer"
 			@mouseover="${this._onHostHover}"
 			@mousemove="${this._onHostMove}"
-           	@mouseout="${this._onHostUnhover}"
+			@mouseout="${this._onHostUnhover}"
 		    style="width: ${this.fullWidth ? '100%' : 'auto'}"
 		>
 			<div class="bar-container">
