@@ -11,14 +11,16 @@
     "media-player-menu-item.js",
     "media-player.js",
     "media-player-audio-bars.js",
+    "slider-bar.js",
+    "progress-bar.js",
     "/lang",
     "/src"
   ],
   "scripts": {
-    "lint": "npm run lint:eslint && npm run lint:lit && npm run lint:style",
-    "lint:eslint": "eslint . --ext .js,.html",
     "lint:fix": "eslint . --ext .js,.html --fix",
-    "lint:lit": "lit-analyzer \"*.js\" demo test",
+    "lint": "npm run lint:eslint && npm run lint:lit && npm run lint:style && lint:langs",
+    "lint:eslint": "eslint . --ext .js,.html",
+    "lint:lit": "lit-analyzer \"*.js\" demo test --strict",
     "lint:style": "stylelint \"**/*.{js,html}\"",
     "start": "web-dev-server --app-index demo/index.html --node-resolve --open --watch",
     "test": "npm run lint && npm run test:headless",
@@ -33,16 +35,15 @@
   "devDependencies": {
     "@babel/core": "^7",
     "@babel/eslint-parser": "^7",
-    "@brightspace-ui/stylelint-config": "^0.7",
+    "@brightspace-ui/stylelint-config": "^1.1",
     "@brightspace-ui/testing": "^1.16.1",
     "@web/dev-server": "^0.4.5",
     "eslint": "^8",
-    "eslint-config-brightspace": "^0.21",
-    "lit-analyzer": "^1",
-    "stylelint": "^15"
+    "eslint-config-brightspace": "^1.1",
+    "lit-analyzer": "^2",
+    "stylelint": "^16"
   },
   "dependencies": {
-    "@brightspace-ui-labs/seek-bar": "^3",
     "@brightspace-ui/core": "^3",
     "fuse.js": "^6.4.6",
     "lit": "^3",
