@@ -153,6 +153,18 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this.max = 100;
 	}
 
+	connectedCallback() {
+		super.connectedCallback();
+		window.addEventListener('mouseup', () => { this._barUp(); });
+		window.addEventListener('mousemove', (event) => { this._onTrack(event); });
+	}
+
+	disconnectedCallback() {
+		super.disconnectedCallback();
+		window.removeEventListener('mouseup', () => { this._barUp(); });
+		window.removeEventListener('mousemove', (event) => { this._onTrack(event); });
+	}
+
 	render() {
 		return html`
 		<div id="sliderContainer"
@@ -165,7 +177,6 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				<div
 					id="sliderBar"
 					@mousedown="${this._barDown}"
-					@mouseup="${this._barUp}"
 					role="slider"
 					aria-label="${this.localize('sliderBarProgress')}"
 					aria-orientation="${this.vertical ? 'vertical' : 'horizontal'}"
@@ -226,10 +237,9 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		this.dragging = true;
 		this._positionKnob(ratio);
-		event.preventDefault();
-		this.focus();
 
-		this.addEventListener('mousemove', this._onTrack);
+		event.preventDefault();
+		this.shadowRoot.getElementById('sliderKnob').focus();
 	}
 
 	_barUp() {
@@ -289,11 +299,6 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
-	_knobDown(event) {
-		event.preventDefault();
-		this.focus();
-	}
-
 	_onHostHover() {
 		this.hovering = true;
 	}
@@ -327,9 +332,11 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_onTrack(event) {
-		this.dispatchEvent(new CustomEvent('position-change', { bubbles: true, composed: true }));
-		event.stopPropagation();
-		this._track(event);
+		if (this.dragging) {
+			this.dispatchEvent(new CustomEvent('position-change', { bubbles: true, composed: true }));
+			event.stopPropagation();
+			this._track(event);
+		}
 	}
 
 	_positionKnob(ratio) {
