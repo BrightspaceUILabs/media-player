@@ -931,7 +931,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					><d2l-button-icon
 							icon="tier1:search"
 							id="d2l-labs-media-player-search-button"
-							label=${this.localize('showSearchInput')}
+							text=${this.localize('showSearchInput')}
 							theme="${ifDefined(theme)}"
 						></d2l-button-icon>
 						<input
