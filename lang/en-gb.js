@@ -20,7 +20,7 @@ export default {
 	"retry": "Retry",
 	"searchPlaceholder": "Search...",
 	"seekSlider": "seek slider",
-	"settings": "settings",
+	"settings": " Settings",
 	"showSearchInput": "Show search input",
 	"sliderBarProgress": "slider bar progress",
 	"speed": "speed",

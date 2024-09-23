@@ -20,7 +20,7 @@ export default {
 	"retry": "Réessayer",
 	"searchPlaceholder": "Recherche en cours…",
 	"seekSlider": "curseur de recherche",
-	"settings": "settings",
+	"settings": "paramètres",
 	"showSearchInput": "Afficher l’entrée de recherche",
 	"sliderBarProgress": "progression de la barre de défilement",
 	"speed": "vitesse",
