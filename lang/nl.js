@@ -20,7 +20,7 @@ export default {
 	"retry": "Opnieuw proberen",
 	"searchPlaceholder": "Zoeken...",
 	"seekSlider": "zoekschuifregelaar",
-	"settings": "settings",
+	"settings": "instellingen",
 	"showSearchInput": "Zoekopties tonen",
 	"sliderBarProgress": "voortgang schuifbalk",
 	"speed": "snelheid",

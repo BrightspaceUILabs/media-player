@@ -20,7 +20,7 @@ export default {
 	"retry": "Forsøg igen",
 	"searchPlaceholder": "Søg ...",
 	"seekSlider": "søgningsskyder",
-	"settings": "settings",
+	"settings": "indstillinger",
 	"showSearchInput": "Vis søgeinput",
 	"sliderBarProgress": "skyder for statuslinje",
 	"speed": "hastighed",

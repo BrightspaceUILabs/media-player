@@ -20,7 +20,7 @@ export default {
 	"retry": "Repetir",
 	"searchPlaceholder": "Pesquisar...",
 	"seekSlider": "controle deslizante de busca",
-	"settings": "settings",
+	"settings": "configurações",
 	"showSearchInput": "Mostrar entrada de pesquisa",
 	"sliderBarProgress": "progresso da barra deslizante",
 	"speed": "velocidade",
