@@ -1186,7 +1186,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_getDownloadLink() {
 		const srcUrl = this._getCurrentSource();
-		if (srcUrl.startsWith('blob:')) {
+		if (srcUrl?.startsWith('blob:')) {
 			return srcUrl;
 		}
 
