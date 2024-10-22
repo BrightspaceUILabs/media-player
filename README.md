@@ -15,7 +15,7 @@
 > - [x] Demo page
 > - [x] README documentation
 
-A Lit element based media player component, designed for similarity across browsers. Capable of playing video and audio content.
+A Lit element based media player component, designed for similarity across browsers. Capable of playing video and audio contents.
 
 > Displaying video
 ![Example of video](demo/example-video.gif)
