@@ -962,7 +962,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 								</d2l-menu-item>
 								${this._getTracksMenuView()}
 								${this._getQualityMenuView()}
-								${this._getDownloadButtonView()}
+								${this.allowDownload && this._getCurrentSource() && this._getDownloadButtonView()}
 								<slot name="settings-menu-item"></slot>
 							</d2l-menu>
 						</d2l-dropdown-menu>
@@ -1176,8 +1176,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_getDownloadButtonView() {
-		if (!this.allowDownload) return null;
-
 		const linkHref = this._getDownloadLink();
 		return html`
 			<d2l-menu-item-link href="${linkHref}" text="${this.localize('download')}" download=${this.downloadFilename}></d2l-menu-item-link>
@@ -1186,7 +1184,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_getDownloadLink() {
 		const srcUrl = this._getCurrentSource();
-		if (srcUrl?.startsWith('blob:')) {
+		if (srcUrl.startsWith('blob:')) {
 			return srcUrl;
 		}
 
