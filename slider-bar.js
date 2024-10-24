@@ -335,7 +335,7 @@ class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (!this.dragging) {
 			return;
 		}
-		
+
 		this.dispatchEvent(new CustomEvent('position-change', { bubbles: true, composed: true }));
 		event.stopPropagation();
 		this._track(event);
