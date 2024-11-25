@@ -962,7 +962,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 								</d2l-menu-item>
 								${this._getTracksMenuView()}
 								${this._getQualityMenuView()}
-								${this.allowDownload && this._getCurrentSource() && this._getDownloadButtonView()}
+								${(this.allowDownload && this._getCurrentSource()) ? this._getDownloadButtonView() : ''}
 								<slot name="settings-menu-item"></slot>
 							</d2l-menu>
 						</d2l-dropdown-menu>
