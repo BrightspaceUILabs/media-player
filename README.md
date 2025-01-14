@@ -305,8 +305,10 @@ Then run the tests:
 ```shell
 # update vdiff goldens
 npm run vdiff:goldens
+
 # run vdiff tests
 npm run vdiff
+
 # view report
 npm run vdiff:report
 ```
