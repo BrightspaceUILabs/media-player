@@ -1,4 +1,5 @@
 import '@brightspace-ui/core/components/alert/alert.js';
+import '@brightspace-ui/core/components/button/button.js';
 import '@brightspace-ui/core/components/button/button-icon.js';
 import '@brightspace-ui/core/components/colors/colors.js';
 import '@brightspace-ui/core/components/dropdown/dropdown.js';
@@ -11,6 +12,7 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
+import '@brightspace-ui/core/components/inputs/input-textarea.js';
 import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
@@ -98,6 +100,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
 			playInView: { type: Boolean, attribute: 'play-in-view' },
 			_chapters: { type: Array, attribute: false },
+			_checkBoxHidden: { state: true },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -139,6 +142,20 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				display: none;
 			}
 
+			#d2l-labs-media-player-chat-box-input {
+				height: 5rem;
+			}
+			#d2l-labs-media-player-chat-box-container[hidden] {
+				display: none !important;
+			}
+
+			#d2l-labs-media-player-chat-box-container {
+				display: flex;
+				width: 1500rem;
+				height: 100%;
+				background-color: white;
+			}
+
 			#d2l-labs-media-player-media-container {
 				align-items: center;
 				justify-content: center;
@@ -160,7 +177,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 
 			#d2l-labs-media-player-video {
-				display: block;
+				display: flex;
 				height: 100%;
 				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
@@ -640,6 +657,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this.playInView = false;
 
 		this._chapters = [];
+		this._checkBoxHidden = true;
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = this.durationHint || 1;
@@ -944,6 +962,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 							type="text"
 						></input>
 					</div>
+
+					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleCheckBoxState}"></d2l-button-icon>
+
 					<d2l-dropdown>
 						<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
 						<d2l-dropdown-menu id="d2l-labs-media-player-settings-menu" no-pointer theme="${ifDefined(theme)}">
@@ -1238,6 +1259,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					>
 						<source @error=${this._onError}>
 					</video>
+					${this._renderChatBox()}
 				`;
 			case SOURCE_TYPES.audio:
 				return html`
@@ -1508,6 +1530,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
+	}
+
+	_handleCheckBoxState() {
+		this._checkBoxHidden = !this._checkBoxHidden;
 	}
 
 	_hidingCustomControls() {
@@ -2080,6 +2106,18 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				this.load();
 			}
 		}
+	}
+
+	_renderChatBox() {
+		return html`
+			<div id="d2l-labs-media-player-chat-box-container" ?hidden="${this._checkBoxHidden}">
+				<div>
+
+				</div>
+				<d2l-input-textarea id="d2l-labs-media-player-chat-box-input" label="Questions about the video?"></d2l-input-textarea>
+				<d2l-button>Send</d2l-button>
+			</div>
+		`;
 	}
 
 	_renderTranscriptViewer() {
