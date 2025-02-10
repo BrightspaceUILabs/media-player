@@ -1004,6 +1004,33 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} while (this._loading);
 	}
 
+	getSnapshot() {
+		// Get current time
+		const videoTime = this.currentTime;
+		console.error('Current Time: %d', videoTime);
+
+		// TODO: Could store the video as a property. Removes need to fetch.
+		const vid = this.shadowRoot.querySelector('video');
+
+		// Make the canvas for the image
+		const canvas = document.createElement('canvas');
+		canvas.width = 1920;
+		canvas.height = 1080;
+
+		// Draw the image to the canvas
+		const ctx = canvas.getContext('2d');
+		ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+		const image = canvas.toDataURL('image/jpeg');
+
+		// Download the image
+		const a = document.createElement('a');
+		a.href = image;
+		a.download = 'output.png';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
 	load() {
 		if (this._media && this._media.paused) {
 			this._media.load();
@@ -2257,6 +2284,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} else {
 			this._playRequested = false;
 			this._media.pause();
+			this.getSnapshot();
 		}
 	}
 
