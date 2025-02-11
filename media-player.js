@@ -2284,9 +2284,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} else {
 			this._playRequested = false;
 			this._media.pause();
-			this.getSnapshot(); // TODO: remove this when no longer testing. Should be attached to chat window
-			//const subttls = this.shadowRoot.querySelector('track');
-			//console.error('Subtitles: %s', this._snapshot.textSeen);
+			//this.getSnapshot(); // TODO: remove this when no longer testing. Should be attached to chat window
 		}
 	}
 
