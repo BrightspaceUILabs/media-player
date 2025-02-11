@@ -65,6 +65,9 @@ const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hov
 const DEFAULT_PREVIEW_WIDTH = 160;
 const DEFAULT_PREVIEW_HEIGHT = 90;
 
+const DEFAULT_CANVAS_WIDTH = 1920;
+const DEFAULT_CANVAS_HEIGHT = 1080;
+
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
@@ -675,6 +678,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
+		this._snapshot = {};
 	}
 
 	get currentTime() {
@@ -992,6 +996,17 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
+	// TODO: Remove later
+	downloadImage() {
+		// Download the image
+		const a = document.createElement('a');
+		a.href = this._snapshot.image;
+		a.download = `screenshot_${this._snapshot.time}.png`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
@@ -1003,52 +1018,44 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			await new Promise((resolve) => setTimeout(() => resolve(), 1000));
 		} while (this._loading);
 	}
-
+	// TODO: Connect this to a button
 	getSnapshot() {
-		// Get current time
-		const videoTime = this.currentTime;
-		console.error('Current Time: %d', videoTime);
+		if (Object.keys(this._snapshot).length === 0) {
+			this.initializeSnapshot();
+		}
 
-		// TODO: Could store the video as a property. Removes need to fetch.
-		const vid = this.shadowRoot.querySelector('video');
+		this._snapshot.time = this._getTimestamp();
+		this._snapshot.ctx.drawImage(this._snapshot.video, 0, 0, this._snapshot.canvas.width, this._snapshot.canvas.height);
+		this._snapshot.image = this._snapshot.canvas.toDataURL('image/jpeg');
 
-		// Make the canvas for the image
-		const canvas = document.createElement('canvas');
-		canvas.width = 1920;
-		canvas.height = 1080;
+		this.downloadImage(); // TODO: Remove later
 
-		// Draw the image to the canvas
-		const ctx = canvas.getContext('2d');
-		ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-		const image = canvas.toDataURL('image/jpeg');
-
-		// Download the image
-		const a = document.createElement('a');
-		a.href = image;
-		a.download = 'output.png';
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
+		return this._snapshot;
 	}
-
+	initializeSnapshot() {
+		this._snapshot.time = '';
+		this._snapshot.video = this._media;
+		this._snapshot.canvas = document.createElement('canvas');
+		this._snapshot.canvas.width = DEFAULT_CANVAS_WIDTH;
+		this._snapshot.canvas.height = DEFAULT_CANVAS_HEIGHT;
+		this._snapshot.ctx = this._snapshot.canvas.getContext('2d');
+		this._snapshot.image = null;
+	}
 	load() {
 		if (this._media && this._media.paused) {
 			this._media.load();
 		}
 	}
-
 	pause() {
 		if (this._media && !this._media.paused) {
 			this._togglePlay();
 		}
 	}
-
 	play() {
 		if (this._media && this._media.paused) {
 			this._togglePlay();
 		}
 	}
-
 	requestFullscreen() {
 		if (fullscreenApi.isFullscreen) {
 			return;
@@ -1056,7 +1063,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		this._toggleFullscreen();
 	}
-
 	get _media() {
 		if (!this.shadowRoot) return null;
 		switch (this.mediaType) {
@@ -1068,7 +1074,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				return null;
 		}
 	}
-
 	get _selectedTrackLabel() {
 		for (let i = 0; i < this._tracks.length; i++) {
 			const track = this._tracks[i];
@@ -1082,15 +1087,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return this.localize('off');
 	}
-
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
-
 	_closeTranscript() {
 		this.dispatchEvent(new CustomEvent('close-transcript', { bubbles: true, composed: true }));
 	}
-
 	_disableNativeCaptions() {
 		if (!this._media) return;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1103,15 +1105,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
-
 	_downloadCaptions() {
 		this.dispatchEvent(new CustomEvent('download-captions', { bubbles: true, composed: true }));
 	}
-
 	_downloadTranscript() {
 		this.dispatchEvent(new CustomEvent('download-transcript', { bubbles: true, composed: true }));
 	}
-
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -1146,7 +1145,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return a.href;
 	}
-
 	_getChapterMarkersView() {
 		if (this._chapters.length === 0) return;
 
@@ -1176,7 +1174,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			` : null;
 		});
 	}
-
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
@@ -1197,7 +1194,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
-
 	_getCurrentSource() {
 		return this.src || this._sources[this._selectedQuality];
 	}
@@ -1503,6 +1499,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
 			</div>
 		`;
+	}
+
+	_getTimestamp() {
+		return new Date(this._currentTime * 1000).toISOString().substring(11, 19);
 	}
 
 	_getTrackIdentifier(srclang, kind) {
@@ -2284,7 +2284,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} else {
 			this._playRequested = false;
 			this._media.pause();
-			this.getSnapshot();
+			this.getSnapshot(); // TODO: remove this when no longer testing. Should be attached to chat window
+			//const subttls = this.shadowRoot.querySelector('track');
+			//console.error('Subtitles: %s', this._snapshot.textSeen);
 		}
 	}
 
