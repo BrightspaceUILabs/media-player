@@ -1034,6 +1034,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 	initializeSnapshot() {
 		this._snapshot.time = '';
+		this._snapshot.transcript = {};
 		this._snapshot.video = this._media;
 		this._snapshot.canvas = document.createElement('canvas');
 		this._snapshot.canvas.width = DEFAULT_CANVAS_WIDTH;
@@ -1041,6 +1042,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._snapshot.ctx = this._snapshot.canvas.getContext('2d');
 		this._snapshot.image = null;
 	}
+
 	load() {
 		if (this._media && this._media.paused) {
 			this._media.load();
@@ -2284,7 +2286,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} else {
 			this._playRequested = false;
 			this._media.pause();
-			//this.getSnapshot(); // TODO: remove this when no longer testing. Should be attached to chat window
 		}
 	}
 
