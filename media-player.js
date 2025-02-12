@@ -1047,17 +1047,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
-	// TODO: Remove later
-	downloadImage() {
-		// Download the image
-		const a = document.createElement('a');
-		a.href = this._snapshot.image;
-		a.download = `screenshot_${this._snapshot.time}.png`;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-	}
-
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
@@ -1069,7 +1058,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			await new Promise((resolve) => setTimeout(() => resolve(), 1000));
 		} while (this._loading);
 	}
-	// TODO: Connect this to a button
+
 	getSnapshot() {
 		if (Object.keys(this._snapshot).length === 0) {
 			this.initializeSnapshot();
@@ -1079,12 +1068,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._snapshot.ctx.drawImage(this._snapshot.video, 0, 0, this._snapshot.canvas.width, this._snapshot.canvas.height);
 		this._snapshot.image = this._snapshot.canvas.toDataURL('image/jpeg');
 
-		this.downloadImage(); // TODO: Remove later
-
 		return this._snapshot;
 	}
+
 	initializeSnapshot() {
-		this._snapshot.time = '';
+		this._snapshot.time = '00:00:00';
 		this._snapshot.transcript = {};
 		this._snapshot.video = this._media;
 		this._snapshot.canvas = document.createElement('canvas');
@@ -1140,17 +1128,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return this.localize('off');
 	}
-<<<<<<< HEAD
-=======
 
 	_addChat() {
 		this._chatLog += DOMPurify.sanitize('<p>User: Question</p>');
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
 		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
 		chatContainer.scrollBottom = chatContainer.scrollHeight;
+		this.getSnapshot();
 	}
 
->>>>>>> archang/inspiration-2025/video-qa-ai
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
