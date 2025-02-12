@@ -1087,16 +1087,19 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			this._media.load();
 		}
 	}
+
 	pause() {
 		if (this._media && !this._media.paused) {
 			this._togglePlay();
 		}
 	}
+
 	play() {
 		if (this._media && this._media.paused) {
 			this._togglePlay();
 		}
 	}
+
 	requestFullscreen() {
 		if (fullscreenApi.isFullscreen) {
 			return;
@@ -1104,6 +1107,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		this._toggleFullscreen();
 	}
+
 	get _media() {
 		if (!this.shadowRoot) return null;
 		switch (this.mediaType) {
@@ -1115,6 +1119,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				return null;
 		}
 	}
+
 	get _selectedTrackLabel() {
 		for (let i = 0; i < this._tracks.length; i++) {
 			const track = this._tracks[i];
@@ -1140,9 +1145,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
+
 	_closeTranscript() {
 		this.dispatchEvent(new CustomEvent('close-transcript', { bubbles: true, composed: true }));
 	}
+
 	_disableNativeCaptions() {
 		if (!this._media) return;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1155,12 +1162,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
+
 	_downloadCaptions() {
 		this.dispatchEvent(new CustomEvent('download-captions', { bubbles: true, composed: true }));
 	}
+
 	_downloadTranscript() {
 		this.dispatchEvent(new CustomEvent('download-transcript', { bubbles: true, composed: true }));
 	}
+
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -1195,6 +1205,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return a.href;
 	}
+
 	_getChapterMarkersView() {
 		if (this._chapters.length === 0) return;
 
@@ -1224,6 +1235,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			` : null;
 		});
 	}
+
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
@@ -1244,6 +1256,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
+
 	_getCurrentSource() {
 		return this.src || this._sources[this._selectedQuality];
 	}
