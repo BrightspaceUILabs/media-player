@@ -21,6 +21,7 @@ export default {
 	"searchPlaceholder": "Search...",
 	"seekSlider": "seek slider",
 	"settings": "settings",
+	"ai-chat": "AI Q&A Chat",
 	"showSearchInput": "Show search input",
 	"sliderBarProgress": "slider bar progress",
 	"speed": "speed",
