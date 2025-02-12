@@ -158,20 +158,20 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			#d2l-labs-media-player-chat-box-container {
+				background-color: white;
 				display: flex;
 				flex-direction: column;
-				width: 100%;
-				height: 100%;
-				background-color: white;
 				flex-shrink: 1;
+				height: 100%;
+				width: 100%;
 			}
 
 			#d2l-labs-media-player-chat-container {
+				border: 1px solid black;
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
 				height: 100%;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
-				border: 1px solid black;
 				padding: 10px;
 			}
 
