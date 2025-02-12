@@ -16,9 +16,11 @@ import '@brightspace-ui/core/components/inputs/input-textarea.js';
 import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
+import './src/components/d2l-labs-media-player-text-input.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { debounce } from 'lodash-es';
+import DOMPurify from 'dompurify';
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
 import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
@@ -29,6 +31,7 @@ import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 const DEFAULT_SPEED = '1.0';
 const DEFAULT_VOLUME = '1.0';
@@ -100,7 +103,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			transcriptViewerOn: { type: Boolean, attribute: 'transcript-viewer-on' },
 			playInView: { type: Boolean, attribute: 'play-in-view' },
 			_chapters: { type: Array, attribute: false },
-			_checkBoxHidden: { state: true },
 			_currentTime: { type: Number, attribute: false },
 			_duration: { type: Number, attribute: false },
 			_heightPixels: { type: Number, attribute: false },
@@ -127,6 +129,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
+			_chatBoxHidden: { state: true },
+			_chatLog: { state: true }
 		};
 	}
 
@@ -143,17 +147,41 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			#d2l-labs-media-player-chat-box-input {
-				height: 5rem;
+				height: 3rem;
+			}
+
+			#d2l-labs-media-player-chat-box-bottom-padding {
+				min-height: 2.8rem;
 			}
 			#d2l-labs-media-player-chat-box-container[hidden] {
 				display: none !important;
 			}
 
 			#d2l-labs-media-player-chat-box-container {
-				display: flex;
-				width: 1500rem;
-				height: 100%;
 				background-color: white;
+				display: flex;
+				flex-direction: column;
+				flex-shrink: 1;
+				height: 100%;
+				width: 100%;
+			}
+
+			#d2l-labs-media-player-chat-container {
+				border: 1px solid black;
+				display: flex;
+				flex-direction: column; /* Stack items from top to bottom */
+				height: 100%;
+				overflow-y: auto; /* Enables vertical scrolling when needed */
+				padding: 10px;
+			}
+
+			.d2l-labs-media-player-chat-box-horizontally-aligned {
+				display: flex;
+				margin-top: auto;
+			}
+
+			p {
+				color: black;
 			}
 
 			#d2l-labs-media-player-media-container {
@@ -161,7 +189,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				justify-content: center;
 				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
 				max-height: 100vh;
-				overflow: hidden;
+				max-width: 100%;
+				/* Removed overflow hidden for now to have chatbox show */
+				/* overflow: hidden; */
 				position: relative;
 				width: 100%;
 			}
@@ -657,7 +687,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this.playInView = false;
 
 		this._chapters = [];
-		this._checkBoxHidden = true;
+		this._chatBoxHidden = true;
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = this.durationHint || 1;
@@ -1075,6 +1105,13 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 
 		return this.localize('off');
+	}
+
+	_addChat() {
+		this._chatLog += DOMPurify.sanitize('<p>User: Question</p>');
+		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
+		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
+		chatContainer.scrollBottom = chatContainer.scrollHeight;
 	}
 
 	_clearPreference(preferenceKey) {
@@ -1533,7 +1570,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_handleCheckBoxState() {
-		this._checkBoxHidden = !this._checkBoxHidden;
+		this._chatBoxHidden = !this._chatBoxHidden;
 	}
 
 	_hidingCustomControls() {
@@ -2110,12 +2147,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_renderChatBox() {
 		return html`
-			<div id="d2l-labs-media-player-chat-box-container" ?hidden="${this._checkBoxHidden}">
-				<div>
-
+			<div id="d2l-labs-media-player-chat-box-container" ?hidden="${this._chatBoxHidden}">
+				<div id="d2l-labs-media-player-chat-container">
+					${unsafeHTML(this._chatLog)}
 				</div>
-				<d2l-input-textarea id="d2l-labs-media-player-chat-box-input" label="Questions about the video?"></d2l-input-textarea>
-				<d2l-button>Send</d2l-button>
+				<div class="d2l-labs-media-player-chat-box-horizontally-aligned">
+					<d2l-labs-media-player-text-input id="d2l-labs-media-player-chat-box-input"></d2l-labs-media-player-text-input>
+					<d2l-button @click="${this._addChat}">Send</d2l-button>
+				</div>
+				<div id="d2l-labs-media-player-chat-box-bottom-padding"></div>
 			</div>
 		`;
 	}
