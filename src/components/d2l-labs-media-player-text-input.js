@@ -33,11 +33,6 @@ class MyTextareaInputElem extends LitElement {
 		}
 		return this._area;
 	}
-
-	// get _value() {
-	// 	// TODO: Get element textarea somehow? constructor? initializer??? then send it through to the media-player
-	// }
-
 }
 
 customElements.define('d2l-labs-media-player-text-input', MyTextareaInputElem);

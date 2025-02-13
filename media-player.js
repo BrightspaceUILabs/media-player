@@ -172,7 +172,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				border: 1px solid black;
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
-				height: 100%;
+				height: 100vh;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 10px;
 			}
@@ -698,6 +698,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._hovering = false;
 		this._hoveringMediaControls = false;
 		this._loading = false;
+		this._mediaCanvas = { init:false },
 		this._message = {
 			text: null,
 			type: null
@@ -705,6 +706,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._muted = false;
 		this._playing = false;
 		this._posterVisible = true;
+		this._queryTextArea = {};
 		this._recentlyShowedCustomControls = false;
 		this._searchInputFocused = false;
 		this._searchInstances = {};
@@ -714,6 +716,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
 		this._timeFontSizeRem = 0.95; // 0.95rem is the default font size for d2l-typography
+		this._trackFullText = null;
 		this._trackText = null;
 		this._tracks = [];
 		this._usingVolumeContainer = false;
@@ -725,8 +728,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
-		this._mediaCanvas = { init:false },
-		this._queryTextArea = {};
 	}
 
 	get currentTime() {
@@ -1052,7 +1053,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			timestamp: this._getTimestamp(),
 			query: userQuery,
 			image: this.getScreenshot(),
-			transcript: []
+			transcript: this._getTruncatedTranscript()
 		};
 	}
 
@@ -1144,17 +1145,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const userInput = this._queryTextArea.text.trim();
 
 		if (userInput.length === 0) return;
-		const snapshot = this.createSnapshot(userInput);
-		console.error(snapshot);
+		// This is the data that will be sent out
+		// const snapshot = this.createSnapshot(userInput);
 
-		//Call this._getTruncatedTranscript() when sending the prompt to Bedrock
-		//console.log(this._getTruncatedTranscript());
 		this._chatLog += DOMPurify.sanitize(`<p>User: ${userInput}</p>`);
 		this._queryTextArea.text = '';
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
 
-		if (this._chatContainer === null) {
-			this._chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
+		if (this._chatContainer === undefined) {
+			this._chatContainer = this.shadowRoot.getElementById('d2l-labs-media-player-chat-container');
 		}
 		this._chatContainer.scrollBottom = this._chatContainer.scrollHeight;
 	}
@@ -1619,15 +1618,16 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_getTruncatedTranscript() {
-		const selectedTextTrack = this._getSelectedTextTrack();
-
-		if (!selectedTextTrack || !selectedTextTrack.cues) return;
+		if (this._trackFullText === null) {
+			this._trackFullText = this._getSelectedTextTrack();
+		}
+		if (!this._trackFullText || !this._trackFullText.cues) return;
 
 		let transcript = '';
 		let currentCue = null;
 
-		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
-			currentCue = selectedTextTrack.cues[i];
+		for (let i = 0; i < this._trackFullText.cues.length; i++) {
+			currentCue = this._trackFullText.cues[i];
 			if (currentCue.startTime <= this.currentTime) {
 				transcript += ` ${ this._sanitizeText(currentCue.text)}`;
 			}
