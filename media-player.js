@@ -12,7 +12,6 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
-import '@brightspace-ui/core/components/inputs/input-textarea.js';
 import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
@@ -726,7 +725,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
-		this._snapshot = {};
+		this._mediaCanvas = { init:false },
+		this._queryTextArea = {};
 	}
 
 	get currentTime() {
@@ -1047,6 +1047,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
+	createSnapshot(userQuery) {
+		return {
+			timestamp: this._getTimestamp(),
+			query: userQuery,
+			image: this.getScreenshot(),
+			transcript: []
+		};
+	}
+
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
@@ -1059,27 +1068,20 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} while (this._loading);
 	}
 
-	getSnapshot() {
-		if (Object.keys(this._snapshot).length === 0) {
-			this.initializeSnapshot();
-		}
-
-		this._snapshot.time = this._getTimestamp();
-		this._snapshot.ctx.drawImage(this._snapshot.video, 0, 0, this._snapshot.canvas.width, this._snapshot.canvas.height);
-		this._snapshot.image = this._snapshot.canvas.toDataURL('image/jpeg');
-
-		return this._snapshot;
+	getScreenshot() {
+		if (!this._mediaCanvas.init) { this.initializeCanvas(); }
+		this._mediaCanvas.ctx.drawImage(this._media, 0, 0, this._mediaCanvas.canvas.width, this._mediaCanvas.canvas.height);
+		return this._mediaCanvas.canvas.toDataURL('image/jpeg');
 	}
 
-	initializeSnapshot() {
-		this._snapshot.time = '00:00:00';
-		this._snapshot.transcript = {};
-		this._snapshot.video = this._media;
-		this._snapshot.canvas = document.createElement('canvas');
-		this._snapshot.canvas.width = DEFAULT_CANVAS_WIDTH;
-		this._snapshot.canvas.height = DEFAULT_CANVAS_HEIGHT;
-		this._snapshot.ctx = this._snapshot.canvas.getContext('2d');
-		this._snapshot.image = null;
+	initializeCanvas() {
+		if (this._mediaCanvas.init) return;
+		const canvas = document.createElement('canvas');
+		canvas.width = DEFAULT_CANVAS_WIDTH;
+		canvas.height = DEFAULT_CANVAS_HEIGHT;
+		this._mediaCanvas.canvas = canvas;
+		this._mediaCanvas.ctx = this._mediaCanvas.canvas.getContext('2d');
+		this._mediaCanvas.init = true;
 	}
 
 	load() {
@@ -1130,11 +1132,24 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_addChat() {
-		this._chatLog += DOMPurify.sanitize('<p>User: Question</p>');
+
+		if (Object.keys(this._queryTextArea).length === 0) {
+			this._queryTextArea = this.shadowRoot.getElementById('d2l-labs-media-player-chat-box-input');
+		}
+		const userInput = this._queryTextArea.text.trim();
+
+		if (userInput.length === 0) return;
+		const snapshot = this.createSnapshot(userInput);
+		console.error(snapshot);
+
+		this._chatLog += DOMPurify.sanitize(`<p>User: ${userInput}</p>`);
+		this._queryTextArea.text = '';
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
-		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
-		chatContainer.scrollBottom = chatContainer.scrollHeight;
-		this.getSnapshot();
+
+		if (this._chatContainer === null) {
+			this._chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
+		}
+		this._chatContainer.scrollBottom = this._chatContainer.scrollHeight;
 	}
 
 	_clearPreference(preferenceKey) {
