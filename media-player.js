@@ -172,7 +172,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				border: 1px solid black;
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
-				height: 100vh;
+				height: 100%;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 10px;
 			}
