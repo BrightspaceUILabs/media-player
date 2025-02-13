@@ -70,6 +70,9 @@ const SEARCH_CONTAINER_HOVER_CLASS = 'd2l-labs-media-player-search-container-hov
 const DEFAULT_PREVIEW_WIDTH = 160;
 const DEFAULT_PREVIEW_HEIGHT = 90;
 
+const DEFAULT_CANVAS_WIDTH = 1920;
+const DEFAULT_CANVAS_HEIGHT = 1080;
+
 const SAFARI_EXPIRY_EARLY_SWAP_SECONDS = 10;
 const SAFARI_EXPIRY_MIN_ERROR_EMIT_SECONDS = 30;
 const isSafari = () => navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') === -1;
@@ -723,6 +726,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
+		this._snapshot = {};
 	}
 
 	get currentTime() {
@@ -1055,6 +1059,29 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} while (this._loading);
 	}
 
+	getSnapshot() {
+		if (Object.keys(this._snapshot).length === 0) {
+			this.initializeSnapshot();
+		}
+
+		this._snapshot.time = this._getTimestamp();
+		this._snapshot.ctx.drawImage(this._snapshot.video, 0, 0, this._snapshot.canvas.width, this._snapshot.canvas.height);
+		this._snapshot.image = this._snapshot.canvas.toDataURL('image/jpeg');
+
+		return this._snapshot;
+	}
+
+	initializeSnapshot() {
+		this._snapshot.time = '00:00:00';
+		this._snapshot.transcript = {};
+		this._snapshot.video = this._media;
+		this._snapshot.canvas = document.createElement('canvas');
+		this._snapshot.canvas.width = DEFAULT_CANVAS_WIDTH;
+		this._snapshot.canvas.height = DEFAULT_CANVAS_HEIGHT;
+		this._snapshot.ctx = this._snapshot.canvas.getContext('2d');
+		this._snapshot.image = null;
+	}
+
 	load() {
 		if (this._media && this._media.paused) {
 			this._media.load();
@@ -1112,6 +1139,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
 		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
 		chatContainer.scrollBottom = chatContainer.scrollHeight;
+		this.getSnapshot();
 	}
 
 	_clearPreference(preferenceKey) {
@@ -1535,6 +1563,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					html`<span class="d2l-label-text" id="d2l-labs-media-player-thumbnails-preview-chapter" style="bottom: ${thumbHeight}px">${chapterTitleLabel}</span>`}
 			</div>
 		`;
+	}
+
+	_getTimestamp() {
+		return new Date(this._currentTime * 1000).toISOString().substring(11, 19);
 	}
 
 	_getTrackIdentifier(srclang, kind) {
