@@ -1135,6 +1135,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_addChat() {
+		//Call this._getTruncatedTranscript() when sending the prompt to Bedrock
+		//console.log(this._getTruncatedTranscript());
 		this._chatLog += DOMPurify.sanitize('<p>User: Question</p>');
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
 		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
@@ -1599,6 +1601,24 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
+	}
+
+	_getTruncatedTranscript() {
+		const selectedTextTrack = this._getSelectedTextTrack();
+
+		if (!selectedTextTrack || !selectedTextTrack.cues) return;
+
+		let transcript = '';
+		let currentCue = null;
+
+		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
+			currentCue = selectedTextTrack.cues[i];
+			if (currentCue.startTime <= this.currentTime) {
+				transcript += ` ${ this._sanitizeText(currentCue.text)}`;
+			}
+		}
+
+		return transcript;
 	}
 
 	_handleCheckBoxState() {
