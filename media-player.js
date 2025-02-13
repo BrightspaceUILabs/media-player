@@ -1089,16 +1089,19 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			this._media.load();
 		}
 	}
+
 	pause() {
 		if (this._media && !this._media.paused) {
 			this._togglePlay();
 		}
 	}
+
 	play() {
 		if (this._media && this._media.paused) {
 			this._togglePlay();
 		}
 	}
+
 	requestFullscreen() {
 		if (fullscreenApi.isFullscreen) {
 			return;
@@ -1106,6 +1109,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		this._toggleFullscreen();
 	}
+
 	get _media() {
 		if (!this.shadowRoot) return null;
 		switch (this.mediaType) {
@@ -1117,6 +1121,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				return null;
 		}
 	}
+
 	get _selectedTrackLabel() {
 		for (let i = 0; i < this._tracks.length; i++) {
 			const track = this._tracks[i];
@@ -1142,6 +1147,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const snapshot = this.createSnapshot(userInput);
 		console.error(snapshot);
 
+		//Call this._getTruncatedTranscript() when sending the prompt to Bedrock
+		//console.log(this._getTruncatedTranscript());
 		this._chatLog += DOMPurify.sanitize(`<p>User: ${userInput}</p>`);
 		this._queryTextArea.text = '';
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
@@ -1155,9 +1162,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	_clearPreference(preferenceKey) {
 		localStorage.removeItem(preferenceKey);
 	}
+
 	_closeTranscript() {
 		this.dispatchEvent(new CustomEvent('close-transcript', { bubbles: true, composed: true }));
 	}
+
 	_disableNativeCaptions() {
 		if (!this._media) return;
 		for (let i = 0; i < this._media.textTracks.length; i++) {
@@ -1170,12 +1179,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
+
 	_downloadCaptions() {
 		this.dispatchEvent(new CustomEvent('download-captions', { bubbles: true, composed: true }));
 	}
+
 	_downloadTranscript() {
 		this.dispatchEvent(new CustomEvent('download-transcript', { bubbles: true, composed: true }));
 	}
+
 	static _formatTime(totalSeconds) {
 		totalSeconds = Math.floor(totalSeconds);
 
@@ -1210,6 +1222,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return a.href;
 	}
+
 	_getChapterMarkersView() {
 		if (this._chapters.length === 0) return;
 
@@ -1239,6 +1252,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			` : null;
 		});
 	}
+
 	_getChapterTitle() {
 		if (!(this._chapters.length > 0 && this._hoverTime >= this._chapters[0].time)) return;
 
@@ -1259,6 +1273,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 		}
 	}
+
 	_getCurrentSource() {
 		return this.src || this._sources[this._selectedQuality];
 	}
@@ -1601,6 +1616,24 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				</d2l-menu>
 			</d2l-menu-item>
 		` : null;
+	}
+
+	_getTruncatedTranscript() {
+		const selectedTextTrack = this._getSelectedTextTrack();
+
+		if (!selectedTextTrack || !selectedTextTrack.cues) return;
+
+		let transcript = '';
+		let currentCue = null;
+
+		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
+			currentCue = selectedTextTrack.cues[i];
+			if (currentCue.startTime <= this.currentTime) {
+				transcript += ` ${ this._sanitizeText(currentCue.text)}`;
+			}
+		}
+
+		return transcript;
 	}
 
 	_handleCheckBoxState() {
