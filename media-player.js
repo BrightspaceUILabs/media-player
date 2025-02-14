@@ -2082,9 +2082,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	_onTextAreaBlur() {
 		this._textAreaFocused = false;
 	}
+
 	_onTextAreaFocus() {
 		this._textAreaFocused = true;
 	}
+
 	_onTimelineMarkerClick(time) {
 		return () => this.currentTime = time;
 	}
