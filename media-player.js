@@ -706,13 +706,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._muted = false;
 		this._playing = false;
 		this._posterVisible = true;
-		this._queryTextArea = {};
+		this._queryTextArea = null;
 		this._recentlyShowedCustomControls = false;
 		this._searchInputFocused = false;
 		this._searchInstances = {};
 		this._searchResults = [];
 		this._settingsMenu = null;
 		this._sources = {};
+		this.__textAreaFocused = false;
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
 		this._timeFontSizeRem = 0.95; // 0.95rem is the default font size for d2l-typography
@@ -888,7 +889,13 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		${this._getLoadingSpinnerView()}
 
-		<div id="d2l-labs-media-player-media-container" class=${classMap(mediaContainerClass)} style=${styleMap(mediaContainerStyle)} @mousemove=${this._onVideoContainerMouseMove} @keydown=${this._listenForKeyboard}>
+		<div id="d2l-labs-media-player-media-container"
+			tabindex="-1"
+			class=${classMap(mediaContainerClass)}
+			style=${styleMap(mediaContainerStyle)}
+			@mousemove=${this._onVideoContainerMouseMove}
+			@keydown=${this._listenForKeyboard}
+			>
 			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
 			${this._getMediaAreaView()}
 
@@ -998,7 +1005,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						></input>
 					</div>
 
-					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleCheckBoxState}"></d2l-button-icon>
+					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
 
 					<d2l-dropdown>
 						<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
@@ -1138,10 +1145,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_addChat() {
-
-		if (Object.keys(this._queryTextArea).length === 0) {
-			this._queryTextArea = this.shadowRoot.getElementById('d2l-labs-media-player-chat-box-input');
-		}
 		const userInput = this._queryTextArea.text.trim();
 
 		if (userInput.length === 0) return;
@@ -1636,7 +1639,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		return transcript;
 	}
 
-	_handleCheckBoxState() {
+	_handleChatBoxState() {
+		if (this._queryTextArea === null) {
+			this._queryTextArea = this.shadowRoot.getElementById('d2l-labs-media-player-chat-box-input');
+		}
 		this._chatBoxHidden = !this._chatBoxHidden;
 	}
 
@@ -1646,7 +1652,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_listenForKeyboard(e) {
-		if (this._searchInputFocused) {
+		if (this._searchInputFocused || this._textAreaFocused) {
 			return;
 		}
 		this._showControls(true);
@@ -2076,6 +2082,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		setTimeout(initializeTracks, 0);
 	}
 
+	_onTextAreaBlur() {
+		this._textAreaFocused = false;
+	}
+
+	_onTextAreaFocus() {
+		this._textAreaFocused = true;
+	}
+
 	_onTimelineMarkerClick(time) {
 		return () => this.currentTime = time;
 	}
@@ -2219,7 +2233,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					${unsafeHTML(this._chatLog)}
 				</div>
 				<div class="d2l-labs-media-player-chat-box-horizontally-aligned">
-					<d2l-labs-media-player-text-input id="d2l-labs-media-player-chat-box-input"></d2l-labs-media-player-text-input>
+					<d2l-labs-media-player-text-input
+						id="d2l-labs-media-player-chat-box-input"
+						@blur=${this._onTextAreaBlur}
+						@focus=${this._onTextAreaFocus}
+					></d2l-labs-media-player-text-input>
 					<d2l-button @click="${this._addChat}">Send</d2l-button>
 				</div>
 				<div id="d2l-labs-media-player-chat-box-bottom-padding"></div>
