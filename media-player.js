@@ -1652,8 +1652,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_listenForKeyboard(e) {
-		if (this._searchInputFocused || this._textAreaFocused) { return; }
-
+		if (this._searchInputFocused || this._textAreaFocused) {
+			return;
+		}
 		this._showControls(true);
 		switch (e.key) {
 			case KEY_BINDINGS.play:
@@ -1917,9 +1918,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._searchResults = searcher.search(this._searchInput.value)
 			.map(result => (isNaN(result.item.startTime) ? result.item.start : result.item.startTime));
 	}
+
 	_onSearchInputFocus() {
 		this._searchInputFocused = true;
 	}
+
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
