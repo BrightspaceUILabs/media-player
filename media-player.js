@@ -12,7 +12,6 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
-import '@brightspace-ui/core/components/inputs/input-textarea.js';
 import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
@@ -699,6 +698,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._hovering = false;
 		this._hoveringMediaControls = false;
 		this._loading = false;
+		this._mediaCanvas = { init:false },
 		this._message = {
 			text: null,
 			type: null
@@ -706,6 +706,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._muted = false;
 		this._playing = false;
 		this._posterVisible = true;
+		this._queryTextArea = {};
 		this._recentlyShowedCustomControls = false;
 		this._searchInputFocused = false;
 		this._searchInstances = {};
@@ -716,6 +717,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
 		this._timeFontSizeRem = 0.95; // 0.95rem is the default font size for d2l-typography
+		this._trackFullText = null;
 		this._trackText = null;
 		this._tracks = [];
 		this._usingVolumeContainer = false;
@@ -727,7 +729,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
-		this._snapshot = {};
 	}
 
 	get currentTime() {
@@ -1048,6 +1049,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
+	createSnapshot(userQuery) {
+		return {
+			timestamp: this._getTimestamp(),
+			query: userQuery,
+			image: this.getScreenshot(),
+			transcript: this._getTruncatedTranscript()
+		};
+	}
+
 	exitFullscreen() {
 		if (!fullscreenApi.isFullscreen) return;
 
@@ -1060,27 +1070,20 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		} while (this._loading);
 	}
 
-	getSnapshot() {
-		if (Object.keys(this._snapshot).length === 0) {
-			this.initializeSnapshot();
-		}
-
-		this._snapshot.time = this._getTimestamp();
-		this._snapshot.ctx.drawImage(this._snapshot.video, 0, 0, this._snapshot.canvas.width, this._snapshot.canvas.height);
-		this._snapshot.image = this._snapshot.canvas.toDataURL('image/jpeg');
-
-		return this._snapshot;
+	getScreenshot() {
+		if (!this._mediaCanvas.init) { this.initializeCanvas(); }
+		this._mediaCanvas.ctx.drawImage(this._media, 0, 0, this._mediaCanvas.canvas.width, this._mediaCanvas.canvas.height);
+		return this._mediaCanvas.canvas.toDataURL('image/jpeg');
 	}
 
-	initializeSnapshot() {
-		this._snapshot.time = '00:00:00';
-		this._snapshot.transcript = {};
-		this._snapshot.video = this._media;
-		this._snapshot.canvas = document.createElement('canvas');
-		this._snapshot.canvas.width = DEFAULT_CANVAS_WIDTH;
-		this._snapshot.canvas.height = DEFAULT_CANVAS_HEIGHT;
-		this._snapshot.ctx = this._snapshot.canvas.getContext('2d');
-		this._snapshot.image = null;
+	initializeCanvas() {
+		if (this._mediaCanvas.init) return;
+		const canvas = document.createElement('canvas');
+		canvas.width = DEFAULT_CANVAS_WIDTH;
+		canvas.height = DEFAULT_CANVAS_HEIGHT;
+		this._mediaCanvas.canvas = canvas;
+		this._mediaCanvas.ctx = this._mediaCanvas.canvas.getContext('2d');
+		this._mediaCanvas.init = true;
 	}
 
 	load() {
@@ -1136,13 +1139,24 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_addChat() {
-		//Call this._getTruncatedTranscript() when sending the prompt to Bedrock
-		//console.log(this._getTruncatedTranscript());
-		this._chatLog += DOMPurify.sanitize('<p>User: Question</p>');
+
+		if (Object.keys(this._queryTextArea).length === 0) {
+			this._queryTextArea = this.shadowRoot.getElementById('d2l-labs-media-player-chat-box-input');
+		}
+		const userInput = this._queryTextArea.text.trim();
+
+		if (userInput.length === 0) return;
+		// This is the data that will be sent out
+		// const snapshot = this.createSnapshot(userInput);
+
+		this._chatLog += DOMPurify.sanitize(`<p>User: ${userInput}</p>`);
+		this._queryTextArea.text = '';
 		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
-		const chatContainer = this.shadowRoot.querySelector('#d2l-labs-media-player-chat-container');
-		chatContainer.scrollBottom = chatContainer.scrollHeight;
-		this.getSnapshot();
+
+		if (this._chatContainer === undefined) {
+			this._chatContainer = this.shadowRoot.getElementById('d2l-labs-media-player-chat-container');
+		}
+		this._chatContainer.scrollBottom = this._chatContainer.scrollHeight;
 	}
 
 	_clearPreference(preferenceKey) {
@@ -1605,15 +1619,16 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_getTruncatedTranscript() {
-		const selectedTextTrack = this._getSelectedTextTrack();
-
-		if (!selectedTextTrack || !selectedTextTrack.cues) return;
+		if (this._trackFullText === null) {
+			this._trackFullText = this._getSelectedTextTrack();
+		}
+		if (!this._trackFullText || !this._trackFullText.cues) return;
 
 		let transcript = '';
 		let currentCue = null;
 
-		for (let i = 0; i < selectedTextTrack.cues.length; i++) {
-			currentCue = selectedTextTrack.cues[i];
+		for (let i = 0; i < this._trackFullText.cues.length; i++) {
+			currentCue = this._trackFullText.cues[i];
 			if (currentCue.startTime <= this.currentTime) {
 				transcript += ` ${ this._sanitizeText(currentCue.text)}`;
 			}
