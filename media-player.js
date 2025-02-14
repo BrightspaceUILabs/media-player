@@ -712,6 +712,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._searchResults = [];
 		this._settingsMenu = null;
 		this._sources = {};
+		this._textAreaFocused = false;
 		this._timelinePreviewOffset = 0;
 		this._trackFontSizeRem = 1;
 		this._timeFontSizeRem = 0.95; // 0.95rem is the default font size for d2l-typography
@@ -1631,7 +1632,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_listenForKeyboard(e) {
-		if (this._searchInputFocused) {
+		if (this._searchInputFocused || this._textAreaFocused) {
 			return;
 		}
 		this._showControls(true);
@@ -1897,11 +1898,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._searchResults = searcher.search(this._searchInput.value)
 			.map(result => (isNaN(result.item.startTime) ? result.item.start : result.item.startTime));
 	}
-
 	_onSearchInputFocus() {
 		this._searchInputFocused = true;
 	}
-
 	async _onSlotChange(e) {
 		this._tracks = [];
 		const nodes = e.target.assignedNodes();
@@ -2061,6 +2060,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		setTimeout(initializeTracks, 0);
 	}
 
+	_onTextAreaBlur() {
+		console.error('Focused: ', this._textAreaFocused);
+		this._textAreaFocused = false;
+	}
+
+	_onTextAreaFocus() {
+		this._textAreaFocused = true;
+	}
+
 	_onTimelineMarkerClick(time) {
 		return () => this.currentTime = time;
 	}
@@ -2204,7 +2212,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					${unsafeHTML(this._chatLog)}
 				</div>
 				<div class="d2l-labs-media-player-chat-box-horizontally-aligned">
-					<d2l-labs-media-player-text-input id="d2l-labs-media-player-chat-box-input"></d2l-labs-media-player-text-input>
+					<d2l-labs-media-player-text-input
+						id="d2l-labs-media-player-chat-box-input"
+						@blur=${this._onTextAreaBlur}
+						@focus=${this._ontextAreaFocus}
+					></d2l-labs-media-player-text-input>
 					<d2l-button @click="${this._addChat}">Send</d2l-button>
 				</div>
 				<div id="d2l-labs-media-player-chat-box-bottom-padding"></div>
