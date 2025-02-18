@@ -148,13 +148,18 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				display: none;
 			}
 
-			#d2l-labs-media-player-chat-box-input {
-				height: 3rem;
+			d2l-button-subtle {
+				flex: 0 0 auto
 			}
 
-			#d2l-labs-media-player-chat-box-bottom-padding {
-				min-height: 2.8rem;
+			#textarea.d2l-input {
+				border: 2px dashed blue;
 			}
+
+			#d2l-labs-media-player-chat-box-input {
+				height: 100%;
+			}
+
 			#d2l-labs-media-player-chat-box-container[hidden] {
 				display: none !important;
 			}
@@ -165,25 +170,36 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				flex-direction: column;
 				flex-shrink: 1;
 				height: 100%;
-				width: 100%;
+				width: 20%;
+				border-radius: 0 10px 10px 0;
+				border: 1px solid var(--d2l-color-mica);
+				background: var(--d2l-color-regolith);
 			}
 
 			#d2l-labs-media-player-chat-container {
-				border: 1px solid black;
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
-				height: 100%;
+				height: 85%;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
-				padding: 10px;
+				padding: 5px;
+				text-wrap: pretty;
+				word-wrap: break-word;
 			}
 
 			.d2l-labs-media-player-chat-box-horizontally-aligned {
 				display: flex;
+				justify-content: center;
+				align-items: center;
 				margin-top: auto;
+				width: 100%;
+				height: 15%;
+				border-top: 1px solid var(--d2l-color-mica);
 			}
 
 			p {
 				color: black;
+				padding: 1px;
+				text-wrap: wrap;
 			}
 
 			#d2l-labs-media-player-media-container {
@@ -2229,7 +2245,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	_renderChatBox() {
 		return html`
 			<div id="d2l-labs-media-player-chat-box-container" ?hidden="${this._chatBoxHidden}">
-				<div id="d2l-labs-media-player-chat-container">
+				<div id="d2l-labs-media-player-chat-container" class="d2l-template-scroll">
 					${unsafeHTML(this._chatLog)}
 				</div>
 				<div class="d2l-labs-media-player-chat-box-horizontally-aligned">
@@ -2238,9 +2254,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						@blur=${this._onTextAreaBlur}
 						@focus=${this._onTextAreaFocus}
 					></d2l-labs-media-player-text-input>
-					<d2l-button @click="${this._addChat}">Send</d2l-button>
+					<d2l-button-subtle text="Send" @click="${this._addChat}"></d2l-button-sublte>
 				</div>
-				<div id="d2l-labs-media-player-chat-box-bottom-padding"></div>
 			</div>
 		`;
 	}
