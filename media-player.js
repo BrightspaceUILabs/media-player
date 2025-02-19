@@ -150,15 +150,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 			.d2l-template-primary-secondary-content {
 				display: flex;
-				min-width: 400px;
-				min-height: 300px;
-				max-width: 1200px;
-				max-height: 900px;
 			}
 
 			.d2l-template-primary-secondary-secondary-container {
-				flex: 1 1 auto;
-				overrflow-y: auto;
+				flex: 1 0 15%;
 			}
 
 			.d2l-template-primary-secondary-secondary-container[hidden] {
@@ -167,7 +162,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 
 			#d2l-labs-media-player-media-content {
-				flex: 1 1 auto;
+				flex: 1 0 85%;
 			}
 
 			button.d2l-button-subtle:active {
@@ -217,12 +212,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				align-items: center;
 				justify-content: center;
 				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
-				max-height: 100vh;
+				//min-height: 300px;
+				max-height: 100%;
 				max-width: 100%;
 				/* Removed overflow hidden for now to have chatbox show */
 				/* overflow: hidden; */
 				position: relative;
-				width: 100%;
 			}
 
 			.d2l-labs-media-player-type-is-audio {
@@ -238,7 +233,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			#d2l-labs-media-player-video {
 				display: flex;
 				height: 100%;
-				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
+				max-height: var(--d2l-labs-media-player-video-max-height, 100%);
 				min-height: 100%;
 				position: relative;
 				width: 100%;
@@ -885,7 +880,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
-			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90vh)' : 'auto',
+			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90%)' : 'auto',
 			height,
 			...this._mediaContainerAspectRatio,
 		};
