@@ -10,6 +10,7 @@ class MyTextareaInputElem extends LitElement {
 			box-shadow: none;
 			flex: 1 1 auto;
 			resize: none;
+			hyphens: auto;
 			scrollbar-width: thin;
 		}`, inputStyles];
 	}
