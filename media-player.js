@@ -2,6 +2,7 @@ import '@brightspace-ui/core/components/alert/alert.js';
 import '@brightspace-ui/core/components/button/button.js';
 import '@brightspace-ui/core/components/button/button-icon.js';
 import '@brightspace-ui/core/components/colors/colors.js';
+import '@brightspace-ui/core/components/dialog/dialog-fullscreen.js';
 import '@brightspace-ui/core/components/dropdown/dropdown.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-menu.js';
 import '@brightspace-ui/core/components/dropdown/dropdown-button-subtle.js';
@@ -12,11 +13,15 @@ import '@brightspace-ui/core/components/menu/menu-item.js';
 import '@brightspace-ui/core/components/menu/menu-item-link.js';
 import '@brightspace-ui/core/components/menu/menu-item-radio.js';
 import '@brightspace-ui/core/components/offscreen/offscreen.js';
+import '@brightspace-ui/core/components/list/list.js';
+import '@brightspace-ui/core/components/list/list-item.js';
+import '@brightspace-ui/core/components/list/list-item-content.js';
 import './slider-bar.js';
 import 'webvtt-parser';
 import './media-player-audio-bars.js';
 import './src/components/d2l-labs-media-player-text-input.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
+import Chart from 'chart.js/auto';
 import { classMap } from 'lit/directives/class-map.js';
 import { debounce } from 'lodash-es';
 import DOMPurify from 'dompurify';
@@ -27,6 +32,7 @@ import { ifDefined } from 'lit/directives/if-defined.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
+import { repeat } from 'lit/directives/repeat.js';
 import ResizeObserver from 'resize-observer-polyfill';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -131,6 +137,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			_tracks: { type: Array, attribute: false },
 			_usingVolumeContainer: { type: Boolean, attribute: false },
 			_volume: { type: Number, attribute: false },
+			_analyticsOpen: { state: true },
 			_chatBoxHidden: { state: true },
 			_chatLog: { state: true }
 		};
@@ -175,6 +182,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				height: 100%;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 10px;
+			}
+
+			#d2l-labs-media-player-analytics-list {
+				padding-top: 2rem;
+			}
+
+			canvas {
+				max-width: 100%;
 			}
 
 			.d2l-labs-media-player-chat-box-horizontally-aligned {
@@ -688,6 +703,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this.loop = false;
 		this.playInView = false;
 
+		this._analyticsOpen = false;
 		this._chapters = [];
 		this._chatBoxHidden = true;
 		this._currentTime = 0;
@@ -729,6 +745,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
+
+		this._fullRange = this._generateData();
+		this._sampleDataPoints = [
+			{ time: 10, count: 2, question: 'What is binary search tree?' },
+			{ time: 200, count: 5, question: 'What if the tree is empty?' },
+			{ time: 500, count: 3, question: 'What are some applications for this question?' },
+			{ time: 744, count: 8, question: 'Is there a recursive solution to this?' },
+		];
 	}
 
 	get currentTime() {
@@ -842,6 +866,42 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				this._timeFontSizeRem = Math.min(multiplier * 0.9 * 0.95, 0.95);
 			}
 		}).observe(this._mediaContainer);
+
+		const ctx = this.shadowRoot.getElementById('lineChart').getContext('2d');
+
+		// Create dataset with only specific points filled
+		const dataset = this._fullRange.map((timeLabel, i) => {
+			const dataPoint = this._sampleDataPoints.find(p => p.time === i);
+			return dataPoint ? dataPoint.count : null; // Keep other points empty
+		});
+
+		new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: this._fullRange,
+				datasets: [{
+					label: 'Questions Asked',
+					data: dataset,
+					borderColor: 'blue',
+					borderWidth: 2,
+					fill: false,
+					tension: 0.4,
+				}]
+			},
+			options: {
+				responsive: true,
+				scales: {
+					x: {
+						title: { display: true, text: 'Timestamp' }
+					},
+					y: {
+						title: { display: true, text: 'Frequency of questions' },
+						beginAtZero: true
+					}
+				}
+			}
+		});
+
 	}
 
 	render() {
@@ -885,6 +945,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			@click="${this._toggleFullscreen}"></d2l-button-icon>` : null;
 
 		return html`
+		${this._renderAnalytics()}
+
 		<slot @slotchange=${this._onSlotChange}></slot>
 
 		${this._getLoadingSpinnerView()}
@@ -1005,7 +1067,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						></input>
 					</div>
 
-					<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click=""></d2l-button-icon>
+					<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click="${this._handleOpenAnalytics}"></d2l-button-icon>
 					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
 
 					<d2l-dropdown>
@@ -1217,6 +1279,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		str.push(seconds);
 
 		return str.join('');
+	}
+
+	_generateData() {
+		const totalSeconds = 13 * 60 + 24; // Sample length of video of 804 seconds
+		const timestamps = Array.from({ length: totalSeconds + 1 }, (_, i) => (MediaPlayer._formatTime(i)));
+		return timestamps;
 	}
 
 	_getAbsoluteUrl(url) {
@@ -1645,6 +1713,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			this._queryTextArea = this.shadowRoot.getElementById('d2l-labs-media-player-chat-box-input');
 		}
 		this._chatBoxHidden = !this._chatBoxHidden;
+	}
+
+	_handleOpenAnalytics() {
+		this._analyticsOpen = !this._analyticsOpen;
+		this.shadowRoot.getElementById('d2l-labs-media-player-analytics-chart').opened = this._analyticsOpen;
 	}
 
 	_hidingCustomControls() {
@@ -2225,6 +2298,32 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				this.load();
 			}
 		}
+	}
+
+	_renderAnalytics() {
+		return html`
+		<d2l-dialog-fullscreen
+			id="d2l-labs-media-player-analytics-chart"
+			title-text="Teacher Analytics"
+			@d2l-dialog-close="${this._handleOpenAnalytics}">
+
+			<canvas id="lineChart"></canvas>
+
+			<d2l-list id="d2l-labs-media-player-analytics-list">
+				${repeat(this._sampleDataPoints, (dataPoint) => html`
+					<d2l-list-item label="List Item 1">
+						<d2l-list-item-content>
+						<div>${dataPoint.question}</div>
+						<div slot="secondary">At time stamp: ${MediaPlayer._formatTime(dataPoint.time)}</div>
+						<div slot="supporting-info">Number of people asked: ${dataPoint.count}</div>
+						</d2l-list-item-content>
+					</d2l-list-item>
+				`)}
+			</d2l-list>
+
+			<d2l-button slot="footer" data-dialog-action>Close</d2l-button>
+		</d2l-dialog-fullscreen>
+		`;
 	}
 
 	_renderChatBox() {
