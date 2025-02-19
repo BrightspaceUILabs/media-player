@@ -1005,6 +1005,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						></input>
 					</div>
 
+					<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click=""></d2l-button-icon>
 					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
 
 					<d2l-dropdown>
