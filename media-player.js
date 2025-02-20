@@ -1062,7 +1062,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (userInput.length === 0) return;
 
 		return {
-			timestamp: this._getTimestamp(),
 			query: userInput,
 			image: this.getScreenshot(),
 			transcript: this._getTruncatedTranscript()
@@ -1163,7 +1162,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._chatContainer.scrollBottom = this._chatContainer.scrollHeight;
 
 		try {
-			const response = await generateResponse(snapshot.transcript, snapshot.image, snapshot.query);
+			const response = await generateResponse(snapshot);
 			this._chatLog += DOMPurify.sanitize(`<p>Bot: ${response.body}</p>`);
 		} catch (error) {
 			return error;
