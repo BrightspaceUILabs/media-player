@@ -3,16 +3,21 @@ import { inputStyles } from '@brightspace-ui/core/components/inputs/input-styles
 
 class MyTextareaInputElem extends LitElement {
 	static get styles() {
-		return [ css`textarea.d2l-input {
-			height: 100%;
-			border-style: none;
-			outline: none;
-			box-shadow: none;
-			flex: 1 1 auto;
-			resize: none;
-			hyphens: auto;
-			scrollbar-width: thin;
-		}`, inputStyles];
+		return [ css`
+			textarea.d2l-input {
+				height: 100%;
+				border-style: none;
+				outline: none;
+				box-shadow: none;
+				resize: none;
+				min-height: 0;
+				min-width: 0;
+				hyphens: auto;
+				overflow: auto;
+				scrollbar-width: thin;
+			}
+
+		`, inputStyles];
 	}
 
 	constructor() {

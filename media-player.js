@@ -138,10 +138,30 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	static get styles() {
 		return [ labelStyles, css`
+
+			d2l-template-primary-secondary:fullscreen {
+				background: black;
+				display: flex;
+				align-items: center;
+				flex-direction: column-reverse;
+			}
+
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content {
+				display: flex;
+				align-items: center;
+				padding: 4%;
+			}
+
+			d2l-template-primary-secondary:fullscreen
+				> .d2l-template-primary-secondary-content
+				> .d2l-template-primary-secondary-secondary-container {
+					height: 80.6%;
+			}
+
 			:host {
 				display: flex;
 				width: 100%;
-				aspect-ratio: 4.96 / 3;
+				aspect-ratio: 1.65826 / 1;
 				position: relative;
 				align-items: center;
 				justify-content: center;
@@ -152,40 +172,47 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			d2l-template-primary-secondary {
-				position:absolute;
-				height:100%;
+				position: absolute;
+				height: 100%;
 				align-content: center;
 			}
 
 			.d2l-template-primary-secondary-content {
 				display: flex;
+				overflow: hidden;
+				height: 100%;
+				align-items: center;
 			}
 
 			.d2l-template-primary-secondary-secondary-container {
-				flex: 1 0 15%;
+				width: 30%;
+				height: 70%;
 			}
 
 			.d2l-template-primary-secondary-secondary-container[hidden] {
 				display: none;
 			}
 
-
 			#d2l-labs-media-player-media-content {
-				flex: 1 0 85%;
-			}
-
-			button.d2l-button-subtle:active {
-				background: var(d2l-color-zircon-plus-2);
+				width: 50%;
+				display: flex;
+				justify-content: center;
+				flex-grow: 1;
 			}
 
 			d2l-button-subtle {
 				height: 100%;
+				flex-grow: 1;
+				justify-content: center;
+				align-items: center;
 				display: flex;
+				overflow: hidden;
 			}
 
 			#d2l-labs-media-player-chat-box-input {
 				height: 100%;
-				width: fit-content;
+				width: 70%;
+				flex-grow: 2;
 			}
 
 
@@ -201,7 +228,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			#d2l-labs-media-player-chat-container {
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
-				height: 85%;
+				height: 80%;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 5px;
 				overflow-wrap: anywhere;
@@ -214,7 +241,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				justify-content: center;
 				align-items: center;
 				margin-top: auto;
-				height: 15%;
+				height: 20%;
 				border-top: 1px solid var(--d2l-color-mica);
 			}
 
@@ -724,6 +751,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		this._chapters = [];
 		this._chatBoxHidden = true;
+		this._chatLog = '';
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = this.durationHint || 1;
@@ -846,6 +874,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+		this._templateContainer = this.shadowRoot.getElementById('d2l-template-primary-secondary');
 
 		this._getMetadata();
 
@@ -920,8 +949,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		return html`
 		${this._getLoadingSpinnerView()}
-		<d2l-template-primary-secondary resizable width-type="fullscreen">
-			<div class="d2l-template-primary-secondary-content">
+		<d2l-template-primary-secondary id="d2l-template-primary-secondary">
+			<div class="d2l-template-primary-secondary-content" id="d2l-template-primary-secondary-content">
 				<main id="d2l-labs-media-player-media-content">
 					<slot
 						id="d2l-labs-media-player-media-container"
@@ -2441,7 +2470,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (fullscreenApi.isFullscreen) {
 			fullscreenApi.exit();
 		} else {
-			fullscreenApi.request(this._mediaContainer);
+			fullscreenApi.request(this._templateContainer);
 		}
 	}
 
