@@ -139,13 +139,22 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	static get styles() {
 		return [ labelStyles, css`
 			:host {
-				display: block;
-				min-height: 140px;
+				display: flex;
+				width: 100%;
+				aspect-ratio: 4.96 / 3;
 				position: relative;
+				align-items: center;
+				justify-content: center;
 			}
 
 			:host([hidden]) {
 				display: none;
+			}
+
+			d2l-template-primary-secondary {
+				position:absolute;
+				height:100%;
+				align-content: center;
 			}
 
 			.d2l-template-primary-secondary-content {
@@ -169,8 +178,14 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				background: var(d2l-color-zircon-plus-2);
 			}
 
+			d2l-button-subtle {
+				height: 100%;
+				display: flex;
+			}
+
 			#d2l-labs-media-player-chat-box-input {
 				height: 100%;
+				width: fit-content;
 			}
 
 
@@ -211,10 +226,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			#d2l-labs-media-player-media-container {
 				align-items: center;
 				justify-content: center;
-				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
-				//min-height: 300px;
-				max-height: 100%;
-				max-width: 100%;
 				/* Removed overflow hidden for now to have chatbox show */
 				/* overflow: hidden; */
 				position: relative;
