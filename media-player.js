@@ -261,14 +261,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				max-width: 100%;
 			}
 
-			#d2l-labs-media-player-analytics-list {
-				padding-top: 2rem;
-			}
-
-			canvas {
-				max-width: 100%;
-			}
-
 			.d2l-labs-media-player-chat-box-horizontally-aligned {
 				display: flex;
 				justify-content: center;
@@ -573,6 +565,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				align-items: center;
 				display: flex;
 			}
+
 			#d2l-labs-media-player-search-container.d2l-labs-media-player-search-container-hidden {
 				display: none;
 			}
@@ -1040,12 +1033,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			@click="${this._toggleFullscreen}"></d2l-button-icon>` : null;
 
 		return html`
-		${this._renderAnalytics()}
 
 		<slot @slotchange=${this._onSlotChange}></slot>
 
 		${this._getLoadingSpinnerView()}
 		<d2l-template-primary-secondary id="d2l-template-primary-secondary">
+			${this._renderAnalytics()}
 			<div class="d2l-template-primary-secondary-content" id="d2l-template-primary-secondary-content">
 				<main id="d2l-labs-media-player-media-content">
 					<slot
@@ -1167,8 +1160,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 									></input>
 								</div>
 
-					<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click="${this._handleOpenAnalytics}"></d2l-button-icon>
-					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
+								<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click="${this._handleOpenAnalytics}"></d2l-button-icon>
+								<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
 
 								<d2l-dropdown>
 									<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
@@ -1323,7 +1316,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const snapshot = this.createSnapshot();
 		if (!snapshot) return;
 
-		this._chatLog += DOMPurify.sanitize(`<p>User: ${snapshot.query}</p>`);
+		this._chatLog += DOMPurify.sanitize(`<p><b>User:</b> ${snapshot.query}</p>`);
 		this._queryTextArea.text = '';
 
 		if (this._chatContainer === undefined) {
@@ -1333,7 +1326,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		try {
 			const response = await generateResponse(snapshot);
-			this._chatLog += DOMPurify.sanitize(`<p>Bot: ${response.body}</p>`);
+			this._chatLog += DOMPurify.sanitize(`<p><b>Bot:</b> ${response.body}</p>`);
 		} catch (error) {
 			return error;
 		}
