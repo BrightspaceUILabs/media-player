@@ -32,6 +32,8 @@ import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
+import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import { repeat } from 'lit/directives/repeat.js';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -90,6 +92,8 @@ const tryParseUrlExpiry = url => {
 		return null;
 	}
 };
+
+marked.use(markedKatex());
 
 class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
@@ -183,10 +187,18 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				display: none;
 			}
 
+			code {
+				color:black;
+			}
+
 			d2l-template-primary-secondary {
 				align-content: center;
 				height: 100%;
 				position: absolute;
+			}
+
+			li {
+				color:black;
 			}
 
 			.d2l-template-primary-secondary-content {
@@ -1320,7 +1332,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		try {
 			const response = await generateResponse(snapshot);
-			this._chatLog += DOMPurify.sanitize(`<p><b>Bot:</b> ${response.body}</p>`);
+			this._chatLog += DOMPurify.sanitize(marked(`<b>Bot:</b> ${response.body}`));
 		} catch (error) {
 			return error;
 		}
