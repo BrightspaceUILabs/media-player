@@ -205,8 +205,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 			.d2l-template-primary-secondary-secondary-container {
 				height: 90%;
-				width: 30%;
 				padding-left: 2%;
+				width: 30%;
 			}
 
 			.d2l-template-primary-secondary-secondary-container[hidden] {
@@ -341,11 +341,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 			#d2l-labs-media-player-media-controls {
 				bottom: 0;
+				height: 50px;
 				position: absolute;
 				transition: bottom 500ms ease;
 				width: 100%;
 				z-index: 2;
-				height: 50px;
 			}
 
 			.d2l-labs-media-player-type-is-audio #d2l-labs-media-player-media-controls {
@@ -366,8 +366,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				--d2l-knob-size: 16px;
 				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
 				--d2l-progress-border-radius: 0;
-				position: absolute;
 				bottom: 80%;
+				position: absolute;
 				width: 100%;
 				z-index: 1;
 			}
