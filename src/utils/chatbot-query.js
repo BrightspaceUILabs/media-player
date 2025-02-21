@@ -1,15 +1,10 @@
-export async function generateResponse(transcript, base64ImageString, question) {
+export async function generateResponse(snapshot) {
 	// Replace the URL with the endpoint with the current stages in api gateway
 	const url = '';
 	const data = {
-		prompt: `Here is a video transcript: "${transcript}" and here is the screenshot of the video when the question was asked.
-		Please answer this question base on the video: "${question}"
-		Simply answer the question and don't say base on trasncript or screenshot.`,
+		sessionId: '12345', // Unique identifier for user session
+		snapshot: snapshot
 	};
-
-	if (base64ImageString !== null && base64ImageString !== '' && base64ImageString !== undefined) {
-		data.image = base64ImageString;
-	}
 
 	try {
 		const response = await fetch(url, {

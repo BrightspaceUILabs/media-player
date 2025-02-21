@@ -1,5 +1,7 @@
 /* eslint quotes: 0 */
 export default {
+	"ai-chat": "AI Q&A Chat",
+	"ai-chat-analytics": "AI Q&A Chat Analytics",
 	"captions": "Captions",
 	"captionsVtt": "Captions (.vtt)",
 	"closedCaptionsAcronym": "CC",
@@ -21,7 +23,6 @@ export default {
 	"searchPlaceholder": "Search...",
 	"seekSlider": "seek slider",
 	"settings": "settings",
-	"ai-chat": "AI Q&A Chat",
 	"showSearchInput": "Show search input",
 	"sliderBarProgress": "slider bar progress",
 	"speed": "speed",
