@@ -32,6 +32,8 @@ import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
+import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import { repeat } from 'lit/directives/repeat.js';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -91,6 +93,8 @@ const tryParseUrlExpiry = url => {
 	}
 };
 
+marked.use(markedKatex());
+
 class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	static get properties() {
@@ -146,43 +150,113 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	static get styles() {
 		return [ labelStyles, css`
+
+			d2l-template-primary-secondary:fullscreen {
+				align-items: center;
+				background: black;
+				display: flex;
+				flex-direction: column-reverse;
+			}
+
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content {
+				align-items: center;
+				display: flex;
+				padding: 4%;
+			}
+
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container {
+				height: 80.6%;
+				padding-left: 2%;
+			}
+
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container > #d2l-labs-media-player-chat-box-container {
+				border: 3px solid var(--d2l-color-chromite);
+				border-radius: 10px;
+			}
+
 			:host {
-				display: block;
-				min-height: 140px;
+				align-items: center;
+				aspect-ratio: 1.65826 / 1;
+				display: flex;
+				justify-content: center;
 				position: relative;
+				width: 100%;
 			}
 
 			:host([hidden]) {
 				display: none;
 			}
 
-			#d2l-labs-media-player-chat-box-input {
-				height: 3rem;
+			code {
+				color: black;
 			}
 
-			#d2l-labs-media-player-chat-box-bottom-padding {
-				min-height: 2.8rem;
+			d2l-template-primary-secondary {
+				align-content: center;
+				height: 100%;
+				position: absolute;
 			}
-			#d2l-labs-media-player-chat-box-container[hidden] {
-				display: none !important;
+
+			li {
+				color: black;
 			}
+
+			.d2l-template-primary-secondary-content {
+				align-items: center;
+				display: flex;
+				height: 100%;
+				overflow: hidden;
+			}
+
+			.d2l-template-primary-secondary-secondary-container {
+				height: 70%;
+				width: 30%;
+			}
+
+			.d2l-template-primary-secondary-secondary-container[hidden] {
+				display: none;
+			}
+
+			#d2l-labs-media-player-media-content {
+				display: flex;
+				flex-grow: 1;
+				justify-content: center;
+				width: 50%;
+			}
+
+			d2l-button-subtle {
+				align-items: center;
+				display: flex;
+				flex-grow: 1;
+				height: 100%;
+				justify-content: center;
+				overflow: hidden;
+			}
+
+			#d2l-labs-media-player-chat-box-input {
+				flex-grow: 2;
+				height: 100%;
+				width: 70%;
+			}
+
 
 			#d2l-labs-media-player-chat-box-container {
-				background-color: white;
+				background: var(--d2l-color-regolith);
+				border: 1px solid var(--d2l-color-mica);
+				border-radius: 0 10px 10px 0;
 				display: flex;
 				flex-direction: column;
-				flex-shrink: 1;
 				height: 100%;
-				width: 100%;
 			}
 
 			#d2l-labs-media-player-chat-container {
-				border: 1px solid black;
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
-				height: 100%;
+				height: 80%;
+				hyphens: auto;
+				overflow-wrap: anywhere;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
-				padding: 10px;
+				padding: 5px;
 			}
 
 			#d2l-labs-media-player-analytics-list {
@@ -194,24 +268,25 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			.d2l-labs-media-player-chat-box-horizontally-aligned {
+				align-items: center;
+				border-top: 1px solid var(--d2l-color-mica);
 				display: flex;
+				height: 20%;
+				justify-content: center;
 				margin-top: auto;
 			}
 
 			p {
 				color: black;
+				padding: 1px;
 			}
 
 			#d2l-labs-media-player-media-container {
 				align-items: center;
 				justify-content: center;
-				/* This max-height prevents the video from growing out of bounds and appearing cut off inside of ISF iframes */
-				max-height: 100vh;
-				max-width: 100%;
 				/* Removed overflow hidden for now to have chatbox show */
 				/* overflow: hidden; */
 				position: relative;
-				width: 100%;
 			}
 
 			.d2l-labs-media-player-type-is-audio {
@@ -227,7 +302,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			#d2l-labs-media-player-video {
 				display: flex;
 				height: 100%;
-				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
+				max-height: var(--d2l-labs-media-player-video-max-height, 100%);
 				min-height: 100%;
 				position: relative;
 				width: 100%;
@@ -280,12 +355,13 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.d2l-labs-media-player-type-is-audio #d2l-labs-media-player-media-controls {
 				background-color: #ffffff;
 			}
+
 			.d2l-labs-media-player-type-is-video #d2l-labs-media-player-media-controls {
 				background-color: rgba(0, 0, 0, 0.69);
 			}
 
 			#d2l-labs-media-player-media-controls.d2l-labs-media-player-hidden {
-				bottom: -8rem;
+				display: none;
 			}
 
 			#d2l-labs-media-player-seek-bar {
@@ -295,7 +371,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
 				--d2l-progress-border-radius: 0;
 				position: absolute;
-				top: -9px;
+				top: -56px;
 				width: 100%;
 				z-index: 1;
 			}
@@ -306,11 +382,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 			#d2l-labs-media-player-buttons {
 				align-items: center;
-				direction: ltr;
+				bottom: 0%;
 				display: flex;
 				flex-direction: row;
 				justify-content: space-between;
-				margin-left: 6px;
+				position: absolute;
+				width: 100%;
 			}
 
 			[dir="rtl"] #d2l-labs-media-player-buttons {
@@ -346,7 +423,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			#d2l-labs-media-player-volume-level-container.d2l-labs-media-player-hidden {
-				left: -10000px;
+				display: none;
 			}
 
 			#d2l-labs-media-player-volume-level-background {
@@ -494,6 +571,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				align-items: center;
 				display: flex;
 			}
+
 			#d2l-labs-media-player-search-container.d2l-labs-media-player-search-container-hidden {
 				display: none;
 			}
@@ -630,20 +708,25 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.transcript-cue-container {
 				padding-left: 10px;
 			}
+
 			.video-transcript-cue {
 				padding-left: 5px;
 			}
+
 			.audio-transcript-cue {
 				padding-left: 5px;
 			}
+
 			.video-transcript-cue[active] {
 				background-color: gray;
 				box-shadow: -5px 0 0 white;
 			}
+
 			.audio-transcript-cue[active] {
 				background-color: lightgray;
 				box-shadow: -5px 0 0 black;
 			}
+
 			#video-transcript-viewer {
 				bottom: 55px;
 				color: white;
@@ -655,6 +738,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 65%;
 				z-index: 1;
 			}
+
 			#audio-transcript-viewer {
 				bottom: 60px;
 				color: black;
@@ -666,33 +750,40 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 100%;
 				z-index: 1;
 			}
+
 			#close-transcript {
 				position: absolute;
 				right: 7px;
 				top: 0;
 				z-index: 1;
 			}
+
 			#video-transcript-download-button {
 				left: 35%;
 				position: absolute;
 				top: 5px;
 				z-index: 2;
 			}
+
 			#audio-transcript-download-button {
 				left: 10px;
 				position: absolute;
 				top: 0;
 				z-index: 2;
 			}
+
 			#audio-transcript-download-menu {
 				left: 35px;
 			}
+
 			#video-close-transcript-icon {
 				color: white;
 			}
+
 			#audio-close-transcript-icon {
 				color: black;
 			}
+
 ` ];
 	}
 
@@ -707,6 +798,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._analyticsOpen = false;
 		this._chapters = [];
 		this._chatBoxHidden = true;
+		this._chatLog = '';
 		this._currentTime = 0;
 		this._determiningSourceType = true;
 		this._duration = this.durationHint || 1;
@@ -837,6 +929,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._volumeSlider = this.shadowRoot.getElementById('d2l-labs-media-player-volume-slider');
 		this._searchInput = this.shadowRoot.getElementById('d2l-labs-media-player-search-input');
 		this._searchContainer = this.shadowRoot.getElementById('d2l-labs-media-player-search-container');
+		this._templateContainer = this.shadowRoot.getElementById('d2l-template-primary-secondary');
 
 		this._getMetadata();
 
@@ -918,7 +1011,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const mediaContainerStyle = {
 			cursor: !this._hidingCustomControls() ? 'auto' : 'none',
 			display: 'flex',
-			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90vh)' : 'auto',
+			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90%)' : 'auto',
 			height,
 			...this._mediaContainerAspectRatio,
 		};
@@ -928,7 +1021,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			lineHeight: `${this._timeFontSizeRem * 1.05263158}rem`, // At max size, this is 1rem.
 		};
 
-		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : 'calc(1.8rem + 38px)' };
+		const trackContainerStyle = { bottom: this._hidingCustomControls() ? '12px' : '10%' };
 		const trackSpanStyle = { fontSize: `${this._trackFontSizeRem}rem`, lineHeight: `${this._trackFontSizeRem * 1.2}rem` };
 
 		const mediaContainerClass = { 'd2l-labs-media-player-type-is-audio': this.mediaType === SOURCE_TYPES.audio, 'd2l-labs-media-player-type-is-video': this.mediaType === SOURCE_TYPES.video };
@@ -946,160 +1039,174 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			@click="${this._toggleFullscreen}"></d2l-button-icon>` : null;
 
 		return html`
-		${this._renderAnalytics()}
 
 		<slot @slotchange=${this._onSlotChange}></slot>
 
 		${this._getLoadingSpinnerView()}
+		<d2l-template-primary-secondary id="d2l-template-primary-secondary">
+			${this._renderAnalytics()}
+			<div class="d2l-template-primary-secondary-content" id="d2l-template-primary-secondary-content">
+				<main id="d2l-labs-media-player-media-content">
+					<slot
+						id="d2l-labs-media-player-media-container"
+						name="primary"
+						tabindex="-1"
+						class=${classMap(mediaContainerClass)}
+						style=${styleMap(mediaContainerStyle)}
+						@mousemove=${this._onVideoContainerMouseMove}
+						@keydown=${this._listenForKeyboard}
+					>
+						<slot @slotchange=${this._onSlotChange}></slot>
+						${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
+						${this._getMediaAreaView()}
 
-		<div id="d2l-labs-media-player-media-container"
-			tabindex="-1"
-			class=${classMap(mediaContainerClass)}
-			style=${styleMap(mediaContainerStyle)}
-			@mousemove=${this._onVideoContainerMouseMove}
-			@keydown=${this._listenForKeyboard}
-			>
-			${this.transcriptViewerOn ? this._renderTranscriptViewer() : ''}
-			${this._getMediaAreaView()}
-
-			${this.isIOSVideo ? null : html`
-				${!this._trackText || this.transcriptViewerOn ? null : html`
-				<div id="d2l-labs-media-player-track-container" style=${styleMap(trackContainerStyle)} @click=${this._onTrackContainerClick}>
-					<div>
-						<span style=${styleMap(trackSpanStyle)} role="status">${this._trackText}</span>
-					</div>
-				</div>
-				`}
-
-			<div class=${classMap(mediaControlsClass)} id="d2l-labs-media-player-media-controls" @mouseenter=${this._startHoveringControls} @mouseleave=${this._stopHoveringControls}>
-				${this._getTimelinePreview()}
-				<div id="d2l-labs-media-player-timeline-markers-container">
-					${this._getSearchResultsView()}
-					${this._getChapterMarkersView()}
-				</div>
-				${this.hideSeekBar ? '' : html`
-					<d2l-slider-bar
-						id="d2l-labs-media-player-seek-bar"
-						fullWidth
-						solid
-						min="0"
-						max="${Math.floor(this._getSeekbarValue(this.duration))}"
-						value="${this._getSeekbarValue(this._currentTime)}"
-						aria-label="${this.localize('seekSlider')}"
-						aria-orientation="horizontal"
-						aria-valuemin="0"
-						aria-valuemax="${Math.floor(this._getSeekbarValue(this.duration))}"
-						aria-valuenow="${this._getSeekbarValue(this._currentTime)}"
-						title="${this.localize('seekSlider')}"
-						@drag-start=${this._onDragStartSeek}
-						@drag-end=${this._onDragEndSeek}
-						@position-change=${this._onPositionChangeSeek}
-						@hovering-move=${this._onHoverMove}
-						@hovering-start=${this._onHoverStart}
-						@hovering-end=${this._onHoverEnd}
-					></d2l-slider-bar>
-				`}
-				<div id="d2l-labs-media-player-buttons">
-					<d2l-button-icon icon="${playIcon}" text="${playTooltip}"  @click="${this._togglePlay}" theme="${ifDefined(theme)}"></d2l-button-icon>
-
-					<div id="d2l-labs-media-player-volume-container" @mouseenter="${this._startUsingVolumeContainer}" @mouseleave="${this._stopUsingVolumeContainer}" ?hidden="${IS_IOS}">
-						<d2l-button-icon
-							class="d2l-dropdown-opener"
-							icon="${volumeIcon}"
-							text="${volumeTooltip}"
-							theme="${ifDefined(theme)}"
-							@blur="${this._stopUsingVolumeContainer}"
-							@click="${this._toggleMute}"
-							@focus="${this._startUsingVolumeContainer}"
-						></d2l-button-icon>
-						<div id="d2l-labs-media-player-volume-level-container" class=${classMap(volumeLevelContainerClass)}>
-							<div class="d2l-labs-media-player-rotated" id="d2l-labs-media-player-volume-level-background">
-								<div id="d2l-labs-media-player-volume-slider-container">
-									<d2l-slider-bar solid
-										id="d2l-labs-media-player-volume-slider"
-										vertical
-										value="${Math.round(this._volume * 100)}"
-										aria-label="${this.localize('volumeSlider')}"
-										aria-orientation="vertical" aria-valuemin="0"
-										aria-valuemax="100"
-										aria-valuenow="${Math.floor(this._volume * 100)}"
-										title="${this.localize('volumeSlider')}"
-										@drag-start=${this._onDragStartVolume}
-										@focus=${this._startUsingVolumeContainer}
-										@focusout=${this._stopUsingVolumeContainer}
-										@position-change=${this._onPositionChangeVolume}
-									></d2l-slider-bar>
+						${this.isIOSVideo ? null : html`
+							${!this._trackText || this.transcriptViewerOn ? null : html`
+							<div id="d2l-labs-media-player-track-container" style=${styleMap(trackContainerStyle)} @click=${this._onTrackContainerClick}>
+								<div>
+									<span style=${styleMap(trackSpanStyle)} role="status">${this._trackText}</span>
 								</div>
 							</div>
-						</div>
-					</div>
+							`}
 
-					<div id="d2l-labs-media-player-time"
-						aria-live="off"
-						aria-hidden="true"
-						tabindex="-1"
-						style=${styleMap(timeStyle)}
-						@focus=${this._onPlayerTimeFocus}
-						@blur=${this._onPlayerTimeBlur}>
-						${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
-					</div>
+						<div class=${classMap(mediaControlsClass)} id="d2l-labs-media-player-media-controls" @mouseenter=${this._startHoveringControls} @mouseleave=${this._stopHoveringControls}>
+							${this._getTimelinePreview()}
+							<div id="d2l-labs-media-player-timeline-markers-container">
+								${this._getSearchResultsView()}
+								${this._getChapterMarkersView()}
+							</div>
+							${this.hideSeekBar ? '' : html`
+								<d2l-slider-bar
+									id="d2l-labs-media-player-seek-bar"
+									fullWidth
+									solid
+									min="0"
+									max="${Math.floor(this._getSeekbarValue(this.duration))}"
+									value="${this._getSeekbarValue(this._currentTime)}"
+									aria-label="${this.localize('seekSlider')}"
+									aria-orientation="horizontal"
+									aria-valuemin="0"
+									aria-valuemax="${Math.floor(this._getSeekbarValue(this.duration))}"
+									aria-valuenow="${this._getSeekbarValue(this._currentTime)}"
+									title="${this.localize('seekSlider')}"
+									@drag-start=${this._onDragStartSeek}
+									@drag-end=${this._onDragEndSeek}
+									@position-change=${this._onPositionChangeSeek}
+									@hovering-move=${this._onHoverMove}
+									@hovering-start=${this._onHoverStart}
+									@hovering-end=${this._onHoverEnd}
+								></d2l-slider-bar>
+							`}
+							<div id="d2l-labs-media-player-buttons">
+								<d2l-button-icon icon="${playIcon}" text="${playTooltip}"  @click="${this._togglePlay}" theme="${ifDefined(theme)}"></d2l-button-icon>
 
-					<div class="d2l-labs-media-player-flex-filler"></div>
+								<div id="d2l-labs-media-player-volume-container" @mouseenter="${this._startUsingVolumeContainer}" @mouseleave="${this._stopUsingVolumeContainer}" ?hidden="${IS_IOS}">
+									<d2l-button-icon
+										class="d2l-dropdown-opener"
+										icon="${volumeIcon}"
+										text="${volumeTooltip}"
+										theme="${ifDefined(theme)}"
+										@blur="${this._stopUsingVolumeContainer}"
+										@click="${this._toggleMute}"
+										@focus="${this._startUsingVolumeContainer}"
+									></d2l-button-icon>
+									<div id="d2l-labs-media-player-volume-level-container" class=${classMap(volumeLevelContainerClass)}>
+										<div class="d2l-labs-media-player-rotated" id="d2l-labs-media-player-volume-level-background">
+											<div id="d2l-labs-media-player-volume-slider-container">
+												<d2l-slider-bar solid
+													id="d2l-labs-media-player-volume-slider"
+													vertical
+													value="${Math.round(this._volume * 100)}"
+													aria-label="${this.localize('volumeSlider')}"
+													aria-orientation="vertical" aria-valuemin="0"
+													aria-valuemax="100"
+													aria-valuenow="${Math.floor(this._volume * 100)}"
+													title="${this.localize('volumeSlider')}"
+													@drag-start=${this._onDragStartVolume}
+													@focus=${this._startUsingVolumeContainer}
+													@focusout=${this._stopUsingVolumeContainer}
+													@position-change=${this._onPositionChangeVolume}
+												></d2l-slider-bar>
+											</div>
+										</div>
+									</div>
+								</div>
 
-					<div
-						@mouseenter=${this._onSearchContainerHover}
-						@mouseleave=${this._onSearchContainerHover}
-						class=${classMap(searchContainerClass)}
-						id="d2l-labs-media-player-search-container"
-					><d2l-button-icon
-							icon="tier1:search"
-							id="d2l-labs-media-player-search-button"
-							text=${this.localize('showSearchInput')}
-							theme="${ifDefined(theme)}"
-						></d2l-button-icon>
-						<input
-							@blur=${this._onSearchInputBlur}
-							@focus=${this._onSearchInputFocus}
-							@input=${debounce(this._onSearchInputChanged, 500)}
-							id="d2l-labs-media-player-search-input"
-							placeholder="${this.localize('searchPlaceholder')}"
-							theme="${ifDefined(theme)}"
-							type="text"
-						></input>
-					</div>
+								<div id="d2l-labs-media-player-time"
+									aria-live="off"
+									aria-hidden="true"
+									tabindex="-1"
+									style=${styleMap(timeStyle)}
+									@focus=${this._onPlayerTimeFocus}
+									@blur=${this._onPlayerTimeBlur}>
+									${MediaPlayer._formatTime(this.currentTime)} / ${MediaPlayer._formatTime(this.duration)}
+								</div>
 
-					<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click="${this._handleOpenAnalytics}"></d2l-button-icon>
-					<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
+								<div class="d2l-labs-media-player-flex-filler"></div>
 
-					<d2l-dropdown>
-						<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
-						<d2l-dropdown-menu id="d2l-labs-media-player-settings-menu" no-pointer theme="${ifDefined(theme)}">
-							<d2l-menu label="${this.localize('settings')}" theme="${ifDefined(theme)}">
-								<d2l-menu-item id="d2l-labs-media-player-playback-speeds" text="${this.localize('playbackSpeed')}">
-									<div slot="supporting">${this._selectedSpeed}</div>
-									<d2l-menu @d2l-menu-item-change=${this._onPlaybackSpeedsMenuItemChange} theme="${ifDefined(theme)}">
-										${PLAYBACK_SPEEDS.map(speed => html`
-											<d2l-menu-item-radio
-												?selected="${speed === this._selectedSpeed}"
-												text="${speed === DEFAULT_SPEED ? `${DEFAULT_SPEED} (${this.localize('default')})` : speed}"
-												value="${speed}"
-											></d2l-menu-item-radio>
-										`)}
-									</d2l-menu>
-								</d2l-menu-item>
-								${this._getTracksMenuView()}
-								${this._getQualityMenuView()}
-								${(this.allowDownload && this._getCurrentSource()) ? this._getDownloadButtonView() : ''}
-								<slot name="settings-menu-item"></slot>
-							</d2l-menu>
-						</d2l-dropdown-menu>
-					</d2l-dropdown>
+								<div
+									@mouseenter=${this._onSearchContainerHover}
+									@mouseleave=${this._onSearchContainerHover}
+									class=${classMap(searchContainerClass)}
+									id="d2l-labs-media-player-search-container"
+								><d2l-button-icon
+										icon="tier1:search"
+										id="d2l-labs-media-player-search-button"
+										text=${this.localize('showSearchInput')}
+										theme="${ifDefined(theme)}"
+									></d2l-button-icon>
+									<input
+										@blur=${this._onSearchInputBlur}
+										@focus=${this._onSearchInputFocus}
+										@input=${debounce(this._onSearchInputChanged, 500)}
+										id="d2l-labs-media-player-search-input"
+										placeholder="${this.localize('searchPlaceholder')}"
+										theme="${ifDefined(theme)}"
+										type="text"
+									></input>
+								</div>
 
-					${fullscreenButton}
+								<d2l-button-icon icon="tier1:user-progress" text="${this.localize('ai-chat-analytics')}" theme="${ifDefined(theme)}" @click="${this._handleOpenAnalytics}"></d2l-button-icon>
+								<d2l-button-icon icon="tier1:comment-filled" text="${this.localize('ai-chat')}" theme="${ifDefined(theme)}" @click="${this._handleChatBoxState}"></d2l-button-icon>
 
-				</div>
-			</div>`}
-		</div>
+								<d2l-dropdown>
+									<d2l-button-icon class="d2l-dropdown-opener" icon="tier1:gear" text="${this.localize('settings')}" theme="${ifDefined(theme)}"></d2l-button-icon>
+									<d2l-dropdown-menu id="d2l-labs-media-player-settings-menu" no-pointer theme="${ifDefined(theme)}">
+										<d2l-menu label="${this.localize('settings')}" theme="${ifDefined(theme)}">
+											<d2l-menu-item id="d2l-labs-media-player-playback-speeds" text="${this.localize('playbackSpeed')}">
+												<div slot="supporting">${this._selectedSpeed}</div>
+												<d2l-menu @d2l-menu-item-change=${this._onPlaybackSpeedsMenuItemChange} theme="${ifDefined(theme)}">
+													${PLAYBACK_SPEEDS.map(speed => html`
+														<d2l-menu-item-radio
+															?selected="${speed === this._selectedSpeed}"
+															text="${speed === DEFAULT_SPEED ? `${DEFAULT_SPEED} (${this.localize('default')})` : speed}"
+															value="${speed}"
+														></d2l-menu-item-radio>
+													`)}
+												</d2l-menu>
+											</d2l-menu-item>
+											${this._getTracksMenuView()}
+											${this._getQualityMenuView()}
+											${(this.allowDownload && this._getCurrentSource()) ? this._getDownloadButtonView() : ''}
+											<slot name="settings-menu-item"></slot>
+										</d2l-menu>
+									</d2l-dropdown-menu>
+								</d2l-dropdown>
+
+								${fullscreenButton}
+
+							</div>
+						</div>`}
+					</slot>
+				</main>
+				<div
+					class="d2l-template-primary-secondary-secondary-container"
+					?hidden="${this._chatBoxHidden}"
+				>
+					${this._renderChatBox()}
+				 </div>
+			</div>
+		</d2l-template-primary-secondary>
 		`;
 	}
 
@@ -1215,7 +1322,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		const snapshot = this.createSnapshot();
 		if (!snapshot) return;
 
-		this._chatLog += DOMPurify.sanitize(`<p>User: ${snapshot.query}</p>`);
+		this._chatLog += DOMPurify.sanitize(`<p><b>User:</b> ${snapshot.query}</p>`);
 		this._queryTextArea.text = '';
 
 		if (this._chatContainer === undefined) {
@@ -1225,7 +1332,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 		try {
 			const response = await generateResponse(snapshot);
-			this._chatLog += DOMPurify.sanitize(`<p>Bot: ${response.body}</p>`);
+			this._chatLog += DOMPurify.sanitize(marked(`<b>Bot:</b> ${response.body}`));
 		} catch (error) {
 			return error;
 		}
@@ -1419,7 +1526,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 					>
 						<source @error=${this._onError}>
 					</video>
-					${this._renderChatBox()}
 				`;
 			case SOURCE_TYPES.audio:
 				return html`
@@ -2335,8 +2441,11 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 	_renderChatBox() {
 		return html`
-			<div id="d2l-labs-media-player-chat-box-container" ?hidden="${this._chatBoxHidden}">
-				<div id="d2l-labs-media-player-chat-container">
+			<slot
+				id="d2l-labs-media-player-chat-box-container"
+				name="secondary"
+			>
+				<div id="d2l-labs-media-player-chat-container" class="d2l-template-scroll">
 					${unsafeHTML(this._chatLog)}
 				</div>
 				<div class="d2l-labs-media-player-chat-box-horizontally-aligned">
@@ -2345,10 +2454,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						@blur=${this._onTextAreaBlur}
 						@focus=${this._onTextAreaFocus}
 					></d2l-labs-media-player-text-input>
-					<d2l-button @click="${this._addChat}">Send</d2l-button>
+					<d2l-button-subtle text="Send" @click="${this._addChat}"></d2l-button-subtle>
 				</div>
-				<div id="d2l-labs-media-player-chat-box-bottom-padding"></div>
-			</div>
+			</slot>
 		`;
 	}
 
@@ -2501,7 +2609,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		if (fullscreenApi.isFullscreen) {
 			fullscreenApi.exit();
 		} else {
-			fullscreenApi.request(this._mediaContainer);
+			fullscreenApi.request(this._templateContainer);
 		}
 	}
 
