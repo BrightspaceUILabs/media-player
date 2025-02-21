@@ -188,7 +188,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			code {
-				color:black;
+				color: black;
 			}
 
 			d2l-template-primary-secondary {
@@ -198,7 +198,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			li {
-				color:black;
+				color: black;
 			}
 
 			.d2l-template-primary-secondary-content {
