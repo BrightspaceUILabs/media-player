@@ -156,6 +156,15 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				> .d2l-template-primary-secondary-content
 				> .d2l-template-primary-secondary-secondary-container {
 					height: 80.6%;
+					padding-left: 2%;
+			}
+
+			d2l-template-primary-secondary:fullscreen
+				> .d2l-template-primary-secondary-content
+				> .d2l-template-primary-secondary-secondary-container
+				> #d2l-labs-media-player-chat-box-container {
+					border-radius: 10px;
+					border: 3px solid var(--d2l-color-chromite);
 			}
 
 			:host {
@@ -324,6 +333,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.d2l-labs-media-player-type-is-audio #d2l-labs-media-player-media-controls {
 				background-color: #ffffff;
 			}
+
 			.d2l-labs-media-player-type-is-video #d2l-labs-media-player-media-controls {
 				background-color: rgba(0, 0, 0, 0.69);
 			}
@@ -675,20 +685,25 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			.transcript-cue-container {
 				padding-left: 10px;
 			}
+
 			.video-transcript-cue {
 				padding-left: 5px;
 			}
+
 			.audio-transcript-cue {
 				padding-left: 5px;
 			}
+
 			.video-transcript-cue[active] {
 				background-color: gray;
 				box-shadow: -5px 0 0 white;
 			}
+
 			.audio-transcript-cue[active] {
 				background-color: lightgray;
 				box-shadow: -5px 0 0 black;
 			}
+
 			#video-transcript-viewer {
 				bottom: 55px;
 				color: white;
@@ -700,6 +715,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 65%;
 				z-index: 1;
 			}
+
 			#audio-transcript-viewer {
 				bottom: 60px;
 				color: black;
@@ -711,33 +727,40 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 100%;
 				z-index: 1;
 			}
+
 			#close-transcript {
 				position: absolute;
 				right: 7px;
 				top: 0;
 				z-index: 1;
 			}
+
 			#video-transcript-download-button {
 				left: 35%;
 				position: absolute;
 				top: 5px;
 				z-index: 2;
 			}
+
 			#audio-transcript-download-button {
 				left: 10px;
 				position: absolute;
 				top: 0;
 				z-index: 2;
 			}
+
 			#audio-transcript-download-menu {
 				left: 35px;
 			}
+
 			#video-close-transcript-icon {
 				color: white;
 			}
+
 			#audio-close-transcript-icon {
 				color: black;
 			}
+
 ` ];
 	}
 
