@@ -160,11 +160,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				padding: 4%;
 			}
 
-			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container {
-				height: 80.6%;
-				padding-left: 2%;
-			}
-
 			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container > #d2l-labs-media-player-chat-box-container {
 				border: 3px solid var(--d2l-color-chromite);
 				border-radius: 10px;
@@ -197,8 +192,9 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			.d2l-template-primary-secondary-secondary-container {
-				height: 70%;
+				height: 90%;
 				width: 30%;
+				padding-left: 2%;
 			}
 
 			.d2l-template-primary-secondary-secondary-container[hidden] {
@@ -227,11 +223,10 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				width: 70%;
 			}
 
-
 			#d2l-labs-media-player-chat-box-container {
 				background: var(--d2l-color-regolith);
-				border: 1px solid var(--d2l-color-mica);
-				border-radius: 0 10px 10px 0;
+				border: 2px solid var(--d2l-color-mica);
+				border-radius: 10px;
 				display: flex;
 				flex-direction: column;
 				height: 100%;
@@ -338,6 +333,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				transition: bottom 500ms ease;
 				width: 100%;
 				z-index: 2;
+				height: 50px;
 			}
 
 			.d2l-labs-media-player-type-is-audio #d2l-labs-media-player-media-controls {
@@ -359,7 +355,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				--d2l-outer-knob-color: var(--d2l-color-celestine-plus-1);
 				--d2l-progress-border-radius: 0;
 				position: absolute;
-				top: -56px;
+				bottom: 80%;
 				width: 100%;
 				z-index: 1;
 			}
