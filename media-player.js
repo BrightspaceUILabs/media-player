@@ -27,6 +27,7 @@ import { debounce } from 'lodash-es';
 import DOMPurify from 'dompurify';
 import fullscreenApi from './src/fullscreen-api.js';
 import Fuse from 'fuse.js';
+import { generateResponse } from './src/utils/chatbot-query.js';
 import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
@@ -1118,10 +1119,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		}
 	}
 
-	createSnapshot(userQuery) {
+	createSnapshot() {
+		const userInput = this._queryTextArea.text.trim();
+		if (userInput.length === 0) return;
+
 		return {
-			timestamp: this._getTimestamp(),
-			query: userQuery,
+			query: userInput,
 			image: this.getScreenshot(),
 			transcript: this._getTruncatedTranscript()
 		};
@@ -1142,7 +1145,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	getScreenshot() {
 		if (!this._mediaCanvas.init) { this.initializeCanvas(); }
 		this._mediaCanvas.ctx.drawImage(this._media, 0, 0, this._mediaCanvas.canvas.width, this._mediaCanvas.canvas.height);
-		return this._mediaCanvas.canvas.toDataURL('image/jpeg');
+		return this._mediaCanvas.canvas.toDataURL('image/png').split(',')[1];
 	}
 
 	initializeCanvas() {
@@ -1207,21 +1210,25 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		return this.localize('off');
 	}
 
-	_addChat() {
-		const userInput = this._queryTextArea.text.trim();
-
-		if (userInput.length === 0) return;
+	async _addChat() {
 		// This is the data that will be sent out
-		// const snapshot = this.createSnapshot(userInput);
+		const snapshot = this.createSnapshot();
+		if (!snapshot) return;
 
-		this._chatLog += DOMPurify.sanitize(`<p>User: ${userInput}</p>`);
+		this._chatLog += DOMPurify.sanitize(`<p>User: ${snapshot.query}</p>`);
 		this._queryTextArea.text = '';
-		this._chatLog += DOMPurify.sanitize('<p>Bot: Answer in a long way. Answer in a long way. Answer in a long way.</p>');
 
 		if (this._chatContainer === undefined) {
 			this._chatContainer = this.shadowRoot.getElementById('d2l-labs-media-player-chat-container');
 		}
 		this._chatContainer.scrollBottom = this._chatContainer.scrollHeight;
+
+		try {
+			const response = await generateResponse(snapshot);
+			this._chatLog += DOMPurify.sanitize(`<p>Bot: ${response.body}</p>`);
+		} catch (error) {
+			return error;
+		}
 	}
 
 	_clearPreference(preferenceKey) {
