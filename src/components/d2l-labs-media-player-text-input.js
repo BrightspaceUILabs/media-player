@@ -5,19 +5,19 @@ class MyTextareaInputElem extends LitElement {
 	static get styles() {
 		return [ css`
 			textarea.d2l-input {
-				height: 100%;
 				border-style: none;
-				outline: none;
 				box-shadow: none;
-				resize: none;
+				height: 100%;
+				hyphens: auto;
 				min-height: 0;
 				min-width: 0;
-				hyphens: auto;
+				outline: none;
 				overflow: auto;
+				resize: none;
 				scrollbar-width: thin;
 			}
 
-		`, inputStyles];
+`, inputStyles];
 	}
 
 	constructor() {

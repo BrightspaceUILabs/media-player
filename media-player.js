@@ -148,40 +148,35 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		return [ labelStyles, css`
 
 			d2l-template-primary-secondary:fullscreen {
+				align-items: center;
 				background: black;
 				display: flex;
-				align-items: center;
 				flex-direction: column-reverse;
 			}
 
 			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content {
-				display: flex;
 				align-items: center;
+				display: flex;
 				padding: 4%;
 			}
 
-			d2l-template-primary-secondary:fullscreen
-				> .d2l-template-primary-secondary-content
-				> .d2l-template-primary-secondary-secondary-container {
-					height: 80.6%;
-					padding-left: 2%;
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container {
+				height: 80.6%;
+				padding-left: 2%;
 			}
 
-			d2l-template-primary-secondary:fullscreen
-				> .d2l-template-primary-secondary-content
-				> .d2l-template-primary-secondary-secondary-container
-				> #d2l-labs-media-player-chat-box-container {
-					border-radius: 10px;
-					border: 3px solid var(--d2l-color-chromite);
+			d2l-template-primary-secondary:fullscreen > .d2l-template-primary-secondary-content > .d2l-template-primary-secondary-secondary-container > #d2l-labs-media-player-chat-box-container {
+				border: 3px solid var(--d2l-color-chromite);
+				border-radius: 10px;
 			}
 
 			:host {
-				display: flex;
-				width: 100%;
-				aspect-ratio: 1.65826 / 1;
-				position: relative;
 				align-items: center;
+				aspect-ratio: 1.65826 / 1;
+				display: flex;
 				justify-content: center;
+				position: relative;
+				width: 100%;
 			}
 
 			:host([hidden]) {
@@ -189,21 +184,21 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			d2l-template-primary-secondary {
-				position: absolute;
-				height: 100%;
 				align-content: center;
+				height: 100%;
+				position: absolute;
 			}
 
 			.d2l-template-primary-secondary-content {
-				display: flex;
-				overflow: hidden;
-				height: 100%;
 				align-items: center;
+				display: flex;
+				height: 100%;
+				overflow: hidden;
 			}
 
 			.d2l-template-primary-secondary-secondary-container {
-				width: 30%;
 				height: 70%;
+				width: 30%;
 			}
 
 			.d2l-template-primary-secondary-secondary-container[hidden] {
@@ -211,46 +206,46 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			#d2l-labs-media-player-media-content {
-				width: 50%;
 				display: flex;
-				justify-content: center;
 				flex-grow: 1;
+				justify-content: center;
+				width: 50%;
 			}
 
 			d2l-button-subtle {
-				height: 100%;
-				flex-grow: 1;
-				justify-content: center;
 				align-items: center;
 				display: flex;
+				flex-grow: 1;
+				height: 100%;
+				justify-content: center;
 				overflow: hidden;
 			}
 
 			#d2l-labs-media-player-chat-box-input {
+				flex-grow: 2;
 				height: 100%;
 				width: 70%;
-				flex-grow: 2;
 			}
 
 
 			#d2l-labs-media-player-chat-box-container {
-				display: flex;
-				height: 100%;
-				flex-direction: column;
-				border-radius: 0 10px 10px 0;
-				border: 1px solid var(--d2l-color-mica);
 				background: var(--d2l-color-regolith);
+				border: 1px solid var(--d2l-color-mica);
+				border-radius: 0 10px 10px 0;
+				display: flex;
+				flex-direction: column;
+				height: 100%;
 			}
 
 			#d2l-labs-media-player-chat-container {
 				display: flex;
 				flex-direction: column; /* Stack items from top to bottom */
 				height: 80%;
+				hyphens: auto;
+				overflow-wrap: anywhere;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 5px;
-				overflow-wrap: anywhere;
 				text-wrap: pretty;
-				hyphens: auto;
 			}
 
 			#d2l-labs-media-player-analytics-list {
@@ -262,12 +257,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			}
 
 			.d2l-labs-media-player-chat-box-horizontally-aligned {
-				display: flex;
-				justify-content: center;
 				align-items: center;
-				margin-top: auto;
-				height: 20%;
 				border-top: 1px solid var(--d2l-color-mica);
+				display: flex;
+				height: 20%;
+				justify-content: center;
+				margin-top: auto;
 			}
 
 			p {
@@ -376,12 +371,12 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 
 			#d2l-labs-media-player-buttons {
 				align-items: center;
-				position: absolute;
 				bottom: 0%;
-				width: 100%;
 				display: flex;
 				flex-direction: row;
 				justify-content: space-between;
+				position: absolute;
+				width: 100%;
 			}
 
 			[dir="rtl"] #d2l-labs-media-player-buttons {
