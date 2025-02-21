@@ -245,7 +245,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				overflow-wrap: anywhere;
 				overflow-y: auto; /* Enables vertical scrolling when needed */
 				padding: 5px;
-				text-wrap: pretty;
 			}
 
 			#d2l-labs-media-player-analytics-list {
@@ -2443,7 +2442,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						@blur=${this._onTextAreaBlur}
 						@focus=${this._onTextAreaFocus}
 					></d2l-labs-media-player-text-input>
-					<d2l-button-subtle text="Send" @click="${this._addChat}"></d2l-button-sublte>
+					<d2l-button-subtle text="Send" @click="${this._addChat}"></d2l-button-subtle>
 				</div>
 			</slot>
 		`;
