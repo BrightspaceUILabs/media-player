@@ -20,7 +20,7 @@ export default {
 	"retry": "E hoao hou",
 	"searchPlaceholder": "Huli...",
 	"seekSlider": "imi pahee",
-	"settings": "Nā hoʻonohonoho",
+	"settings": "hoʻonohonoho",
 	"showSearchInput": "Hōʻike i ka hoʻokomo ʻimi",
 	"sliderBarProgress": "ka holomua ʻana o ka pahu slider",
 	"speed": "ka māmā holo",
