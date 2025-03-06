@@ -164,6 +164,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
 				position: relative;
+				width: 100%;
 			}
 
 			#d2l-labs-media-player-video-poster {
