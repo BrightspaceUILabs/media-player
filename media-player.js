@@ -105,7 +105,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			_hovering: { type: Boolean, attribute: false },
 			_loading: { type: Boolean, attribute: false },
 			_maintainHeight: { type: Number, attribute: false },
-			_mediaContainerAspectRatio: { type: Object, attribute: false },
 			_message: { type: Object, attribute: false },
 			_muted: { type: Boolean, attribute: false },
 			_playing: { type: Boolean, attribute: false },
@@ -165,7 +164,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 				max-height: var(--d2l-labs-media-player-video-max-height, 100vh);
 				min-height: 100%;
 				position: relative;
-				width: 100%;
 			}
 
 			#d2l-labs-media-player-video-poster {
@@ -671,8 +669,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 		this._volume = 1;
 		this._webVTTParser = new window.WebVTTParser();
 		this._playRequested = false;
-		this._mediaContainerAspectRatio = {
-		};
 		this.afterCaptions = [];
 		this.beforeCaptions = [];
 	}
@@ -805,7 +801,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 			display: 'flex',
 			minHeight: this.mediaType === SOURCE_TYPES.audio ? 'min(17rem, 90vh)' : 'auto',
 			height,
-			...this._mediaContainerAspectRatio,
 		};
 		const timeStyle = {
 			fontSize: `${this._timeFontSizeRem}rem`,
@@ -1654,11 +1649,6 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_onLoadedData() {
-		const media = this._media;
-		const width = media.videoWidth;
-		const height = media.videoHeight;
-		const aspectRatio = width / height;
-		this._mediaContainerAspectRatio = { 'aspect-ratio': Number.isNaN(aspectRatio) ? 'auto' : aspectRatio.toString() };
 		this._disableNativeCaptions();
 		this.dispatchEvent(new CustomEvent('loadeddata'));
 	}
