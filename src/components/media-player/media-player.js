@@ -16,12 +16,11 @@ import 'webvtt-parser';
 import './media-player-audio-bars.js';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { debounce } from 'lodash-es';
-import fullscreenApi from './src/fullscreen-api.js';
+import fullscreenApi from './fullscreen-api.js';
 import Fuse from 'fuse.js';
 import { getFocusPseudoClass } from '@brightspace-ui/core/helpers/focus.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
-import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
+import { InternalDynamicLocalizeMixin } from './mixins/internal-dynamic-localize-mixin.js';
 import { labelStyles } from '@brightspace-ui/core/components/typography/styles.js';
 import parseSRT from 'parse-srt/src/parse-srt.js';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -631,6 +630,8 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 ` ];
 	}
 
+	#searchTimeout = null;
+
 	constructor() {
 		super();
 
@@ -937,7 +938,7 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 						<input
 							@blur=${this._onSearchInputBlur}
 							@focus=${this._onSearchInputFocus}
-							@input=${debounce(this._onSearchInputChanged, 500)}
+							@input=${this._onSearchInputChanged}
 							id="d2l-labs-media-player-search-input"
 							placeholder="${this.localize('searchPlaceholder')}"
 							theme="${ifDefined(theme)}"
@@ -1772,15 +1773,20 @@ class MediaPlayer extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
 	}
 
 	_onSearchInputChanged() {
-		this._onSearchContainerHover();
-		if (this._searchInput.value.length < 2) {
-			this._searchResults = [];
-			return;
+		if (this.#searchTimeout) {
+			clearTimeout(this.#searchTimeout);
 		}
-		const srclang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
-		const searcher = this._searchInstances[srclang];
-		this._searchResults = searcher.search(this._searchInput.value)
-			.map(result => (isNaN(result.item.startTime) ? result.item.start : result.item.startTime));
+		this.#searchTimeout = setTimeout(() => {
+			this._onSearchContainerHover();
+			if (this._searchInput.value.length < 2) {
+				this._searchResults = [];
+				return;
+			}
+			const srclang = this._getSrclangFromTrackIdentifier(this._selectedTrackIdentifier);
+			const searcher = this._searchInstances[srclang];
+			this._searchResults = searcher.search(this._searchInput.value)
+				.map(result => (isNaN(result.item.startTime) ? result.item.start : result.item.startTime));
+		}, 500);
 	}
 
 	_onSearchInputFocus() {

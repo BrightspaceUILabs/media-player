@@ -1,4 +1,4 @@
-import '../media-player.js';
+import '../src/components/media-player/media-player.js';
 import { expect, fixture, html, runConstructor } from '@brightspace-ui/testing';
 
 describe('d2l-labs-media-player', () => {

@@ -1,11 +1,11 @@
-import '../media-player.js';
+import '../src/components/media-player/media-player.js';
 import { expect, fixture, focusElem, html } from '@brightspace-ui/testing';
 
 describe('d2l-labs-media-player', () => {
 	it('video', async() => {
 		const elem = await fixture(
 			html`
-			<d2l-labs-media-player 
+			<d2l-labs-media-player
 				src="./test/videos/1_lego.webm"
 				media-type="video">
 			</d2l-labs-media-player>`
@@ -16,9 +16,9 @@ describe('d2l-labs-media-player', () => {
 	it('video-with-poster', async() => {
 		const elem = await fixture(
 			html`
-			<d2l-labs-media-player 
-				src="./test/videos/1_lego.webm" 
-				poster="./demo/sample-poster.png" 
+			<d2l-labs-media-player
+				src="./test/videos/1_lego.webm"
+				poster="./demo/components/media-player/sample-poster.png"
 				media-type="video">
 			</d2l-labs-media-player>`
 		);
@@ -40,7 +40,7 @@ describe('d2l-labs-media-player', () => {
 		const elem = await fixture(
 			html`
 			<d2l-labs-media-player src="./test/videos/1_lego.webm" media-type="video">
-				<track src="./demo/sample-vtt-en.vtt" kind="captions" srclang="en" label="English" default>
+				<track src="./demo/components/media-player/sample-vtt-en.vtt" kind="captions" srclang="en" label="English" default>
 			</d2l-labs-media-player>`
 		);
 		await focusElem(elem.shadowRoot.querySelector('#d2l-labs-media-player-search-container'));
@@ -51,7 +51,7 @@ describe('d2l-labs-media-player', () => {
 		const elem = await fixture(
 			html`
 			<d2l-labs-media-player src="./test/audio/applause.mp3" media-type="audio">
-				<track src="./demo/sample-vtt-en.vtt" kind="captions" srclang="en" label="English" default>
+				<track src="./demo/components/media-player/sample-vtt-en.vtt" kind="captions" srclang="en" label="English" default>
 			</d2l-labs-media-player>`
 		);
 		await focusElem(elem.shadowRoot.querySelector('#d2l-labs-media-player-search-container'));

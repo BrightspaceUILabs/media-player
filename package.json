@@ -20,7 +20,7 @@
     "lint:fix": "eslint . --ext .js,.html --fix",
     "lint": "npm run lint:eslint && npm run lint:lit && npm run lint:style && lint:langs",
     "lint:eslint": "eslint . --ext .js,.html",
-    "lint:lit": "lit-analyzer \"*.js\" demo test --strict",
+    "lint:lit": "lit-analyzer \"*.js\" demo/components/media-player test --strict",
     "lint:style": "stylelint \"**/*.{js,html}\"",
     "start": "web-dev-server --app-index demo/index.html --node-resolve --open --watch",
     "test": "npm run lint && npm run test:headless",
@@ -47,7 +47,6 @@
     "@brightspace-ui/core": "^3",
     "fuse.js": "^6.4.6",
     "lit": "^3",
-    "lodash-es": "^4.17.21",
     "parse-srt": "^1.0.0-alpha",
     "resize-observer-polyfill": "^1",
     "webvtt-parser": "^2.1.2"

@@ -1,6 +1,6 @@
 import '@brightspace-ui/core/components/colors/colors.js';
 import { css, html, LitElement } from 'lit';
-import { InternalDynamicLocalizeMixin } from './src/mixins/internal-dynamic-localize-mixin.js';
+import { InternalDynamicLocalizeMixin } from './mixins/internal-dynamic-localize-mixin.js';
 import { RtlMixin } from '@brightspace-ui/core/mixins/rtl-mixin.js';
 
 class SliderBar extends InternalDynamicLocalizeMixin(RtlMixin(LitElement)) {
