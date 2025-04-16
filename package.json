@@ -39,7 +39,7 @@
     "@brightspace-ui/testing": "^1.16.1",
     "@web/dev-server": "^0.4.5",
     "eslint": "^8",
-    "eslint-config-brightspace": "^1.1",
+    "eslint-config-brightspace": "^2.7",
     "lit-analyzer": "^2",
     "stylelint": "^16"
   },
